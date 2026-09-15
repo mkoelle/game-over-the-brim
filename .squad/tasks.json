@@ -1,0 +1,324 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Add lean-mechanic tuning knobs to VehicleStats",
+      "description": "Add exported fields for the landing/impact lean mechanic: max lean angle clamp, landing-angle trigger threshold, impact-speed trigger threshold, self-correction duration/rate.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium",
+      "details": "Same pattern as existing air_control/drift_grip knobs — exported vars with doc comments explaining tuning intent, defaults chosen for arcade feel not simulation accuracy.",
+      "test_strategy": ".tres opens in Inspector with new fields editable.",
+      "scope": "scripts/resources/vehicle_stats.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T05:11:16.903Z"
+    },
+    {
+      "id": 2,
+      "title": "Add deterministic landing/impact lean to VehicleController",
+      "description": "On airborne-to-grounded transition or hard lateral impact, sample touchdown angle vs ground normal, impact speed along a lateral axis, and current speed ONCE per event; compute a bounded pitch/roll lean from a designed curve over those sampled values and apply as a rotational offset that decays to level over the configured duration.",
+      "status": "done",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "details": "Must NOT derive lean from raw per-frame move_and_slide() contact data — that path is non-deterministic (contact-order dependency, sub-pixel contact-point variance, floor-snap flicker between grounded/airborne, discrete-time tunneling push-out impulses, multi-body collision order). Same sampled inputs must always produce the same lean output. Clamp max lean well short of any stuck/upside-down state so it composes safely with the stuck/flip recovery tasks.",
+      "test_strategy": "Same sampled inputs (angle/speed) always produce same lean output across runs; lean visibly decays back to level within the configured duration.",
+      "scope": "scripts/vehicles/vehicle_controller.gd",
+      "agent_hints": [
+        "developer",
+        "architect"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T05:24:20.472Z"
+    },
+    {
+      "id": 3,
+      "title": "Surface lean state in debug HUD",
+      "description": "Extend the debug overlay to show current lean angle and the last trigger cause (landing-angle vs impact-speed) for hand-feel tuning.",
+      "status": "done",
+      "dependencies": [
+        2
+      ],
+      "priority": "medium",
+      "details": "Read VehicleController state only, same pattern as the existing last_input readout — do not poll Input.* directly from the debug layer (Architecture Decision 01).",
+      "test_strategy": "F3 overlay shows lean angle climb/decay and correct trigger label during a ramp landing.",
+      "scope": "scripts/ui/debug_overlay.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T05:28:51.186Z"
+    },
+    {
+      "id": 4,
+      "title": "GdUnit4 test: lean determinism, decay, and clamp",
+      "description": "Feed fixed sampled inputs (touchdown angle, impact speed, current speed) via scene_runner; assert identical inputs always produce identical lean output, lean decays to level within the configured duration, and lean never exceeds the clamp.",
+      "status": "done",
+      "dependencies": [
+        2
+      ],
+      "priority": "high",
+      "details": "Covers the determinism guarantee that is the actual design justification for allowing lean at all (Guardrail 1 reproducibility, not a bespoke visual telegraph).",
+      "test_strategy": "task test passes.",
+      "scope": "test/unit/**",
+      "agent_hints": [
+        "qa",
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T06:28:23.456Z"
+    },
+    {
+      "id": 5,
+      "title": "Hand-feel test lean on ramp landings",
+      "description": "Manually verify on test_track.tscn's ramp that lean reads as a consequence of a reckless landing (not random), self-corrects fast enough to not feel like lost control, and doesn't read as a bug.",
+      "status": "blocked",
+      "dependencies": [
+        2,
+        3
+      ],
+      "priority": "medium",
+      "details": "No file change — tuning/verification pass only, adjust VehicleStats knobs from task 1 by feel.",
+      "agent_hints": [
+        "qa"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T06:39:03.878Z"
+    },
+    {
+      "id": 6,
+      "title": "Update vehicles.md to reflect bounded-lean behavior",
+      "description": "Rewrite the Technical Implementation section's COM-anchoring claim to describe the shipped bounded/self-correcting lean instead of an absolute never-tips guarantee.",
+      "status": "done",
+      "dependencies": [
+        2
+      ],
+      "priority": "low",
+      "details": "vehicles.md currently states COM is anchored specifically to prevent tipping over — that's now inaccurate once the lean mechanic ships and needs to match actual behavior.",
+      "scope": "docs/design/vehicles.md",
+      "agent_hints": [
+        "product-owner"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T06:39:27.842Z"
+    },
+    {
+      "id": 7,
+      "title": "Detect stuck/flipped vehicle state",
+      "description": "Track sustained abnormal state — orientation past a threshold or near-zero velocity with no valid floor contact — held for N seconds, and emit a stuck/flip signal when the threshold is crossed. Track last-known valid grounded position as the future recovery point.",
+      "status": "done",
+      "dependencies": [
+        2
+      ],
+      "priority": "medium",
+      "details": "Timer-gated to avoid false positives from normal airtime. This is a safety net for physics edge cases (tunneling, wedged geometry, multi-body pileups) that the lean clamp in task 2 doesn't fully rule out.",
+      "test_strategy": "Force the car into a wedged/flipped test position in a scratch scene; confirm signal fires after the timer, not instantly.",
+      "scope": "scripts/vehicles/vehicle_controller.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T06:49:25.985Z"
+    },
+    {
+      "id": 8,
+      "title": "Recover from stuck/flip: reset near last valid position",
+      "description": "On the stuck/flip signal, reset the vehicle to the last valid grounded position plus a small offset, zero velocity and angular velocity, with a brief invulnerability window.",
+      "status": "done",
+      "dependencies": [
+        7
+      ],
+      "priority": "medium",
+      "details": "Matches the existing Comic Respawn convention already documented in vehicles.md (<=1.5s, instant control back). Prefer an in-place transform/velocity reset over deleting and recreating the node — recreation loses input_source/stats wiring and connected signals unless carefully restored, while a reset achieves the identical player-visible outcome.",
+      "test_strategy": "Trigger task 7's stuck signal manually; confirm car reappears near last valid ground position, controllable immediately.",
+      "scope": "scripts/vehicles/vehicle_controller.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T06:59:19.253Z"
+    },
+    {
+      "id": 9,
+      "title": "GdUnit4 test: stuck detection and recovery",
+      "description": "Simulate a stuck condition (fixed bad orientation/velocity held past the timer), assert recovery fires, position resets near the tracked last-valid point, velocity/angular velocity zero, and the stuck flag clears.",
+      "status": "done",
+      "dependencies": [
+        7,
+        8
+      ],
+      "priority": "medium",
+      "test_strategy": "task test passes.",
+      "scope": "test/unit/**",
+      "agent_hints": [
+        "qa",
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T07:11:47.548Z"
+    },
+    {
+      "id": 10,
+      "title": "Debug hotkey: manually trigger stuck/flip recovery",
+      "description": "Add a debug-only hotkey, gated behind GameConfig.debug_mode (same pattern as the existing F3 telemetry toggle), that calls the recovery routine from task 8 directly on the local player's vehicle.",
+      "status": "done",
+      "dependencies": [
+        8
+      ],
+      "priority": "low",
+      "details": "Expose the recovery routine as a public method on VehicleController so the debug layer can call it without the controller polling Input itself (Architecture Decision 01).",
+      "test_strategy": "With debug mode on, press the hotkey mid-drive; car resets near last valid position same as an automatic recovery would.",
+      "scope": "scripts/{vehicles,ui}/*.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T07:16:49.937Z"
+    },
+    {
+      "id": 11,
+      "title": "Add coast-down deceleration when throttle is released",
+      "description": "Add a coast_deceleration knob to VehicleStats and apply it in VehicleController when throttle is 0, so releasing the gas scrubs speed instead of holding constant velocity forever.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium",
+      "details": "Currently current_speed only changes under nonzero throttle input, so releasing the pedal acts like cruise control. coast_deceleration should be weaker than braking_force so active braking still feels stronger than just lifting off. Independent of the lean/flip tasks.",
+      "test_strategy": "Release throttle mid-drive: speed visibly drops off over ~1-2s instead of holding flat; braking still decelerates faster than coasting.",
+      "scope": "scripts/resources/vehicle_stats.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T04:59:33.804Z",
+      "updated_at": "2026-09-15T07:25:37.752Z"
+    },
+    {
+      "id": 12,
+      "title": "Add balance-tilt tuning knobs to VehicleStats",
+      "description": "Add exported fields for the continuous corner-support balance tilt: max balance tilt angle, corner raycast probe distance, and a smoothing/response-rate knob for how quickly tilt follows changing support.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium",
+      "details": "Separate knobs from the existing event-lean fields (max_lean_angle etc.) rather than reusing them -- balance tilt is a continuous, always-on function of support state while event lean is a decaying one-shot response to a trigger; sharing a cap would couple two mechanics with different tuning needs. Same doc-comment style as existing knobs (units stated, tuning intent stated).",
+      "test_strategy": ".tres/Inspector shows new fields editable.",
+      "scope": "scripts/resources/vehicle_stats.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T09:46:22.880Z",
+      "updated_at": "2026-09-15T09:46:55.443Z"
+    },
+    {
+      "id": 13,
+      "title": "Compute continuous balance tilt from four-corner support raycasts",
+      "description": "Cast four downward raycasts from the vehicle footprint's corners (derived from the collision shape's extents, oriented by current yaw) each grounded physics frame; weight how many corners have ground under them and compute a continuous tilt value toward the unsupported side(s), clamped to the new max balance tilt angle.",
+      "status": "done",
+      "dependencies": [
+        12
+      ],
+      "priority": "medium",
+      "details": "Store the result in new fields (e.g. _balance_pitch_deg / _balance_roll_deg) separate from the existing event-lean fields -- do not overwrite _lean_pitch_deg/_lean_roll_deg here; composing the two is a distinct task (see dependent task). All four corners supported (or within a near-full-support threshold) must yield zero balance tilt. A fully airborne car (zero corners supported) must not apply balance tilt at all -- that's the existing airborne/falling code path, a different case from partial support while grounded. Must never touch self/transform.basis -- raycast results only ever feed the visual-mesh-only tilt fields, preserving the yaw-only collision body invariant from task 2.",
+      "test_strategy": "Manual scratch-scene check: park the car with a known corner hanging off a ledge, confirm the computed balance tilt fields move off zero in the expected direction; all-four-supported case stays at zero.",
+      "scope": "scripts/vehicles/vehicle_controller.gd",
+      "agent_hints": [
+        "developer",
+        "architect"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T09:46:22.880Z",
+      "updated_at": "2026-09-15T10:00:52.597Z"
+    },
+    {
+      "id": 14,
+      "title": "Resolve composition of balance tilt with event-triggered lean on the visual mesh",
+      "description": "Decide and implement how the continuous balance tilt combines with the existing event-triggered _lean_pitch_deg/_lean_roll_deg when writing the visual mesh's rotation each frame -- they currently both would target the same MeshInstance3D.rotation.",
+      "status": "done",
+      "dependencies": [
+        13
+      ],
+      "priority": "high",
+      "details": "This is the trickiest open design question flagged during scoping, called out as its own reviewable decision rather than folded silently into the raycast task. Candidate approaches: additive blend of both values before writing to the mesh; suppressing balance tilt for a short window right after an event-lean trigger so they don't visibly fight; or balance tilt taking priority during sustained grounded state since it reflects an ongoing physical fact while event lean is inherently transient. Whichever is chosen must be justified against Guardrail 1 (reproducible, not random-feeling) and must not reintroduce the original bug (car resting precariously with zero tilt) or a new one (mesh visibly fighting itself between two competing rotations right after a landing on an edge).",
+      "test_strategy": "Manual scratch-scene check: trigger an event lean, then let the car settle into a partial-support resting state, confirm the mesh rotation transitions smoothly rather than snapping or oscillating between the two sources.",
+      "scope": "scripts/vehicles/vehicle_controller.gd",
+      "agent_hints": [
+        "architect",
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T09:46:22.880Z",
+      "updated_at": "2026-09-15T10:08:37.706Z"
+    },
+    {
+      "id": 15,
+      "title": "Surface balance-tilt state in debug HUD",
+      "description": "Extend the debug overlay to show current balance-tilt magnitude and how many footprint corners are currently supported, for hand-feel tuning.",
+      "status": "done",
+      "dependencies": [
+        14
+      ],
+      "priority": "medium",
+      "details": "Same pattern as the existing lean readout in debug_overlay.gd -- read VehicleController state only, no Input polling from the debug layer (Architecture Decision 01).",
+      "test_strategy": "F3 overlay shows balance-tilt magnitude and supported-corner count change live while driving onto a ledge.",
+      "scope": "scripts/ui/debug_overlay.gd",
+      "agent_hints": [
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T09:46:22.880Z",
+      "updated_at": "2026-09-15T10:13:28.708Z"
+    },
+    {
+      "id": 16,
+      "title": "GdUnit4 tests: balance-tilt support states",
+      "description": "Cover three support states: all four corners supported yields zero balance tilt; a controlled partial-support scenario (e.g. car positioned so only some corners are over a floor edge) produces a tilt in the correct direction bounded by the clamp; a fully airborne car (zero corners supported) applies no balance tilt.",
+      "status": "done",
+      "dependencies": [
+        14
+      ],
+      "priority": "medium",
+      "test_strategy": "task test passes.",
+      "scope": "test/unit/**",
+      "agent_hints": [
+        "qa",
+        "developer"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T09:46:22.880Z",
+      "updated_at": "2026-09-15T11:56:33.859Z"
+    },
+    {
+      "id": 17,
+      "title": "Hand-feel test balance tilt on partial-support resting states",
+      "description": "Manually verify on test_track.tscn (or a constructed edge case) that resting precariously now visibly reads as precarious, composition with event lean doesn't look glitchy or fighting, and normal driving on minor bumps/uneven ground doesn't feel twitchy from raycast noise.",
+      "status": "blocked",
+      "dependencies": [
+        14,
+        15
+      ],
+      "priority": "medium",
+      "details": "No file change -- tuning/verification pass only, adjust VehicleStats balance-tilt knobs from task 12 by feel. Explicit scrutiny item: the corner-raycast approach could be noisy on rough terrain, so check ordinary driving doesn't pick up unwanted jitter, not just the precarious-edge case.",
+      "agent_hints": [
+        "qa"
+      ],
+      "subtasks": [],
+      "created_at": "2026-09-15T09:46:22.880Z",
+      "updated_at": "2026-09-15T11:56:35.140Z"
+    }
+  ]
+}

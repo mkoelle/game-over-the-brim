@@ -81,5 +81,6 @@ Before races or in tournament lobbies, players personalize their racer:
 
 Following [.agents/physics.md](file:///.agents/physics.md):
 - **Node Type**: `CharacterBody3D` for tight, responsive arcade feel.
-- **Center of Mass**: Artificially anchored to the ground plane below the brim to ensure tall hats drift cleanly without tipping over.
-- **Physics Tuning**: Exposed as exported variables in a custom `VehicleStats.tres` Resource for live-tuning acceleration, grip, drift slip, and top speed without recompiling scripts.
+- **Center of Mass**: Artificially anchored to the ground plane below the brim so tall hats drift cleanly and steering stays yaw-only — the collision body never physically tips or flips.
+- **Landing/Impact Lean**: A reckless landing or hard side impact can induce a temporary, bounded pitch/roll lean, applied to the car's visual mesh only (never the collision body, which stays yaw-only as above) and always self-correcting back to level within a configured duration. Deterministic by design — sampled once per landing/impact event from clean state (touchdown angle, impact speed) rather than accumulated from noisy per-frame collision data, so the same reckless landing always produces the same lean, never a random-feeling one.
+- **Physics Tuning**: Exposed as exported variables in a custom `VehicleStats.tres` Resource for live-tuning acceleration, grip, drift slip, top speed, and lean thresholds without recompiling scripts.
