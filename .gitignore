@@ -20,9 +20,6 @@
 # Local `task check` scratch output
 godot_check.log
 
-# MCP config (contains API keys)
-.mcp.json
-
 # OS
 .DS_Store
 Thumbs.db
