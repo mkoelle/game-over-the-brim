@@ -63,7 +63,9 @@ Guardrail 3 (the "1-Car Fun" Rule), not a bug hunt:
 Use `docs/templates/bug-report.md` for anything concrete (crash,
 clipping, stuck state). For pure feel/tuning notes ("acceleration feels
 too slow"), a note in STATE.md's Recent Progress or a direct tuning pass
-on the relevant `VehicleStats`/`ChaseCamera` export is enough — these
+on the relevant `VehicleStats` export or `CarFollowCam` inspector value
+(the `PhantomCamera3D` in `main.tscn`, plus its `YawDriver` child) is
+enough — these
 aren't "bugs," they're calibration.
 
 ## Debug mode

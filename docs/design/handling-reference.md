@@ -338,6 +338,20 @@ body of about 2.5 m long. Scale them by the final body length.
 | FOV boost decay | 0.5 s out | 0.3-0.8 s | [E] slow release feels like deceleration |
 | FOV by speed alone | +0 to +4 degrees across 0 to top speed | | [E] STK has none |
 
+**T-005 measurement (scripted drive, 2026-11-25).** Phantom Camera's Third
+Person damping lags the aim point, not just the camera. Three start values
+failed there. These are measured on our own track, not estimates.
+- Position lag 0.15 s put the camera 8.2 m back at top speed. With 0.06 s
+  it sits 6.1 m back, which meets the 6.0 m target with no extra
+  speed-linked distance.
+- Vertical lag 0.3 s let the camera drop into Ramp2 on its 30 degree
+  climb. 0.2 s clears it.
+- Rotation lag 0.25 s gave 35 degrees of yaw lag at full lock and top
+  speed. 0.15 s gives 20 degrees.
+
+The full table is in
+[T-005](../tasks/T-005-replace-chase-camera-with-phantom-camera.md).
+
 ### Drift behavior
 
 [E] unless noted.

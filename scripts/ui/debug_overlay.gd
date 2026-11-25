@@ -9,7 +9,7 @@ extends CanvasLayer
 ## Decision 01 — the car never polls Input.* globally either).
 
 ## The vehicle to read telemetry from. Assigned externally (e.g. main.gd),
-## same pattern as ChaseCamera.target.
+## same pattern as CarFollowCam.follow_target.
 @export var target: VehicleController
 
 @onready var _label: Label = $PanelContainer/Label

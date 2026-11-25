@@ -9,16 +9,21 @@ extends Node
 ## cross-node references in the .tscn: all of these are plain siblings
 ## under Main, so a direct reference is simplest and avoids any ambiguity
 ## in how an exported property resolves across instanced sub-scenes.
+##
+## The chase camera is a Phantom Camera rig (ADR-013): GameCamera +
+## PhantomCameraHost renders whichever PhantomCamera3D has top priority,
+## and CarFollowCam follows the car. Its ChaseCamYawDriver child reads
+## `follow_target`, so this is the only place the car is assigned.
 
 @onready var _car: VehicleController = $TophatCar
-@onready var _chase_camera: ChaseCamera = $ChaseCamera
+@onready var _follow_cam: PhantomCamera3D = $CarFollowCam
 @onready var _debug_overlay: DebugOverlay = $DebugOverlay
 
 
 func _ready() -> void:
-	_chase_camera.target = _car
+	_follow_cam.follow_target = _car
 	_debug_overlay.target = _car
 	print_rich(
-		"[color=green][OverTheBrim][/color] Test track loaded, car spawned, chase camera following."
+		"[color=green][OverTheBrim][/color] Test track loaded, car spawned, CarFollowCam following."
 	)
 	EventBus.race_started.emit()
