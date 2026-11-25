@@ -20,7 +20,7 @@ A row with `placeholder: yes` must be replaced or confirmed before release.
 
 | Path(s) | Source URL | Author | License (SPDX) | Date added | Placeholder |
 | --- | --- | --- | --- | --- | --- |
-| `addons/gdUnit4/` (v6.2.1, includes its bundled `.png` icons and logos) | <https://github.com/MikeSchulze/gdUnit4> | Mike Schulze | MIT | 2026-09-09 | no |
+| `addons/gdUnit4/` (v6.2.3 since T-009, includes its bundled `.png` icons and logos) | <https://github.com/godot-gdunit-labs/gdUnit4> | Mike Schulze | MIT | 2026-09-09 | no |
 
 The license text is in `addons/gdUnit4/LICENSE`. It requires the copyright
 notice to ship "in all copies or substantial portions". The addon is not
