@@ -10,6 +10,17 @@ Versioning follows the tag pushed to trigger a release (see
 
 ## [Unreleased]
 
+### Changed (toolchain, ADR-023)
+
+- Replaced gdtoolkit (`gdformat`/`gdlint`, Python, last released
+  2025-10) with GDQuest GDScript Formatter 0.28.0 (`gdscript-formatter`
+  for formatting and linting; Rust single binary). This reformatted 4
+  files with layout-only changes, checked with `--verify-structure`.
+- Replaced pre-commit (Python) with prek 0.5.11 (Rust drop-in). It reads
+  the same `.pre-commit-config.yaml`.
+- Dropped uv and every `pypi:` tool from `mise.toml`. The toolchain is
+  now native binaries only (Godot, Task, gdscript-formatter, prek).
+
 ### Fixed
 
 - `.import` files are now committed. `.gitignore` used to exclude them, so

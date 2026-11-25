@@ -22,5 +22,6 @@
 - **[ADR-020](ADR-020-steam-remote-play-together-online-path.md)**: Steam Remote Play Together as First Online Path (**Proposed**)
 - **ADR-021** (reserved): 3D Physics Engine Pin — written by [T-001](../tasks/T-001-pin-3d-physics-engine.md)
 - **[ADR-022](ADR-022-dev-workflow-lean-trunk-and-model-tiering.md)**: Development Workflow: Lean Trunk, Feel Gates, Model Tiering (supersedes ADR-008)
+- **[ADR-023](ADR-023-native-binary-toolchain.md)**: Native-Binary Dev Toolchain (gdscript-formatter + prek replace gdtoolkit + pre-commit; no Python)
 
 Adoption order and tickets: [docs/plans/addon-adoption-plan.md](../plans/addon-adoption-plan.md)

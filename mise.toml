@@ -7,9 +7,11 @@
 # release.yml's GODOT_VERSION / container tag or project.godot's
 # config/features.
 
+# Every tool is a single native binary: no Python or uv. The earlier
+# pip/pypi tools broke when mise removed the Python they were built
+# against (ADR-023).
 [tools]
 godot = "4.7.2-stable"
 task = "3.54.0"
-uv = "0.13.9"
-"pypi:gdtoolkit" = "4.5.0"
-"pypi:pre-commit" = "4.7.0"
+"github:GDQuest/GDScript-formatter" = { version = "0.28.0", bin = "gdscript-formatter" }  # format + lint
+prek = "0.5.11"                                 # drop-in pre-commit runner

@@ -148,7 +148,7 @@ custom render pipeline; no live-ops backend).
   `4.7.2` from Homebrew on PATH) and corrected to `"4.7"` / `4.7.2`. Confirm
   which `godot` resolves first on PATH before touching this again.
   **Update 2026-11-24:** the toolchain is now mise-managed on purpose.
-  `mise.toml` pins Godot, Task, gdtoolkit, pre-commit and uv for local use
+  `mise.toml` pins Godot, Task and the lint/format/hook tools (see ADR-023) for local use
   and for CI (`jdx/mise-action` replaces `chickensoft-games/setup-godot`,
   `arduino/setup-task` and the pip install step). `task check:versions`
   (run first in `task ci`) fails if `mise.toml`, `release.yml`

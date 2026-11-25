@@ -29,8 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Installs every tool pinned in mise.toml (Godot, Task, gdtoolkit,
-      # pre-commit, uv): the same versions `mise install` gives locally.
+      # Installs every tool pinned in mise.toml (Godot, Task,
+      # gdscript-formatter, prek): the same versions `mise install` gives
+      # locally.
       - name: Setup toolchain (mise.toml)
         uses: jdx/mise-action@v5
 

@@ -4,12 +4,12 @@
 # pushing instead of guessing whether it'll pass.
 version: "3"
 
-# Tool versions (Godot, Task, gdtoolkit, pre-commit, uv) live in mise.toml,
+# Tool versions (Godot, Task, gdscript-formatter, prek) live in mise.toml,
 # not here. Bootstrap once with `mise trust && mise install`, then
 # `task setup`.
 vars:
-  # First-party GDScript only — addons/ (gdUnit4) is vendored, not ours to
-  # reformat or lint.
+  # First-party GDScript only. addons/ is vendored code: we never reformat
+  # or lint it.
   GD_PATHS: scripts/ test/
 
 tasks:
@@ -21,12 +21,16 @@ tasks:
   setup:
     desc: >-
       Full local dev setup: install the pinned toolchain from mise.toml
-      (idempotent) and register the pre-commit hook (runs task fmt +
-      task lint on every commit). CI installs the same toolchain via
-      jdx/mise-action instead and never registers the hook.
+      (idempotent) and register the git pre-commit hook with prek (runs
+      task fmt + task lint on every commit). CI installs the same
+      toolchain via jdx/mise-action and never registers the hook.
     cmds:
       - mise install
-      - pre-commit install
+      # --force replaces an old pre-commit hook. Without it, prek keeps that
+      # hook as pre-commit.legacy and chains it ("migration mode"), and the
+      # chained hook fails once Python pre-commit is gone.
+      - rm -f .git/hooks/pre-commit.legacy
+      - prek install --force
 
   check:versions:
     desc: >-
@@ -98,19 +102,22 @@ tasks:
         $TIMEOUT_BIN godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd -a test --ignoreHeadlessMode -c
 
   fmt:
-    desc: Reformat first-party GDScript in place (gdformat).
+    desc: >-
+      Reformat first-party GDScript in place (gdscript-formatter). The
+      --verify-structure flag rejects output whose parse tree differs
+      from the input.
     cmds:
-      - gdformat {{.GD_PATHS}}
+      - gdscript-formatter --verify-structure {{.GD_PATHS}}
 
   fmt:check:
     desc: Check GDScript formatting without modifying files (CI mode).
     cmds:
-      - gdformat --check --diff {{.GD_PATHS}}
+      - gdscript-formatter --check {{.GD_PATHS}}
 
   lint:
-    desc: Lint first-party GDScript (gdlint).
+    desc: Lint first-party GDScript (gdscript-formatter lint, official style guide rules).
     cmds:
-      - gdlint {{.GD_PATHS}}
+      - gdscript-formatter lint {{.GD_PATHS}}
 
   ci:
     desc: Everything the GitHub Actions CI job runs, in the same order.
