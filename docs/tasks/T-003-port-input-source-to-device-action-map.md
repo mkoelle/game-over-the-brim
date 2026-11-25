@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P1
+**Status:** Todo
 **Estimate:** 3h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-014](../adr/ADR-014-per-device-input-action-map.md)

@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P2
+**Status:** Todo
 **Estimate:** 3h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-013](../adr/ADR-013-camera-addon-phantom-camera.md)

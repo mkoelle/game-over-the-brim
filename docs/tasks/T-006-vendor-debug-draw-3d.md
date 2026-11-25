@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P2
+**Status:** Todo
 **Estimate:** 3h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-016](../adr/ADR-016-debug-visualization-addon-debug-draw-3d.md), [ADR-015](../adr/ADR-015-native-gdextension-addon-policy.md)

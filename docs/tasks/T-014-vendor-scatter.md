@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P3
+**Status:** Blocked (1-Car Fun gate not passed)
 **Estimate:** 3h
 **Phase:** 3 — Track building ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-017](../adr/ADR-017-track-tooling-road-generator-and-scatter.md)

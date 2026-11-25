@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P1
+**Status:** Todo
 **Estimate:** 3h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-013](../adr/ADR-013-camera-addon-phantom-camera.md)
@@ -27,6 +28,9 @@ values only as a first guess, then tune by feel.
 - [ ] `follow_target` is assigned in `main.gd`, never hardcoded as a node
       path in the camera.
 - [ ] `test/integration/test_main.gd` still passes.
+- [ ] The `godot-ai` MCP spike result (reliable or not, and what failed)
+      is recorded in ADR-022 §6, and the PR includes a screenshot of the
+      running camera framing.
 
 ### Context
 
@@ -70,7 +74,12 @@ Plus a one-line doc update: the `ChaseCamera` mention in
    `1 - exp(-rate * delta)` decay weight and `look_smoothing`, then call
    the PCam third-person rotation setter. Remove all position logic.
    Otherwise, delete the file.
-4. Edit `main.tscn` in the editor:
+4. **`godot-ai` MCP spike** (ADR-022 §6): open the editor with the
+   project, then make the scene edits below through the MCP
+   (`node_create`, `node_set_property`, `scene_save`). Verify with
+   `project_run` plus `editor_screenshot`/`logs_read`. If the MCP is
+   unreliable, do the same edits by hand in the editor and record why.
+   Edit `main.tscn`:
    - Replace the `ChaseCamera` node with `GameCamera` (`Camera3D`) +
      `PhantomCameraHost`.
    - Add `CarFollowCam` (`PhantomCamera3D`, `priority = 10`).

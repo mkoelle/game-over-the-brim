@@ -3,6 +3,7 @@
 **Assignee:** Unassigned (owner decision required)
 **Date:** 2026-11-24
 **Priority:** P3
+**Status:** Todo
 **Estimate:** 3h (research and decision; hands-on testing needs a Steam app ID)
 **Phase:** 5 — Online path ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-020](../adr/ADR-020-steam-remote-play-together-online-path.md) (Proposed)

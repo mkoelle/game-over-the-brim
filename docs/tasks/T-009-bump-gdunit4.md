@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P3
+**Status:** Todo
 **Estimate:** 1h
 **Phase:** 1 — Maintenance ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-007](../adr/ADR-007-build-test-and-release-pipeline.md)

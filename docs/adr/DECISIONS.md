@@ -7,7 +7,7 @@
 - **[ADR-005](file:///docs/adr/ADR-005-presenter-and-active-spectator-architecture.md)**: Presenter Mode and Active Spectator Architecture
 - **[ADR-006](file:///docs/adr/ADR-006-role-based-event-direction-and-multi-window.md)**: Role-Based Event Direction and Multi-Window Host Architecture
 - **[ADR-007](file:///docs/adr/ADR-007-build-test-and-release-pipeline.md)**: Build, Test, and Release Pipeline (GdUnit4, GitHub Actions CI/release, Desktop+Android)
-- **[ADR-008](file:///docs/adr/ADR-008-llm-delegation-model-selection.md)**: LLM Delegation Model Selection (OpenRouter)
+- **[ADR-008](file:///docs/adr/ADR-008-llm-delegation-model-selection.md)**: LLM Delegation Model Selection (OpenRouter), **superseded by ADR-022**
 - **[ADR-009](file:///docs/adr/ADR-009-netcode-addon-netfox.md)**: Netcode Addon Selection (netfox)
 - **[ADR-010](file:///docs/adr/ADR-010-input-glyph-addon-controller-icons.md)**: Input Prompt Glyph Addon Selection (Controller Icons)
 - **[ADR-011](file:///docs/adr/ADR-011-ai-state-machine-addon-limboai.md)**: AI / State Machine Addon Selection (LimboAI)
@@ -21,5 +21,6 @@
 - **[ADR-019](ADR-019-third-party-asset-sourcing-and-licensing.md)**: Third-Party Asset Sourcing and License Tracking
 - **[ADR-020](ADR-020-steam-remote-play-together-online-path.md)**: Steam Remote Play Together as First Online Path (**Proposed**)
 - **ADR-021** (reserved): 3D Physics Engine Pin — written by [T-001](../tasks/T-001-pin-3d-physics-engine.md)
+- **[ADR-022](ADR-022-dev-workflow-lean-trunk-and-model-tiering.md)**: Development Workflow: Lean Trunk, Feel Gates, Model Tiering (supersedes ADR-008)
 
 Adoption order and tickets: [docs/plans/addon-adoption-plan.md](../plans/addon-adoption-plan.md)
