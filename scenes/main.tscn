@@ -1,21 +1,53 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://c40e40okggc85"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="PackedScene" path="res://scenes/arenas/test_track.tscn" id="2_track"]
+[ext_resource type="Script" uid="uid://dvq7otjk7uef6" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://5tg78r237ark" path="res://scenes/arenas/test_track.tscn" id="2_track"]
 [ext_resource type="PackedScene" path="res://scenes/vehicles/tophat_car.tscn" id="3_car"]
-[ext_resource type="Script" path="res://scripts/camera/chase_camera.gd" id="4_camera"]
+[ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="4_tipki"]
+[ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="5_85g3d"]
 [ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_debug"]
+[ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="6_choun"]
+[ext_resource type="Script" uid="uid://c6yqlbgpbqjjy" path="res://scripts/camera/chase_cam_yaw_driver.gd" id="7_ya4ey"]
 
-[node name="Main" type="Node"]
+[sub_resource type="Resource" id="Resource_eb6dy"]
+script = ExtResource("6_choun")
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_tipki"]
+radius = 0.25
+
+[node name="Main" type="Node" unique_id=664154211]
 script = ExtResource("1_main")
 
-[node name="TestTrack" parent="." instance=ExtResource("2_track")]
+[node name="TestTrack" parent="." unique_id=1902343183 instance=ExtResource("2_track")]
 
-[node name="TophatCar" parent="." instance=ExtResource("3_car")]
+[node name="TophatCar" parent="." unique_id=1657780306 instance=ExtResource("3_car")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -20)
 
-[node name="ChaseCamera" type="Camera3D" parent="."]
+[node name="GameCamera" type="Camera3D" parent="." unique_id=1063209109]
+physics_interpolation_mode = 2
+top_level = true
 current = true
-script = ExtResource("4_camera")
 
-[node name="DebugOverlay" parent="." instance=ExtResource("5_debug")]
+[node name="PhantomCameraHost" type="Node" parent="GameCamera" unique_id=694295048]
+process_priority = 300
+process_physics_priority = 300
+script = ExtResource("4_tipki")
+
+[node name="CarFollowCam" type="Node3D" parent="." unique_id=1997785916]
+script = ExtResource("5_85g3d")
+priority = 10
+follow_mode = 6
+tween_resource = SubResource("Resource_eb6dy")
+follow_offset = Vector3(0, 1, 0)
+follow_damping = true
+follow_damping_value = Vector3(0.06, 0.2, 0.06)
+follow_distance = 4.657
+vertical_rotation_offset = 0.2606
+spring_length = 4.657
+shape = SubResource("SphereShape3D_tipki")
+margin = 0.2
+
+[node name="YawDriver" type="Node" parent="CarFollowCam" unique_id=79572450]
+script = ExtResource("7_ya4ey")
+
+[node name="DebugOverlay" parent="." unique_id=408800508 instance=ExtResource("5_debug")]
