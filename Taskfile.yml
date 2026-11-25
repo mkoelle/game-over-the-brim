@@ -86,6 +86,9 @@ tasks:
         # (present on CI's ubuntu runner); macOS doesn't ship it by default,
         # so fall back to `gtimeout` (brew coreutils) and, failing that,
         # run untimed rather than erroring.
+        # reports/ lives inside the project: .gdignore keeps Godot from
+        # importing GdUnit4's HTML/CSS reports (UID-duplicate warnings).
+        mkdir -p reports && touch reports/.gdignore
         TIMEOUT_BIN=""
         if command -v timeout >/dev/null 2>&1; then
           TIMEOUT_BIN="timeout 120"
@@ -154,16 +157,22 @@ tasks:
       templates installed locally (Editor > Manage Export Templates) —
       release.yml instead runs inside a container that already has them.
     cmds:
+      # Godot will not create the output folder; .gdignore keeps it out of imports.
+      - mkdir -p build/windows && touch build/.gdignore
       - godot --headless --export-release "Windows Desktop"
 
   export:linux:
     desc: "Export a release Linux build to build/linux/. Same export-template requirement as export:windows."
     cmds:
+      # Godot will not create the output folder; .gdignore keeps it out of imports.
+      - mkdir -p build/linux && touch build/.gdignore
       - godot --headless --export-release "Linux"
 
   export:macos:
     desc: "Export a release macOS build to build/macos/. Same export-template requirement as export:windows."
     cmds:
+      # Godot will not create the output folder; .gdignore keeps it out of imports.
+      - mkdir -p build/macos && touch build/.gdignore
       - godot --headless --export-release "macOS"
 
   export:android:
@@ -172,6 +181,8 @@ tasks:
       keystore not provisioned yet — see STATE.md). Same export-template
       requirement as export:windows.
     cmds:
+      # Godot will not create the output folder; .gdignore keeps it out of imports.
+      - mkdir -p build/android && touch build/.gdignore
       - godot --headless --export-debug "Android"
 
   export:

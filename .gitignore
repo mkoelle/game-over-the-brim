@@ -1,6 +1,7 @@
-# Godot
+# Godot: ignore only the .godot/ cache. *.import and *.uid files MUST be
+# committed (they hold import settings and UIDs; without them every clone
+# regenerates UIDs and scene references break). Godot 4.4+ VCS guidance.
 .godot/
-*.import
 
 # Build output / signing secrets (never commit keystores)
 /build/

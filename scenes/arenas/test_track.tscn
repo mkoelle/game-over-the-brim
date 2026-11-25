@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://5tg78r237ark"]
 
-[ext_resource type="Texture2D" uid="uid://4htujfnt4d2e" path="res://assets/art/tracks/dev_grid.png" id="1_grid_tex"]
+[ext_resource type="Texture2D" uid="uid://dl6mr8w0ujhd3" path="res://assets/art/tracks/dev_grid.png" id="1_grid_tex"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
