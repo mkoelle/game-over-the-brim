@@ -8,12 +8,21 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/debug_overlay.tscn" id="5_debug"]
 [ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="6_choun"]
 [ext_resource type="Script" uid="uid://c6yqlbgpbqjjy" path="res://scripts/camera/chase_cam_yaw_driver.gd" id="7_ya4ey"]
+[ext_resource type="Script" uid="uid://ccmiitq0sdh7j" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_noise_emitter_3d.gd" id="8_ya4ey"]
+[ext_resource type="Script" uid="uid://cuffvge5ad4aa" path="res://addons/phantom_camera/scripts/resources/phantom_camera_noise_3d.gd" id="9_eb6dy"]
+[ext_resource type="Script" uid="uid://cu53exryxf82m" path="res://scripts/camera/impact_shake_driver.gd" id="10_trceg"]
 
 [sub_resource type="Resource" id="Resource_eb6dy"]
 script = ExtResource("6_choun")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_tipki"]
 radius = 0.25
+
+[sub_resource type="Resource" id="Resource_a8y0u"]
+script = ExtResource("9_eb6dy")
+frequency = 15.0
+rotational_multiplier_y = 0.5
+rotational_multiplier_z = 0.25
 
 [node name="Main" type="Node" unique_id=664154211]
 script = ExtResource("1_main")
@@ -46,8 +55,18 @@ vertical_rotation_offset = 0.2606
 spring_length = 4.657
 shape = SubResource("SphereShape3D_tipki")
 margin = 0.2
+noise_emitter_layer = 1
 
 [node name="YawDriver" type="Node" parent="CarFollowCam" unique_id=79572450]
 script = ExtResource("7_ya4ey")
+
+[node name="ImpactShake" type="Node3D" parent="." unique_id=1262994598]
+script = ExtResource("8_ya4ey")
+noise = SubResource("Resource_a8y0u")
+duration = 0.08
+decay_time = 0.22
+
+[node name="ImpactShakeDriver" type="Node" parent="ImpactShake" unique_id=1209260386]
+script = ExtResource("10_trceg")
 
 [node name="DebugOverlay" parent="." unique_id=408800508 instance=ExtResource("5_debug")]
