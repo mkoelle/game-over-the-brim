@@ -10,9 +10,6 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  GODOT_VERSION: "4.7.2"
-
 permissions:
   contents: read
   checks: write
@@ -32,22 +29,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Godot
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: ${{ env.GODOT_VERSION }}
-          use-dotnet: false
-
-      - name: Setup Task
-        uses: arduino/setup-task@v3
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install gdformat/gdlint
-        run: task setup:ci
+      # Installs every tool pinned in mise.toml (Godot, Task, gdtoolkit,
+      # pre-commit, uv): the same versions `mise install` gives locally.
+      - name: Setup toolchain (mise.toml)
+        uses: jdx/mise-action@v5
 
       # Every step below is also `task <name>` locally (see Taskfile.yml) —
       # `task ci` runs the same sequence in one shot for a pre-push check.
+      - name: Check Godot version pins agree
+        run: task check:versions
+
       - name: Import project (headless editor pass)
         run: task import
 

@@ -13,7 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Pin in lockstep with ci.yml's GODOT_VERSION and project.godot's engine version.
+  # Pin in lockstep with mise.toml's godot, the godot-ci image tag below and
+  # project.godot's config/features (`task check:versions` enforces this).
   GODOT_VERSION: "4.7.2"
 
 jobs:
