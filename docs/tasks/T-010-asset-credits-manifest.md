@@ -3,7 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P2
-**Status:** Todo
+**Status:** Done
 **Estimate:** 1h
 **Phase:** 2 — Assets ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-019](../adr/ADR-019-third-party-asset-sourcing-and-licensing.md)
@@ -15,14 +15,14 @@ document the import rules. Do this before any free asset enters the repo.
 
 ### Acceptance Criteria
 
-- [ ] `assets/CREDITS.md` exists with columns: path(s), source URL,
+- [x] `assets/CREDITS.md` exists with columns: path(s), source URL,
       author, license (SPDX), date added, placeholder (yes/no).
-- [ ] Every existing file under `assets/` is either listed or marked
+- [x] Every existing file under `assets/` is either listed or marked
       "original (in-house)".
-- [ ] The provenance of `assets/art/tracks/dev_grid.png` is resolved. If
+- [x] The provenance of `assets/art/tracks/dev_grid.png` is resolved. If
       the source is unknown, replace it with an equivalent from Kenney
       Prototype Textures (CC0) and list that.
-- [ ] `docs/standards/asset-organization.md` gains a "Third-party assets"
+- [x] `docs/standards/asset-organization.md` gains a "Third-party assets"
       section summarizing the ADR-019 rules:
   - allowed and forbidden licenses
   - pack subfolder naming (`kenney_racing_kit/`)
@@ -62,3 +62,45 @@ appears in `assets/CREDITS.md`.
 ### Dependencies
 
 None.
+
+### Assumptions (owner to validate)
+
+- **Assumption:** `dev_grid.png` has no recoverable source, so it was
+  replaced by Kenney Prototype Textures `PNG/Light/texture_07.png` (CC0).
+  The path is unchanged, so `test_track.tscn` still works. The new
+  checkerboard is lower contrast than the old one.
+  **Evidence:** `git log --follow` shows only commit `ed5e899` (no source
+  in the message or the repo). The Kenney zip's `License.txt` says
+  "License: (Creative Commons Zero, CC0)" and "free to use in personal,
+  educational and commercial projects". The zip came from
+  <https://opengameart.org/content/prototype-textures> ("All CC0 -
+  Uploader: Kenney"), because kenney.nl's own download link needs a
+  browser session.
+  **Owner check:** run the test track and confirm the ground still reads
+  well. Say if you want a higher-contrast texture (`Dark/texture_07.png`).
+- **Assumption:** the in-house icon set (`icon.svg` and the `.ico`,
+  `.icns` and Android PNGs rendered from it) is original work.
+  **Evidence:** `icon.svg` is hand-written SVG shapes, and ADR-007 records
+  the other files as rendered from it with Godot and Pillow. No commit
+  names an outside author.
+  **Owner check:** confirm you or the project made `icon.svg`.
+- **Assumption:** listing gdUnit4 in the credits screen satisfies its MIT
+  license.
+  **Evidence:** `addons/gdUnit4/LICENSE` says "The above copyright notice
+  and this permission notice shall be included in all copies or substantial
+  portions of the Software." The credits screen can show that notice.
+  Shipping `addons/gdUnit4/LICENSE` in the build also satisfies it.
+  **Owner check:** when T-015 lands, confirm the credits screen shows the
+  gdUnit4 and Godot MIT notices. Also decide whether to exclude the addon
+  from exports (`exclude_filter` is empty today).
+- **Assumption:** Godot Engine (MIT, includes Jolt) needs only its notice
+  and third-party license text in the credits.
+  **Evidence:** <https://godotengine.org/license/> and the Godot docs
+  page "Complying with licenses". I did not re-read the full third-party
+  list in this ticket.
+  **Owner check:** at release, add Godot's copyright text and
+  third-party license list to the credits screen.
+- **Assumption:** CC0 needs no attribution, but we still list Kenney.
+  **Evidence:** `License.txt`: "Support us by crediting Kenney or
+  www.kenney.nl (this is not mandatory)".
+  **Owner check:** none needed. Remove the credit if you prefer.
