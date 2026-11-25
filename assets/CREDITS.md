@@ -31,8 +31,9 @@ in each `.gltf.import`) is a project setting, not an edit of the model.
 | Path(s) | Source URL | Author | License (SPDX) | Date added | Placeholder |
 | --- | --- | --- | --- | --- | --- |
 | `addons/gdUnit4/` (v6.2.3 since T-009, includes its bundled `.png` icons and logos) | <https://github.com/godot-gdunit-labs/gdUnit4> | Mike Schulze | MIT | 2026-09-09 | no |
+| `addons/phantom_camera/` (v0.12, T-004; includes its bundled `.svg`/`.png` icons, fonts and example textures) | <https://github.com/ramokz/phantom-camera> | Marcus Skov | MIT | 2026-11-25 | no |
 
-The license text is in `addons/gdUnit4/LICENSE`. It requires the copyright
+The license text is in `addons/gdUnit4/LICENSE` (and `addons/phantom_camera/LICENSE` for Phantom Camera, copyright 2022 Marcus Skov, same MIT terms). It requires the copyright
 notice to ship "in all copies or substantial portions". The addon is not
 excluded from exports today (`exclude_filter` is empty), so the credits
 screen must show this notice. See the open items below.
@@ -61,6 +62,12 @@ Files named `.gitkeep` and Godot `.import` files are not assets and are not list
 
 ## Open items
 
+- **Nunito fonts inside Phantom Camera.** `addons/phantom_camera/fonts/`
+  ships Nunito `.ttf` files with no font license file. Nunito is published
+  under OFL-1.1 upstream (Google Fonts), but the addon's `LICENSE` is MIT
+  only and does not mention it. Unverified. The fonts are used by the editor
+  panel only. Decide whether to exclude `addons/phantom_camera/fonts/` and
+  the other editor-only folders from exports (T-015).
 - **Replaced `dev_grid.png`.** The previous file was added in commit
   `ed5e899` with no recorded source. It was replaced on 2026-11-25 by the
   Kenney CC0 texture above. The old file is still in git history, so its
