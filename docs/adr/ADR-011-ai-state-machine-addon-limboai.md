@@ -62,3 +62,29 @@ one track is confirmed fun"). Do not vendor before then.
 2. **Hand-roll AI bot decision logic**: Rejected as the default — behavior
    trees are the standard tool for exactly this problem, and LimboAI's
    editor integration outweighs a bespoke bot decision system.
+3. **Beehave** (`bitbrain/beehave`, MIT, v2.9.3, pure GDScript): the
+   fallback for bot behavior trees if LimboAI fails the
+   [ADR-015](ADR-015-native-gdextension-addon-policy.md) native-addon
+   checks (for example, a missing Android binary). It has no state-machine
+   half. `RaceManager` would then use alternative 1 (enum + match).
+
+---
+
+### Amendment — 2026-11-24
+
+- **LimboAI is native code.** It ships either as a C++ engine module
+  (custom engine build) or as a GDExtension. Use the **GDExtension**
+  build. A custom engine build would break the stock-Godot CI and export
+  pipeline (ADR-007). The GDExtension build is "somewhat limited in
+  features" per upstream, so check that the features we need exist before
+  committing.
+- Adoption is gated by
+  [ADR-015](ADR-015-native-gdextension-addon-policy.md): four-platform
+  binaries, `task ci` on 4.7.2, and an export smoke test.
+- Version compatibility (upstream table, verified 2026-11-24): LimboAI
+  **1.8.x** GDExtension supports Godot **4.6+**, and the latest is
+  **v1.8.1** (2026-08-20). Re-verify at adoption.
+- Bot path source: AI bots and traffic follow Road Generator `RoadLane`
+  paths ([ADR-017](ADR-017-track-tooling-road-generator-and-scatter.md)).
+  LimboAI decides *what* to do (overtake, block, take a shortcut).
+  `RoadLane` supplies *where* to drive.
