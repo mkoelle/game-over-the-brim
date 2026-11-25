@@ -71,14 +71,17 @@ Process, tracking and model tiering: [ADR-022](../adr/ADR-022-dev-workflow-lean-
 | [T-007](../tasks/T-007-vehicle-debug-vectors.md) | In-world vehicle debug vectors (F3) | P2 | 2h | T-006 | 016 |
 | [T-008](../tasks/T-008-impact-camera-shake.md) | Impact camera shake | P2 | 3h | T-005 | 013 |
 | [T-009](../tasks/T-009-bump-gdunit4.md) | Bump GdUnit4 6.2.0 → 6.2.3 | P3 | 1h | — | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
+| [T-019](../tasks/T-019-vendor-godot-ai.md) | Vendor godot-ai 4.4.2 (project scope, telemetry off) | P1 | 2h | — | [022](../adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md) |
+| [T-018](../tasks/T-018-upgrade-godot-4-8.md) | Upgrade to Godot 4.8 stable | P2 | 3h | 4.8 stable + addon support | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
 
 **Execution order** (ADR-022; tickets run one at a time, because most of
 them touch `project.godot`):
 
 1. T-001 physics pin. Switching engines later would invalidate tuning.
 2. T-009 GdUnit4 bump, so the new tests are written on 6.2.3.
-3. T-004 → T-005 camera. The camera was flagged in the feel-test, and
-   T-005 is also the `godot-ai` MCP spike.
+3. T-019 → T-004 → T-005 camera. The camera was flagged in the
+   feel-test, and T-005 is also the `godot-ai` MCP spike, which needs
+   T-019 first.
 4. T-002 → T-003 input fix.
 5. T-006 → T-007 debug vectors.
 6. **FC-1 (feel checkpoint 1):** the owner drives with the new camera,
@@ -143,6 +146,9 @@ trigger fires.
 
 ## Rejected (do not re-propose without new information)
 
+- **gdtoolkit / pre-commit**: replaced by gdscript-formatter and prek
+  (ADR-023). The tools were stale and Python-dependent.
+
 - **MultiplayerInput** (`matjlars`): incompatible with Godot 4.7 device IDs
   and the upstream is stale. See ADR-014.
 - **Resonate** (audio manager): the upstream repo is archived.
@@ -160,3 +166,5 @@ trigger fires.
 - `SubViewportContainer` grid for splitscreen.
 - `AnimationTree` for hat eyes.
 - Remote scene tree for live tuning.
+- **From Godot 4.8 (T-018):** a native `Trail3D` node for drift and
+  steam trails, and non-allocating physics queries for per-frame raycasts.

@@ -63,6 +63,16 @@ Plus a doc update: the ADR-016 checklist results.
       - the Android APK, with `adb install -r build/android/*.apk`, then
         launch it on the device
 
+      Local Android prerequisites, set up 2026-11-24 (see ADR-007):
+      - Android CLI (`android`, mise global tool `android-cli`).
+        `sdkmanager` is deprecated.
+      - SDK root `~/Library/Android/sdk`, with platform-tools, build-tools
+        36.1.0, platform 36 and cmdline-tools/latest. These match Godot
+        4.7.2's `targetSdk 36` / `buildTools 36.1.0`.
+      - Godot 4.7.2 export templates installed.
+      - A baseline `task export:android` already produced a working
+        55.7 MB APK before this addon.
+
       Each one must reach the test track with no extension-load error.
    5. **Git:** record the vendored size (`du -sh addons/debug_draw_3d`).
    6. **Dev-only:** check whether the release-template library exists and

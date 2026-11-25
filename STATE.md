@@ -29,6 +29,16 @@ Opus checker).
 ---
 
 ## Recent Progress
+- Tooling audit (2026-11-24), all PRs auto-merged:
+  - #5 committed `.import` files (they had been gitignored, which broke
+    UIDs) and fixed export output folders.
+  - #6 replaced the Python tools: gdtoolkit → gdscript-formatter and
+    pre-commit → prek (ADR-023).
+  - Local Android export works through the Android CLI with SDK 36,
+    matching Godot 4.7.2's source.
+  - Export templates installed.
+  - New tickets: T-018 (Godot 4.8 upgrade at stable) and T-019 (godot-ai
+    vendoring before T-005).
 - Addon and third-party evaluation (2026-11-24):
   - ADR-013 to ADR-020 added. ADR-007, ADR-010 and ADR-011 amended.
   - Adoption plan and 16 sized tickets written (see "Deferred" below).
