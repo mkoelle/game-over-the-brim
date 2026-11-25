@@ -7,23 +7,21 @@ extends GdUnitTestSuite
 ## Input is driven through the scene_runner's simulate_action_press()/
 ## simulate_action_release(), the same pattern test/integration/test_main.gd
 ## uses for scene_runner()/simulate_frames(). Under the hood
-## GdUnitSceneRunnerImpl calls Input.action_press("throttle", 1.0) /
-## Input.action_release("throttle") on the shared global action map
-## (see simulate_action_press()/simulate_action_release() and _handle_actions()
-## in addons/gdUnit4/src/core/GdUnitSceneRunnerImpl.gd) —
-## which is exactly the action map InputSource._get_input_from_action_map()
-## reads via Input.get_action_strength()/is_action_pressed() for the default
-## keyboard device (input_source.gd:66-75). That means this exercises the
-## real keyboard InputSource code path end to end with no fake/stub needed,
-## and is more reliable under scene_runner than calling global
-## Input.action_press() directly, since the runner also tracks and
-## auto-releases any action left pressed when it is disposed
-## (_reset_input_to_default() in GdUnitSceneRunnerImpl.gd). We still explicitly release the
-## action at the end of every test as a belt-and-suspenders guard against
-## state leaking into the next test case, per this project's convention of
-## deterministic per-test cleanup.
+## GdUnitSceneRunnerImpl calls Input.action_press() / Input.action_release()
+## on the named action (see simulate_action_press()/simulate_action_release()
+## in addons/gdUnit4/src/core/GdUnitSceneRunnerImpl.gd).
+##
+## The car's default InputSource is the keyboard slot (ADR-014), which reads
+## only the device-scoped copy "throttle@kb", not the core "throttle" action.
+## So the tests press that copy, found via DeviceActionMap.action_name(). This
+## exercises the real keyboard InputSource code path end to end with no
+## fake/stub. The runner also tracks and auto-releases any action left pressed
+## when it is disposed (_reset_input_to_default() in GdUnitSceneRunnerImpl.gd).
+## We still explicitly release the action at the end of every test as a
+## belt-and-suspenders guard against state leaking into the next test case.
 
 const TOPHAT_CAR_SCENE := "res://scenes/vehicles/tophat_car.tscn"
+
 
 ## 3 seconds at the default 60 Hz physics tick — comfortably past
 ## stats.max_speed / stats.acceleration (~1.7s for the Stovepipe Speedster)
@@ -63,7 +61,7 @@ func test_accelerates_under_throttle_and_respects_max_speed() -> void:
 	_add_floor_under(car)
 	var start_position: Vector3 = car.global_position
 
-	runner.simulate_action_press("throttle")
+	runner.simulate_action_press(_keyboard_throttle())
 	await runner.simulate_frames(THROTTLE_FRAMES)
 
 	var forward: Vector3 = -car.global_transform.basis.z
@@ -86,14 +84,14 @@ func test_accelerates_under_throttle_and_respects_max_speed() -> void:
 	assert_float(forward_speed).is_greater(0.0)
 	assert_float(forward_speed).is_less_equal(car.stats.max_speed)
 
-	runner.simulate_action_release("throttle")
+	runner.simulate_action_release(_keyboard_throttle())
 
 
 func test_no_nan_or_inf_during_sustained_throttle() -> void:
 	var runner := scene_runner(TOPHAT_CAR_SCENE)
 	var car: VehicleController = runner.scene()
 
-	runner.simulate_action_press("throttle")
+	runner.simulate_action_press(_keyboard_throttle())
 	await runner.simulate_frames(THROTTLE_FRAMES)
 
 	var position: Vector3 = car.global_position
@@ -106,4 +104,9 @@ func test_no_nan_or_inf_during_sustained_throttle() -> void:
 	assert_bool(is_finite(velocity.y)).is_true()
 	assert_bool(is_finite(velocity.z)).is_true()
 
-	runner.simulate_action_release("throttle")
+	runner.simulate_action_release(_keyboard_throttle())
+
+
+## Device-scoped throttle action read by the default (keyboard) InputSource.
+func _keyboard_throttle() -> StringName:
+	return DeviceActionMap.action_name(InputSource.KEYBOARD_DEVICE, &"throttle")

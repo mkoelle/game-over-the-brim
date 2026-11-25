@@ -52,10 +52,14 @@ func test_overlay_shows_live_speed_and_input() -> void:
 	var label: Label = overlay.get_node("PanelContainer/Label")
 
 	runner.simulate_key_press(KEY_F3)
-	runner.simulate_action_press("throttle")
+	runner.simulate_action_press(
+		DeviceActionMap.action_name(InputSource.KEYBOARD_DEVICE, &"throttle")
+	)
 	await runner.simulate_frames(30)
 
 	assert_str(label.text).contains("Speed:")
 	assert_str(label.text).contains("Throttle: +1.00")
 
-	runner.simulate_action_release("throttle")
+	runner.simulate_action_release(
+		DeviceActionMap.action_name(InputSource.KEYBOARD_DEVICE, &"throttle")
+	)
