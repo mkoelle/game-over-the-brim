@@ -11,8 +11,34 @@ extends CharacterBody3D
 ## (not zero) control while airborne — matching kart-racer convention
 ## rather than a fully unpowered ballistic fall.
 ##
-## No EventBus signals are emitted yet — that lands with the main.tscn
-## wiring task, not here.
+## It emits no EventBus signals. Its one signal, `impacted`, is local to
+## this vehicle (see below).
+
+## Emitted on the first physics frame of a wall contact, not on every
+## frame of a scrape. It fires again during a contact only for a much
+## harder hit, such as scraping one wall into another in a corner.
+## `impact_speed` is how fast the car was moving into the wall, in m/s:
+## the pre-slide velocity along the wall normal. Floor and ceiling
+## contacts never emit it.
+##
+## Local and per-vehicle on purpose: in split screen only this car's camera
+## should shake, so it never goes through EventBus (T-008).
+signal impacted(impact_speed: float)
+
+## A contact whose normal is within about 45 degrees of straight up or
+## down (|normal.y| at or above this) is a floor or a ceiling, not a wall.
+## This matches the default floor_max_angle.
+const WALL_NORMAL_MAX_Y: float = 0.7
+
+## A wall contact that starts within this many seconds of the last one is
+## the same hit, so a scrape that flickers on and off the wall emits
+## `impacted` once.
+const WALL_REARM_TIME: float = 0.1
+
+## During a contact, a frame whose into-wall speed beats the fastest so far
+## by this much, in m/s, is a new hit (a second wall). With today's stats,
+## steering harder into the same wall adds at most about 1 m/s per frame.
+const HARDER_HIT_SPEED: float = 3.0
 
 ## Data-driven tuning knobs (max speed, acceleration, steering, drift grip,
 ## mass). Assign a VehicleStats .tres in the Inspector.
@@ -28,6 +54,8 @@ var input_source: InputSource = InputSource.new()
 var last_input: Dictionary[String, Variant] = { }
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
+var _time_since_wall_contact: float = INF
+var _contact_peak_speed: float = 0.0
 
 
 func _physics_process(delta: float) -> void:
@@ -96,4 +124,29 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y -= _gravity * delta
 
+	# The slide removes the into-wall part of velocity, so read it before.
+	var pre_slide_velocity: Vector3 = velocity
 	move_and_slide()
+	_detect_wall_impact(pre_slide_velocity, delta)
+
+
+## Emits `impacted` on the first frame of a wall contact, or for a much
+## harder hit during one. It reads only is_on_wall() and get_wall_normal(),
+## which return plain values, so it allocates nothing.
+## get_slide_collision() would hand out a KinematicCollision3D object.
+func _detect_wall_impact(pre_slide_velocity: Vector3, delta: float) -> void:
+	var normal: Vector3 = get_wall_normal()
+	if not is_on_wall() or absf(normal.y) >= WALL_NORMAL_MAX_Y:
+		_time_since_wall_contact += delta
+		return
+	var impact_speed: float = -pre_slide_velocity.dot(normal)
+	if _time_since_wall_contact >= WALL_REARM_TIME:
+		# A new contact: any speed into the wall is a hit.
+		_contact_peak_speed = 0.0
+		if impact_speed > 0.0:
+			impacted.emit(impact_speed)
+	elif impact_speed > _contact_peak_speed + HARDER_HIT_SPEED:
+		# Still touching, but suddenly much harder: another wall.
+		impacted.emit(impact_speed)
+	_time_since_wall_contact = 0.0
+	_contact_peak_speed = maxf(_contact_peak_speed, impact_speed)

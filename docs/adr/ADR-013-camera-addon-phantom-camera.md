@@ -106,6 +106,26 @@ only *set priorities* on Phantom Camera nodes.
   camera on the wall surface (149 near-plane frames in a corner). A
   0.25 m `SphereShape3D` keeps it 0.25 m off, with zero near-plane frames.
 
+**T-008 results (2026-11-25):**
+- **Noise reaches cameras by layer only.** `PhantomCameraNoiseEmitter3D`
+  sends its output through the global `PhantomCameraManager.noise_3d_emitted`
+  signal (`phantom_camera_noise_emitter_3d.gd:156`). Every
+  `PhantomCamera3D` whose `noise_emitter_layer` shares a bit with the
+  emitter's layer applies it (`phantom_camera_3d.gd:2017-2019`). The PCam
+  default layer is 0, which ignores every emitter. So in split screen each
+  player needs their own emitter and a layer bit of their own, set on that
+  player's emitter and PCam.
+- **Rotational noise only.** The host multiplies noise onto the camera in
+  camera space, after follow and collision
+  (`phantom_camera_host.gd:872-873`). Positional noise could move the
+  camera into a wall, so `ImpactShake` uses rotation only. The probe
+  measured 0 m of camera offset and 0 clipping frames.
+- **Value mapping.** Rotation per axis, in degrees, is amplitude ×
+  multiplier × trauma² × Perlin noise (`phantom_camera_noise_3d.gd:157-173`).
+  `frequency` is the Perlin frequency over time in seconds. The online
+  docs list different defaults (frequency 0.5, positional on) from the
+  v0.12 source (0.2, off).
+
 ---
 
 ### Notes for T-005

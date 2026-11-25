@@ -29,6 +29,21 @@ const TOPHAT_CAR_SCENE := "res://scenes/vehicles/tophat_car.tscn"
 ## the ramp-up.
 const THROTTLE_FRAMES := 180
 
+## A wall 10.5 m ahead of the car's nose is reached in about 26 physics
+## frames at the Stovepipe Speedster's 24 m/s top speed.
+const WALL_AHEAD_Z := -12.0
+
+
+## Fixed input for the impact tests, so they do not depend on Input state.
+class HeldInput:
+	extends InputSource
+
+	var throttle: float = 0.0
+
+
+	func get_input() -> Dictionary[String, Variant]:
+		return { "throttle": throttle, "steer": 0.0, "drift": false }
+
 
 ## Ground control (accel/brake/drift/steer) only runs while is_on_floor()
 ## is true — a deliberate fix so the car falls ballistically off a ramp
@@ -36,8 +51,11 @@ const THROTTLE_FRAMES := 180
 ## frame while airborne. Tests that exercise ground behavior need an
 ## actual floor under the standalone car instance, or is_on_floor() is
 ## always false and throttle correctly does nothing.
+##
+## The runner's scene sits directly under the tree root, so a body added
+## beside it would outlive the test. auto_free removes it afterwards.
 func _add_floor_under(car: Node3D) -> void:
-	var floor_body := StaticBody3D.new()
+	var floor_body: StaticBody3D = auto_free(StaticBody3D.new())
 	var shape := CollisionShape3D.new()
 	shape.shape = BoxShape3D.new()
 	(shape.shape as BoxShape3D).size = Vector3(200, 1, 200)
@@ -110,3 +128,138 @@ func test_no_nan_or_inf_during_sustained_throttle() -> void:
 ## Device-scoped throttle action read by the default (keyboard) InputSource.
 func _keyboard_throttle() -> StringName:
 	return DeviceActionMap.action_name(InputSource.KEYBOARD_DEVICE, &"throttle")
+
+# --- impacted signal (T-008) ---
+
+
+## Adds a static wall on the Track layer (1), which the car collides with.
+## Freed after the test, like the floor.
+func _add_wall(car: Node3D, center: Vector3, size: Vector3) -> void:
+	var wall: StaticBody3D = auto_free(StaticBody3D.new())
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	(shape.shape as BoxShape3D).size = size
+	wall.add_child(shape)
+	wall.position = center
+	car.get_parent().add_child(wall)
+
+
+## Car on a floor with fixed input, recording every `impacted` speed.
+func _impact_car(runner: GdUnitSceneRunner, impacts: Array[float]) -> VehicleController:
+	var car: VehicleController = runner.scene()
+	_add_floor_under(car)
+	car.input_source = HeldInput.new()
+	car.impacted.connect(
+		func(impact_speed: float) -> void:
+			impacts.append(impact_speed),
+	)
+	return car
+
+
+## Physics ticks, not process frames: headless runs may draw several
+## process frames per physics tick.
+func _physics_frames(count: int) -> void:
+	for i: int in count:
+		await get_tree().physics_frame
+
+
+func test_impacted_fires_once_for_a_head_on_hit_held_against_the_wall() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	_add_wall(car, Vector3(0, 1.0, WALL_AHEAD_Z), Vector3(20, 3, 1))
+	(car.input_source as HeldInput).throttle = 1.0
+	car.velocity = Vector3(0, 0, -car.stats.max_speed)
+
+	# About 26 frames to the wall, then over a second of full throttle into it.
+	await _physics_frames(100)
+
+	assert_int(impacts.size()).is_equal(1)
+	assert_float(impacts[0]).is_equal_approx(car.stats.max_speed, 0.5)
+
+
+func test_impacted_reports_only_the_speed_into_the_wall() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	_add_wall(car, Vector3(0, 1.0, -6.0), Vector3(60, 3, 1))
+	# 60 degrees off the wall normal: half the speed goes into the wall.
+	car.rotation.y = deg_to_rad(60.0)
+	car.velocity = -car.global_basis.z * 20.0
+
+	await _physics_frames(60)
+
+	assert_int(impacts.size()).is_equal(1)
+	assert_float(impacts[0]).is_equal_approx(10.0, 0.5)
+
+
+func test_impacted_fires_once_for_a_long_scrape() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	# A long wall along the car's right side, 1 m away, and a nose turned
+	# 5 degrees into it, so the car rides along it at full throttle.
+	_add_wall(car, Vector3(2.0, 1.0, -90.0), Vector3(1, 3, 200))
+	car.rotation.y = deg_to_rad(-5.0)
+	(car.input_source as HeldInput).throttle = 1.0
+	car.velocity = -car.global_basis.z * car.stats.max_speed
+
+	var wall_frames: int = 0
+	for i: int in 180:
+		await get_tree().physics_frame
+		if car.is_on_wall():
+			wall_frames += 1
+
+	# It really scraped: in contact for most of the 3 s.
+	assert_int(wall_frames).is_greater(120)
+	assert_int(impacts.size()).is_equal(1)
+
+
+func test_impacted_fires_again_when_a_scrape_runs_into_another_wall() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	# The scrape setup above, plus a second wall across the path: a corner.
+	_add_wall(car, Vector3(2.0, 1.0, -90.0), Vector3(1, 3, 200))
+	_add_wall(car, Vector3(-5.0, 1.0, -40.0), Vector3(15, 3, 1))
+	car.rotation.y = deg_to_rad(-5.0)
+	(car.input_source as HeldInput).throttle = 1.0
+	car.velocity = -car.global_basis.z * car.stats.max_speed
+
+	await _physics_frames(150)
+
+	assert_int(impacts.size()).is_equal(2)
+	assert_float(impacts[0]).is_less(3.0)
+	assert_float(impacts[1]).is_greater(20.0)
+
+
+func test_impacted_fires_again_for_a_new_hit() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	_add_wall(car, Vector3(0, 1.0, -4.0), Vector3(20, 3, 1))
+	var input := car.input_source as HeldInput
+
+	input.throttle = 1.0
+	await _physics_frames(60)
+	input.throttle = -1.0
+	await _physics_frames(20)
+	input.throttle = 1.0
+	await _physics_frames(120)
+
+	assert_int(impacts.size()).is_equal(2)
+
+
+func test_impacted_does_not_fire_on_floor_landings() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	(car.input_source as HeldInput).throttle = 1.0
+	# A hard landing while driving forward, from 3 m up.
+	car.position.y = 3.0
+	car.velocity = Vector3(0, -8.0, -car.stats.max_speed)
+
+	await _physics_frames(60)
+
+	assert_bool(car.is_on_floor()).is_true()
+	assert_int(impacts.size()).is_equal(0)
