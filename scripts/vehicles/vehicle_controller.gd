@@ -25,7 +25,7 @@ var input_source: InputSource = InputSource.new()
 
 ## This frame's raw input snapshot, kept for external readout only (e.g.
 ## DebugOverlay) — not read back by this script itself.
-var last_input: Dictionary[String, Variant] = {}
+var last_input: Dictionary[String, Variant] = { }
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 

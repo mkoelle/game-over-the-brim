@@ -336,8 +336,20 @@ pin from training-data memory. Model knowledge of "current" versions goes
 stale immediately and silently produces an outdated pin with no error.
 
 - Check via the registry's own source: `gh api repos/<owner>/<repo>/releases`
-  or `/tags` for GitHub Actions, `pip index versions <pkg>` / PyPI, the
-  Godot Asset Library page for addons.
+  or `/tags` for GitHub Actions and addons, `mise ls-remote <tool>` for
+  toolchain pins, and the Godot **Asset Store** (store.godotengine.org) for
+  addons. The old Asset Library is deprecated as of Godot 4.7.
+- Check that a tool is still the right tool, not only its latest version:
+  look for deprecations, replacements and stale maintenance. Examples
+  found 2026-11-24: Android `sdkmanager` was replaced by the Android CLI,
+  and gdtoolkit had gone 13 months without a release while carrying open
+  4.5+ syntax bugs.
+- When docs and engine source disagree, trust the source for the pinned
+  version. Example: the Godot 4.7 Android docs list SDK 35, but 4.7.2's
+  `config.gradle` targets SDK 36 with build-tools 36.1.0.
+- mise holds back releases younger than 24h (`minimum_release_age`). A
+  "hidden newer release" warning is that deliberate supply-chain delay,
+  not a missed update.
 - Before bumping an existing pin, read that version's changelog/release
   notes for breaking changes — don't bump blind.
 - If verification isn't possible (offline, private registry), say so
@@ -348,12 +360,12 @@ stale immediately and silently produces an outdated pin with no error.
 
 # Development Commands
 
-Toolchain versions (Godot, Task, gdtoolkit, pre-commit, uv) are pinned in
+Toolchain versions (Godot, Task, gdscript-formatter, prek) are pinned in
 `mise.toml`. Bootstrap once per clone:
 
 ```bash
 mise trust && mise install   # install the pinned toolchain
-task setup                   # register the pre-commit hook
+task setup                   # register the git pre-commit hook (prek)
 ```
 
 Everything below is a `task <name>` in `Taskfile.yml` (`task` with no args
@@ -364,8 +376,8 @@ task check:versions   # fail if Godot pins drift (mise.toml / release.yml / proj
 task run              # launch the game
 task ci               # everything CI runs: import, check:parse, test, fmt:check, lint
 task test             # just GdUnit4 (ADR-007), once addons/gdUnit4/ is installed
-task fmt              # reformat GDScript in place (gdformat)
-task lint             # gdlint
+task fmt              # reformat GDScript in place (gdscript-formatter)
+task lint             # gdscript-formatter lint
 task export           # export all 4 platforms locally (needs export templates installed)
 task export:windows   # or one platform at a time — also :linux, :macos, :android
 task clean            # sweep build/, reports/, godot_check.log

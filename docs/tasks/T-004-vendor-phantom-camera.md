@@ -49,7 +49,7 @@ gameplay changes yet.
 4. Open the editor and enable it under **Project → Project Settings →
    Plugins → Phantom Camera**. Confirm the `PhantomCameraManager` autoload
    appears and the Phantom Camera bottom panel loads.
-5. `task import && task ci`. Expect `gdformat` and `gdlint` to ignore
+5. `task import && task ci`. Expect `gdscript-formatter` (fmt and lint) to ignore
    `addons/` (Taskfile `GD_PATHS` is `scripts/ test/`).
 6. Add a `CHANGELOG.md` line under Unreleased.
 
