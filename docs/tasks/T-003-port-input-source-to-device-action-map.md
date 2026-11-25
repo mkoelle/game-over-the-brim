@@ -3,7 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P1
-**Status:** Todo
+**Status:** Done
 **Estimate:** 3h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-014](../adr/ADR-014-per-device-input-action-map.md)
@@ -16,18 +16,19 @@ the keyboard slot responding to joypad 0.
 
 ### Acceptance Criteria
 
-- [ ] `InputSource.get_input()` keeps its current return shape
+- [x] `InputSource.get_input()` keeps its current return shape
       (`throttle`, `steer`, `drift`) and public API.
-- [ ] `KEYBOARD_DEVICE` equals `InputEvent.DEVICE_ID_KEYBOARD` (16). The
+- [x] `KEYBOARD_DEVICE` equals `InputEvent.DEVICE_ID_KEYBOARD` (16). The
       constructor default stays "keyboard".
-- [ ] No `JOY_AXIS_*`, `JOY_BUTTON_*` or `AXIS_DEADZONE` constants remain.
+- [x] No `JOY_AXIS_*`, `JOY_BUTTON_*` or `AXIS_DEADZONE` constants remain.
       Deadzones come from the Input Map.
-- [ ] When a device's actions are missing (empty `StringName`, for example
+- [x] When a device's actions are missing (empty `StringName`, for example
       during a disconnect), the read returns neutral input
       (`0.0, 0.0, false`) without errors.
-- [ ] `test_vehicle_controller.gd` is updated to press device-scoped
-      keyboard actions and passes.
-- [ ] A new isolation test proves joypad input on device N does not drive
+- [x] `test_vehicle_controller.gd` is updated to press device-scoped
+      keyboard actions and passes. *`test_debug_overlay.gd` pressed the
+      core `throttle` too, so it got the same one-line change.*
+- [x] A new isolation test proves joypad input on device N does not drive
       the keyboard slot or device M.
 
 ### Context
@@ -103,3 +104,45 @@ the keyboard slot responding to joypad 0.
 ### Dependencies
 
 - T-002
+
+### Verification results
+
+- `task ci`: Overall Summary 36 test cases, 0 errors, 0 failures,
+  0 orphans. Exit code 0. `fmt:check` and `lint` clean.
+- `test_input_source.gd` has 11 cases: joypad 0 and 1 do not move the
+  keyboard slot, keyboard does not move a joypad, two joypads are isolated
+  both ways, deadzone noise (0.04) is ignored, throttle/brake/steer combine
+  on pad and keyboard, unbuilt device is neutral, disconnect then rebuild
+  recovers, and a source created before its device was built picks it up.
+- `main.gd` did not change. `VehicleController` already holds
+  `InputSource.new()` (keyboard), and the public API is unchanged.
+
+### Assumptions (owner to validate)
+
+- **Pending owner (step 6):** manual 2+ gamepad isolation check. Needs
+  hardware the builder does not have. Steps:
+  1. Temporarily add `_car.input_source = InputSource.new(1)` in
+     `scripts/main.gd` after the car is spawned. Do not commit it.
+  2. Run `task run` and press F3 for the overlay.
+  3. Move pad 1's right trigger and left stick. The overlay `Throttle`
+     and `Steer` lines must follow and the car must drive.
+  4. Move pad 0 and press W, A, S, D. The overlay must stay at
+     `Throttle: +0.00`, `Steer: +0.00`.
+  5. Change it to `InputSource.new(0)` and repeat with the roles swapped.
+  6. Revert the temporary line.
+- **Assumption:** A joypad unplugged and replugged mid-run recovers
+  without errors. (From T-002.)
+  **Evidence:** `test_disconnect_returns_neutral_and_reconnect_recovers`
+  covers erase then rebuild. No real hotplug was exercised.
+  **Owner check:** In the temporary setup above, unplug pad 1. The car
+  must coast with neutral input and the Output panel must show no errors.
+  Replug it and it must drive again. Pad 0 and the keyboard stay inert
+  throughout.
+- **Assumption:** A deadzone of 0.08 leaves no stick drift at rest. (From
+  T-002.)
+  **Evidence:** The unit test shows 0.04 noise is ignored and 0.3 passes.
+  Real hardware noise is not measured.
+  **Owner check:** With the temporary setup, leave each pad untouched for
+  10 seconds. The overlay must stay at `Steer: +0.00` and
+  `Throttle: +0.00`. If it twitches, raise the deadzone in `project.godot`
+  for that action.
