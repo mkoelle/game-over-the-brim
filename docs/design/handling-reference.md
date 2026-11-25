@@ -371,7 +371,8 @@ body of about 2.5 m long. Scale them by the final body length.
 
 - Reverse look is allowed to swing behind the car with a separate setting
   (STK uses its own angle and distance, with smoothing off). [P]
-- Our controller does not invert steering in reverse. Keep the camera
+- Our controller flips the yaw direction in reverse, like a real car
+  (`signf(current_speed)` in `vehicle_controller.gd`). Keep the camera
   behind the car when reversing for now. [E]
 
 ## 5. Implementation techniques
