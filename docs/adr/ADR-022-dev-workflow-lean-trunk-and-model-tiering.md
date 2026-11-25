@@ -117,6 +117,57 @@ it for scene edits through the editor API and for screenshot verification.
 Adopt it for scene work if it proves reliable. Otherwise fall back to
 hand-editing `.tscn` plus run/log checks. Record the result in this ADR.
 
+**6a. Spike result (T-005, 2026-11-25): adopt for scene work, with
+fallbacks.**
+
+*Setup.* The session's own MCP tools pointed at the owner's 3.2.4
+server, which is the wrong version. So the spike drove godot-ai 4.4.2
+through a scripted stdio client (from T-019). It ran one session per call
+sequence, against an editor started on the ticket worktree with an
+isolated HOME and ports 8010/9510.
+
+*Counts.* There were 58 tool calls: 49 succeeded and 9 failed.
+- **Scene edits, once the scene was open:** 31 of 33 calls succeeded,
+  counting the hierarchy and property reads in between. The edits were
+  `scene_open`, `node_manage` delete and move, `node_create`,
+  `script_attach`, 11 `node_set_property` calls, `resource_manage create`
+  (a `SphereShape3D` sub-resource) and 2 `scene_save` calls. Every
+  `main.tscn` change in T-005 went through the MCP; none were hand-edited.
+  The saved file is a real editor save, with `unique_id`s, uids and the
+  `@tool` host's own properties.
+- **`node_create` with a script class failed 2 of 2:**
+  `VALUE_OUT_OF_RANGE: Unknown node type: PhantomCameraHost` (and
+  `PhantomCamera3D`). Workaround, which worked: create the base type
+  (`Node`, `Node3D`), then `script_attach` the addon script. This is how
+  the `.tscn` stores such nodes anyway.
+- **The first edit attempt failed 4 calls with `EDITOR_NOT_READY: No scene
+  open`.** Cause: `main.tscn` still referenced a script I had already
+  renamed. `scene_open` returned success with `switched: false, settle:
+  "timeout"`, and the editor log showed the load error. The editor had to
+  be restarted. After the restart, the same calls succeeded.
+- **`logs_read source="game"` failed 3 of 3** with `Command get_logs timed
+  out after 5.0s`. `source="editor"` and `source="all"` worked. Game
+  stdout was read from a CLI run instead.
+- **`project_run` and `editor_screenshot source="game"` worked**, with
+  one trap. `project_run` can return before the game is live (`status:
+  "not_live"` at 3 s). A screenshot taken then showed frame 2, with the
+  camera still at its start position. Poll `editor_state` until
+  `game_status.status` is `"live"`, then capture. The second run was live
+  in 0.8 s, and its screenshot showed the real framing.
+- **Stale script defaults.** The editor did not rescan a script edited
+  on disk while it ran. `node_get_properties` showed the old export
+  defaults. `scene_save` did not bake them in, but this is a hazard.
+
+*Recommendation.* Adopt godot-ai for scene edits and for run-plus-screenshot
+checks. Its edits are real editor saves, and every edit call is undoable
+and reports clear errors. Keep these rules:
+- Finish script renames and edits before opening the editor.
+- Create script-class nodes as the base type plus `script_attach`.
+- Poll for `"live"` before taking a game screenshot.
+- Read game output from a CLI run, not `logs_read source="game"`.
+- Fall back to hand-editing `.tscn` only if the editor cannot load the
+  scene.
+
 **7. Ask less, probe more.** Before asking the owner, try a reversible
 probe: run it, read it, test it. Ask only for what tools cannot establish.
 

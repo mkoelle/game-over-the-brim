@@ -82,6 +82,30 @@ only *set priorities* on Phantom Camera nodes.
   the .NET build, so these are inert. Do not delete them, because that
   would modify vendor code (AGENTS.md Boundaries).
 
+**T-005 results (2026-11-25):**
+- **Physics interpolation gap.** The high-refresh comparison was skipped,
+  because no high-refresh monitor is available (owner, 2026-11-24).
+  `physics/common/physics_interpolation` stays off. At 60 Hz render and
+  60 Hz physics the scripted drive measured a 14 m/s² peak camera
+  acceleration on the straight, which is smooth. Above 60 Hz the camera may
+  step, because the car only moves in `_physics_process`. Follow-up:
+  compare interpolation on and off on a 120 Hz+ display.
+- **No jitter tip printed.** The tip never fired in any run.
+  `set_follow_target` resets `_follow_target_physics_based` to false
+  (`phantom_camera_3d.gd:2291`) before `_check_physics_body` (`:2300`).
+  The tip needs that flag true (`:2040`), so the first target assignment
+  never prints it.
+- **Confirmed by running.** Third Person has no yaw damping of its own:
+  `ChaseCamYawDriver` smooths yaw. Collision pull-in is not smoothed: at a
+  crash the boom went from 4.66 m to 3.56 m to 3.07 m in two frames.
+- **Damping lags the aim point.** In Third Person the follow damping moves
+  the cast origin, which is also the aim point. So X/Z damping adds about
+  speed × T of distance and moves the car up toward screen centre. With
+  T = 0.15 s at 24 m/s, the camera sat 8.2 m back. T-005 uses 0.06 s.
+- **Default collision shape.** The default frustum-pyramid shape stops the
+  camera on the wall surface (149 near-plane frames in a corner). A
+  0.25 m `SphereShape3D` keeps it 0.25 m off, with zero near-plane frames.
+
 ---
 
 ### Notes for T-005

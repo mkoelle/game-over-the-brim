@@ -10,6 +10,16 @@ Versioning follows the tag pushed to trigger a release (see
 
 ## [Unreleased]
 
+### Changed (T-005)
+
+- The chase camera now runs on Phantom Camera (ADR-013). `main.tscn` has
+  `GameCamera` (`Camera3D` + `PhantomCameraHost`) and `CarFollowCam`, a
+  Third Person `PhantomCamera3D` that collides with the Track layer only.
+  `ChaseCamYawDriver` (`scripts/camera/chase_cam_yaw_driver.gd`, replacing
+  `chase_camera.gd`) turns the rig with the car and holds its height on a
+  jump. The values were tuned against a scripted drive. The owner confirms
+  them by feel at FC-1.
+
 ### Added (T-004)
 
 - Vendored Phantom Camera v0.12 (`ramokz/phantom-camera`, MIT) into

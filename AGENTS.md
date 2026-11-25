@@ -301,8 +301,9 @@ ADR-008's OpenRouter delegation is superseded.
   gameplay-feel tuning, and any ticket the builder failed twice.
 - **Fresh session per ticket batch.** Carry state between sessions in the
   ticket files, not in chat history.
-- **Godot editor MCP (`godot-ai`):** being spiked on T-005 for scene
-  edits and screenshot checks. See ADR-022 for the outcome.
+- **Godot editor MCP (`godot-ai`):** adopted for scene edits and
+  run-plus-screenshot checks after the T-005 spike. Follow the rules and
+  known failures in ADR-022 §6a.
 
 ---
 
