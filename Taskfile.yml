@@ -26,7 +26,11 @@ tasks:
       toolchain via jdx/mise-action and never registers the hook.
     cmds:
       - mise install
-      - prek install
+      # --force replaces an old pre-commit hook. Without it, prek keeps that
+      # hook as pre-commit.legacy and chains it ("migration mode"), and the
+      # chained hook fails once Python pre-commit is gone.
+      - rm -f .git/hooks/pre-commit.legacy
+      - prek install --force
 
   check:versions:
     desc: >-
