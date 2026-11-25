@@ -253,3 +253,25 @@ someone provisions a real keystore and sets the three GitHub Secrets above.
   for all four platforms, macOS signing inside the bundle, and
   `.gitattributes` binary entries. These are now governed by
   [ADR-015](ADR-015-native-gdextension-addon-policy.md).
+
+---
+
+### Amendment — 2026-11-24 (tooling audit)
+
+- **Local Android export.** The Android SDK is managed with the **Android
+  CLI** (`android sdk install …`; mise global tool `android-cli`).
+  `sdkmanager` is deprecated, and `--licenses` is no longer needed: the
+  CLI writes `licenses/android-sdk-license` on first install. The SDK root
+  is `~/Library/Android/sdk` (set in `~/.androidrc` and in mise
+  `ANDROID_HOME`). Packages are platform-tools, **build-tools 36.1.0** and
+  **platforms/android-36**, plus cmdline-tools/latest. These match Godot
+  4.7.2's own `config.gradle` (`targetSdk 36`, `buildTools '36.1.0'`).
+  The Godot 4.7 docs still list SDK 35, so trust the engine source. Godot
+  4.8 adds an editor-managed Android/Java SDK, to be re-evaluated in T-018.
+- **Export templates.** The local 4.7.2 template folder was empty, so
+  every local `task export:*` would have failed. The official `.tpz` is
+  now installed (SHA-512 verified against the release's `SHA512-SUMS.txt`).
+  `task export:*` creates `build/<platform>/` (fixed in #5).
+- **Formatter/hooks.** gdtoolkit + pre-commit were replaced by
+  gdscript-formatter + prek. See
+  [ADR-023](ADR-023-native-binary-toolchain.md).

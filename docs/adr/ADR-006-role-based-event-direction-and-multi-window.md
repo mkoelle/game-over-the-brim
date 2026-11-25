@@ -34,6 +34,15 @@ We need a system where:
 
 ---
 
+### Input focus (added 2026-11-24)
+
+Godot 4.7 can ignore joypad input while the game window is unfocused
+(**Input Devices → Joypads → Ignore Joypad on Unfocused Application**,
+off by default). Godot 4.8 turns it on by default for *new* projects. The
+multi-window host/presenter setup moves focus to the presenter or
+operator window while players are still driving, so this setting must
+stay **off**. Re-check it on every engine upgrade (T-018).
+
 ### Consequences
 
 **Positive:**

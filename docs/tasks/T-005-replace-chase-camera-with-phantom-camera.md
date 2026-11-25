@@ -108,3 +108,4 @@ wall or the floor.
 ### Dependencies
 
 - T-004
+- T-019 (godot-ai vendored and wired, for the MCP spike)
