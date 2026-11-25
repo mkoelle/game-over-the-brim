@@ -10,6 +10,12 @@ Versioning follows the tag pushed to trigger a release (see
 
 ## [Unreleased]
 
+### Changed (T-009)
+
+- Bumped vendored GdUnit4 to v6.2.3 (from `godot-gdunit-labs/gdUnit4`). No
+  breaking or CLI changes. Includes a fix for the scene runner delivering
+  input events twice (GD-1459).
+
 ### Changed (toolchain, ADR-023)
 
 - Replaced gdtoolkit (`gdformat`/`gdlint`, Python, last released

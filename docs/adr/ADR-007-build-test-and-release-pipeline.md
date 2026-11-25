@@ -24,7 +24,7 @@ custom render pipeline; no live-ops backend).
   simulation (`simulate_frames`), which fits testing physics/frame-based
   vehicle behavior better than GUT's manual frame stepping, and its official
   GitHub Action, which reduces custom CI glue. Vendored at `addons/gdUnit4/`
-  (v6.2.0), registered in `project.godot`'s `[editor_plugins] enabled`.
+  (v6.2.3), registered in `project.godot`'s `[editor_plugins] enabled`.
   Verified locally (Godot 4.7.2): `godot --headless -s
   addons/gdUnit4/bin/GdUnitCmdTool.gd -a test --ignoreHeadlessMode -c` runs
   and exits with the correct non-zero code on a failing test, and exits 0
@@ -246,9 +246,10 @@ someone provisions a real keystore and sets the three GitHub Secrets above.
 
 - GdUnit4 upstream now lives at `godot-gdunit-labs/gdUnit4`. The latest
   release is **v6.2.3** (2026-11-01, verified via `gh api`). The vendored
-  copy is v6.2.0. Bump tracked in
-  [T-009](../tasks/T-009-bump-gdunit4.md). Read the 6.2.1–6.2.3 release
-  notes before bumping.
+  copy was bumped from v6.2.x to v6.2.3 in
+  [T-009](../tasks/T-009-bump-gdunit4.md). The 6.2.1–6.2.3 notes list no
+  breaking or CLI change, so the `GdUnitCmdTool.gd` invocation is
+  unchanged. A deliberately failing test still gives a non-zero exit.
 - Native (GDExtension) addons add export-pipeline obligations: binaries
   for all four platforms, macOS signing inside the bundle, and
   `.gitattributes` binary entries. These are now governed by
