@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://5tg78r237ark"]
 
 [ext_resource type="Texture2D" uid="uid://dl6mr8w0ujhd3" path="res://assets/art/tracks/dev_grid.png" id="1_grid_tex"]
+[ext_resource type="PackedScene" path="res://assets/art/tracks/kenney_racing_kit/barrier_wall.tscn" id="2_barrier_wall"]
+[ext_resource type="PackedScene" path="res://assets/art/tracks/kenney_racing_kit/barrier_red.tscn" id="3_barrier_red"]
+[ext_resource type="PackedScene" path="res://assets/art/tracks/kenney_racing_kit/pylon.tscn" id="4_pylon"]
+[ext_resource type="PackedScene" path="res://assets/art/tracks/kenney_racing_kit/road_ramp_long.tscn" id="5_ramp"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -13,10 +17,6 @@ uv1_scale = Vector3(0.05, 0.05, 1)
 
 [sub_resource type="StandardMaterial3D" id="Material_Boundary"]
 albedo_color = Color(0.85, 0.35, 0.05, 1)
-roughness = 0.7
-
-[sub_resource type="StandardMaterial3D" id="Material_Obstacle"]
-albedo_color = Color(0.9, 0.78, 0.15, 1)
 roughness = 0.7
 
 [sub_resource type="StandardMaterial3D" id="Material_Ramp"]
@@ -69,44 +69,84 @@ collision_mask = 0
 size = Vector3(1, 3, 98)
 material = SubResource("Material_Boundary")
 
-[node name="InnerWallA" type="CSGBox3D" parent="Walls" unique_id=2038538107]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.5, -23)
-use_collision = true
-collision_mask = 0
-size = Vector3(1, 3, 34)
-material = SubResource("Material_Obstacle")
-
-[node name="InnerWallB" type="CSGBox3D" parent="Walls" unique_id=1670796266]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 1.5, -6)
-use_collision = true
-collision_mask = 0
-size = Vector3(34, 3, 1)
-material = SubResource("Material_Obstacle")
-
-[node name="EndCapSouth" type="CSGBox3D" parent="Walls" unique_id=1453165567]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -40)
-use_collision = true
-collision_mask = 0
-size = Vector3(13, 3, 1)
-material = SubResource("Material_Obstacle")
-
-[node name="EndCapEast" type="CSGBox3D" parent="Walls" unique_id=2112770993]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 1.5, 0)
-use_collision = true
-collision_mask = 0
-size = Vector3(1, 3, 13)
-material = SubResource("Material_Obstacle")
-
-[node name="Ramp" type="CSGBox3D" parent="." unique_id=226611624]
-transform = Transform3D(1, 0, 0, 0, 0.9659258, 0.258819, 0, -0.258819, 0.9659258, -25, 1.5670648, -18.98397)
-use_collision = true
-collision_mask = 0
-size = Vector3(8, 1, 16)
-material = SubResource("Material_Ramp")
-
 [node name="Ramp2" type="CSGBox3D" parent="." unique_id=491477970]
 transform = Transform3D(1, 0, 0, 0, 0.86602557, 0.5000002, 0, -0.5000002, 0.86602557, -27.688313, 3.567, 8.730326)
 use_collision = true
 collision_mask = 0
 size = Vector3(8, 1, 16)
 material = SubResource("Material_Ramp")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="InnerWallA" type="Node3D" parent="Props"]
+
+[node name="Barrier0" parent="Props/InnerWallA" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6, 0, -36)
+
+[node name="Barrier1" parent="Props/InnerWallA" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6, 0, -28)
+
+[node name="Barrier2" parent="Props/InnerWallA" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6, 0, -20)
+
+[node name="Barrier3" parent="Props/InnerWallA" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6, 0, -12)
+
+[node name="BarrierEnd" parent="Props/InnerWallA" instance=ExtResource("3_barrier_red")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 6, 0, -7)
+
+[node name="InnerWallB" type="Node3D" parent="Props"]
+
+[node name="Barrier0" parent="Props/InnerWallB" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -6)
+
+[node name="Barrier1" parent="Props/InnerWallB" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -6)
+
+[node name="Barrier2" parent="Props/InnerWallB" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, -6)
+
+[node name="Barrier3" parent="Props/InnerWallB" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -6)
+
+[node name="BarrierEnd" parent="Props/InnerWallB" instance=ExtResource("3_barrier_red")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 39, 0, -6)
+
+[node name="EndCapSouth" type="Node3D" parent="Props"]
+
+[node name="BarrierWest" parent="Props/EndCapSouth" instance=ExtResource("3_barrier_red")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -40)
+
+[node name="BarrierMid" parent="Props/EndCapSouth" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -40)
+
+[node name="BarrierEast" parent="Props/EndCapSouth" instance=ExtResource("3_barrier_red")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -40)
+
+[node name="EndCapEast" type="Node3D" parent="Props"]
+
+[node name="BarrierSouth" parent="Props/EndCapEast" instance=ExtResource("3_barrier_red")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 40, 0, -5)
+
+[node name="BarrierMid" parent="Props/EndCapEast" instance=ExtResource("2_barrier_wall")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 40, 0, 0)
+
+[node name="BarrierNorth" parent="Props/EndCapEast" instance=ExtResource("3_barrier_red")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 40, 0, 5)
+
+[node name="Slalom" type="Node3D" parent="Props"]
+
+[node name="Pylon0" parent="Props/Slalom" instance=ExtResource("4_pylon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 18)
+
+[node name="Pylon1" parent="Props/Slalom" instance=ExtResource("4_pylon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 24)
+
+[node name="Pylon2" parent="Props/Slalom" instance=ExtResource("4_pylon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 30)
+
+[node name="Pylon3" parent="Props/Slalom" instance=ExtResource("4_pylon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, 36)
+
+[node name="Ramp" parent="." instance=ExtResource("5_ramp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 0, -18.7)
