@@ -55,6 +55,9 @@ Guardrail 3 (the "1-Car Fun" Rule), not a bug hunt:
 - **Collision** — drive into the boundary walls, the mid-field obstacle,
   and off the ramp. Confirm nothing clips through, nothing gets stuck,
   nothing launches unexpectedly.
+- **Impact shake** — a full-speed wall hit should give a short, clear
+  camera shake. A gentle bump or a long scrape along a wall should not
+  shake (T-008).
 - **Console** — check the editor's Output panel for any errors or
   warnings during play.
 
@@ -66,7 +69,9 @@ too slow"), a note in STATE.md's Recent Progress or a direct tuning pass
 on the relevant `VehicleStats` export or `CarFollowCam` inspector value
 (the `PhantomCamera3D` in `main.tscn`, plus its `YawDriver` child) is
 enough — these
-aren't "bugs," they're calibration.
+aren't "bugs," they're calibration. Impact shake is tuned on the
+`ImpactShake` node in `main.tscn` (its noise resource) and its
+`ImpactShakeDriver` child.
 
 ## Debug mode
 

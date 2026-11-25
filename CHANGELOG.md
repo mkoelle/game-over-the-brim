@@ -10,6 +10,17 @@ Versioning follows the tag pushed to trigger a release (see
 
 ## [Unreleased]
 
+### Added (T-008)
+
+- A wall hit shakes the car's camera, scaled by how fast the car hit the
+  wall. `VehicleController` emits a local `impacted(impact_speed)` signal
+  at the start of each wall contact (not every frame of a scrape, and not
+  on landings). `main.tscn` gains `ImpactShake`, a rotation-only
+  `PhantomCameraNoiseEmitter3D`, and its `ImpactShakeDriver` child
+  (`scripts/camera/impact_shake_driver.gd`). Hits under 3 m/s do not
+  shake. A full-speed head-on hit peaks at about 2.5 degrees for about
+  0.2 s. The owner confirms the values by feel.
+
 ### Changed (T-005)
 
 - The chase camera now runs on Phantom Camera (ADR-013). `main.tscn` has
