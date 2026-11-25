@@ -40,3 +40,11 @@ export_presets.cfg text eol=lf
 *.blend binary
 *.icns binary
 *.ico binary
+
+# Native GDExtension binaries (ADR-015 check 5) — never text-normalize these.
+*.dll binary
+*.so binary
+*.dylib binary
+*.framework/** binary
+*.aar binary
+*.wasm binary
