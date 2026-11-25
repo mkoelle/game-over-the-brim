@@ -86,7 +86,9 @@ them touch `project.godot`):
 5. T-006 → T-007 debug vectors.
 6. **FC-1 (feel checkpoint 1):** the owner drives with the new camera,
    correct input and F3 vectors on. Checks: does the camera feel right,
-   and can drift and air problems now be seen and described?
+   and can drift and air problems now be seen and described? Also confirm
+   the pinned physics engine (ADR-021, Jolt) feels right on wall slides
+   and ramp landing; flip back to `GodotPhysics3D` if not.
 7. T-008 impact shake.
 
 [T-017](../tasks/T-017-handling-genre-research.md) (handling genre

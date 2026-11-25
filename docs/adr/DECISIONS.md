@@ -20,7 +20,7 @@
 - **[ADR-018](ADR-018-menu-framework-maaack-menus-template.md)**: Menu Framework (Maaack's Menus Template)
 - **[ADR-019](ADR-019-third-party-asset-sourcing-and-licensing.md)**: Third-Party Asset Sourcing and License Tracking
 - **[ADR-020](ADR-020-steam-remote-play-together-online-path.md)**: Steam Remote Play Together as First Online Path (**Proposed**)
-- **ADR-021** (reserved): 3D Physics Engine Pin — written by [T-001](../tasks/T-001-pin-3d-physics-engine.md)
+- **[ADR-021](ADR-021-3d-physics-engine.md)**: 3D Physics Engine Pin (Jolt Physics; `DEFAULT` resolved to Godot Physics on 4.7.2)
 - **[ADR-022](ADR-022-dev-workflow-lean-trunk-and-model-tiering.md)**: Development Workflow: Lean Trunk, Feel Gates, Model Tiering (supersedes ADR-008)
 - **[ADR-023](ADR-023-native-binary-toolchain.md)**: Native-Binary Dev Toolchain (gdscript-formatter + prek replace gdtoolkit + pre-commit; no Python)
 
