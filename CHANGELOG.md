@@ -10,6 +10,13 @@ Versioning follows the tag pushed to trigger a release (see
 
 ## [Unreleased]
 
+### Added (T-004)
+
+- Vendored Phantom Camera v0.12 (`ramokz/phantom-camera`, MIT) into
+  `addons/phantom_camera/` and enabled the plugin. It registers the
+  `PhantomCameraManager` autoload (ADR-013). No gameplay changes yet; the
+  chase camera swap is T-005.
+
 ### Changed (T-009)
 
 - Bumped vendored GdUnit4 to v6.2.3 (from `godot-gdunit-labs/gdUnit4`). No
