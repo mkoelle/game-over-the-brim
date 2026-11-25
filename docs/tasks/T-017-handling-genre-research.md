@@ -3,7 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P1
-**Status:** Todo
+**Status:** Done
 **Estimate:** 3h (research and writing; no code)
 **Phase:** Handling rework, step 0 (see [STATE.md](../../STATE.md))
 
@@ -17,7 +17,7 @@ baseline.
 
 ### Acceptance Criteria
 
-- [ ] `docs/design/handling-reference.md` covers each area the feel-test
+- [x] `docs/design/handling-reference.md` covers each area the feel-test
       flagged, describing how the genre generally solves it:
   - **Steering:** response curve vs. speed, turn-in delay, counter-steer,
     analog vs. digital input
@@ -28,20 +28,22 @@ baseline.
     landing alignment, slope alignment on the ground
   - **Camera:** follow distance and height, lag, FOV change with speed or
     boost, behavior during drift, airborne framing
-- [ ] Each area gives a **target range** with units (for example "drift
+- [x] Each area gives a **target range** with units (for example "drift
       boost: 0.5–1.5 s at +15–30% top speed") and the source of the
       number.
-- [ ] A short "implementation techniques" section on how arcade karts are
+- [x] A short "implementation techniques" section on how arcade karts are
       commonly built in engines:
   - `CharacterBody3D` vs. sphere-collider rigs
   - visual body tilt separated from the physics body
   - aligning the car to the ground normal
-- [ ] An "Our deviations" section. It ties choices to the game pillars:
+- [x] An "Our deviations" section. It ties choices to the game pillars:
   - hat-car identity (tall hats, tassel physics)
   - couch readability in splitscreen
   - Guardrail 3 ("1-Car Fun")
-- [ ] Sources are listed. Prefer developer talks, postmortems, frame-data
+- [x] Sources are listed. Prefer developer talks, postmortems, frame-data
       or speedrun community measurements, and open-source implementations.
+      *Met mostly by open-source code and fan frame-data. The one GDC talk
+      found could not be read, so no talk numbers are used.*
 
 ### Context
 
@@ -75,8 +77,32 @@ baseline.
 
 The owner reads `handling-reference.md` and confirms the targets match the
 intended feel, or adjusts them. This is a decision checkpoint, not a code
-check.
+check. *Pending owner: see Assumptions below.*
 
 ### Dependencies
 
 None. Can run in parallel with Phase 1 tooling.
+
+### Assumptions (owner to validate)
+
+- **Assumption:** The targets in `handling-reference.md` match the intended
+  feel. Steering, drift, air and camera numbers come from genre data,
+  scaled to our 24 m/s top speed.
+  **Evidence:** SuperTuxKart config and source, Mario Kart Wii community
+  frame data and the sources listed in the doc's section 8.
+  **Owner check:** Read the doc, then do the FC-1 drive and adjust any
+  target that feels wrong.
+- **Assumption:** Two drift tiers (about 0.9 s and 1.9 s) are enough, not
+  three.
+  **Evidence:** Wii-era frame data and SuperTuxKart both use two tiers.
+  Splitscreen readability favours fewer tiers.
+  **Owner check:** Say if you want a third tier in the rework.
+- **Assumption:** The starting camera values (4.5 to 6 m back, 2.2 to
+  2.5 m up, FOV 75 plus 8 on boost) are good enough for T-005 to start.
+  Most are our estimates, anchored on SuperTuxKart's camera code.
+  **Evidence:** Doc section 4. No primary source gives speed-linked FOV.
+  **Owner check:** Judge the camera in the first T-005 drive.
+- **Assumption:** Fan-wiki numbers (Mario Kart Wii, fan frame counts) are
+  accurate enough as secondary evidence.
+  **Evidence:** They are cross-checked against SuperTuxKart where possible.
+  **Owner check:** None needed unless a target feels off.
