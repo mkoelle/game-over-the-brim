@@ -338,10 +338,19 @@ stale immediately and silently produces an outdated pin with no error.
 
 # Development Commands
 
-Everything below is a `task <name>` in `Taskfile.yml` (requires
-[Task](https://taskfile.dev); `task` with no args lists all of them):
+Toolchain versions (Godot, Task, gdtoolkit, pre-commit, uv) are pinned in
+`mise.toml`. Bootstrap once per clone:
 
 ```bash
+mise trust && mise install   # install the pinned toolchain
+task setup                   # register the pre-commit hook
+```
+
+Everything below is a `task <name>` in `Taskfile.yml` (`task` with no args
+lists all of them):
+
+```bash
+task check:versions   # fail if Godot pins drift (mise.toml / release.yml / project.godot)
 task run              # launch the game
 task ci               # everything CI runs: import, check:parse, test, fmt:check, lint
 task test             # just GdUnit4 (ADR-007), once addons/gdUnit4/ is installed

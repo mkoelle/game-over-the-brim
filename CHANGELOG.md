@@ -10,6 +10,18 @@ Versioning follows the tag pushed to trigger a release (see
 
 ## [Unreleased]
 
+### Changed
+
+- Dev toolchain is now managed by mise. `mise.toml` pins Godot 4.7.2,
+  Task 3.54.0, gdtoolkit 4.5.0, pre-commit 4.7.0 and uv 0.13.9. CI
+  installs the same pins via `jdx/mise-action@v5`, replacing
+  `setup-godot`, `setup-task` and the pip install step. `task setup` now
+  runs `mise install` and `pre-commit install`. `task setup:ci` is
+  removed.
+- New `task check:versions`, the first step of `task ci`/`task verify`
+  and CI. It fails on Godot version drift between `mise.toml`,
+  `release.yml` and `project.godot`.
+
 ## [0.0.2-alpha] - 2026-09-14
 
 ### Added

@@ -4,9 +4,10 @@
 # pushing instead of guessing whether it'll pass.
 version: "3"
 
+# Tool versions (Godot, Task, gdtoolkit, pre-commit, uv) live in mise.toml,
+# not here. Bootstrap once with `mise trust && mise install`, then
+# `task setup`.
 vars:
-  GODOT_VERSION: 4.7.2
-  GDTOOLKIT_VERSION: 4.*
   # First-party GDScript only — addons/ (gdUnit4) is vendored, not ours to
   # reformat or lint.
   GD_PATHS: scripts/ test/
@@ -19,18 +20,32 @@ tasks:
 
   setup:
     desc: >-
-      Full local dev setup: gdformat/gdlint + the pre-commit hook (runs
-      task fmt + task lint on every commit).
+      Full local dev setup: install the pinned toolchain from mise.toml
+      (idempotent) and register the pre-commit hook (runs task fmt +
+      task lint on every commit). CI installs the same toolchain via
+      jdx/mise-action instead and never registers the hook.
     cmds:
-      - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}" pre-commit
+      - mise install
       - pre-commit install
 
-  setup:ci:
+  check:versions:
     desc: >-
-      Minimal setup for CI — gdformat/gdlint only. No git hook; CI never
-      commits.
+      Fail if the Godot version drifts between mise.toml, release.yml
+      (GODOT_VERSION and the godot-ci container tag) and project.godot's
+      config/features. ADR-007 records a real past drift.
+    silent: true
     cmds:
-      - pip3 install --user "gdtoolkit=={{.GDTOOLKIT_VERSION}}"
+      - |
+        MISE_GODOT=$(sed -n 's/^godot *= *"\([0-9.]*\)-stable".*/\1/p' mise.toml)
+        RELEASE_GODOT=$(sed -n 's/^ *GODOT_VERSION: *"\([0-9.]*\)".*/\1/p' .github/workflows/release.yml)
+        RELEASE_IMAGE=$(sed -n 's/^ *image: *barichello\/godot-ci:\([0-9.]*\).*/\1/p' .github/workflows/release.yml)
+        FEATURE=$(sed -n 's/^config\/features=PackedStringArray("\([0-9.]*\)".*/\1/p' project.godot)
+        echo "mise.toml=$MISE_GODOT release.yml=$RELEASE_GODOT image=$RELEASE_IMAGE project.godot=$FEATURE"
+        if [ -z "$MISE_GODOT" ] || [ "$MISE_GODOT" != "$RELEASE_GODOT" ] \
+          || [ "$MISE_GODOT" != "$RELEASE_IMAGE" ] || [ "${MISE_GODOT%.*}" != "$FEATURE" ]; then
+          echo "Godot version drift — update all four to match mise.toml."
+          exit 1
+        fi
 
   run:
     desc: Launch the game.
@@ -97,6 +112,7 @@ tasks:
   ci:
     desc: Everything the GitHub Actions CI job runs, in the same order.
     cmds:
+      - task: check:versions
       - task: import
       - task: check:parse
       - task: test
@@ -115,7 +131,7 @@ tasks:
         set +e
         FAILED=0
         RESULTS_FILE=$(mktemp)
-        for name in import check:parse test fmt:check lint; do
+        for name in check:versions import check:parse test fmt:check lint; do
           echo "=== $name ==="
           task "$name"
           rc=$?
