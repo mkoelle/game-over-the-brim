@@ -1,7 +1,7 @@
 # Development State
 
 ## Active Milestone
-**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-9 complete, merged to `main` (#1). Hand feel-test done 2026-11-24: drivable, but needs tuning. The "1-Car Fun" gate (Guardrail 3) is NOT passed yet. Phase 1 of the [addon adoption plan](docs/plans/addon-adoption-plan.md) (physics pin, per-device input fix, Phantom Camera, debug vectors) supports the tuning pass. Phases 3-4 stay blocked until the gate passes.**
+**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-9 complete, merged to `main` (#1). Hand feel-test done 2026-11-24: drivable, but steering response, drift, camera and ramps/air/landing all feel wrong. The current tuning is **not a usable reference baseline**. The "1-Car Fun" gate (Guardrail 3) is NOT passed. Handling needs a rework pass (self-implemented per ADR-012), not small tuning. Phase 1 of the [addon adoption plan](docs/plans/addon-adoption-plan.md) (physics pin, per-device input fix, Phantom Camera, debug vectors) supports the tuning pass. Phases 3-4 stay blocked until the gate passes.**
 
 ---
 
@@ -142,7 +142,8 @@ before it unless marked parallel.
    `docs/standards/manual-testing.md`.
 
 **Tasks 1-9 are all complete** and merged (#1). The hand feel-test ran
-2026-11-24 with the result "needs tuning". Next action: the Phase 1 tickets
+2026-11-24. Steering, drift, camera and ramps/air/landing all felt wrong,
+and the current values are not a reference baseline. Next action: the Phase 1 tickets
 in `docs/plans/addon-adoption-plan.md`, then another tuning pass. The
 original instruction for the feel-test follows: open the project in the
 editor and actually feel-test the handling by hand (headless verification confirms

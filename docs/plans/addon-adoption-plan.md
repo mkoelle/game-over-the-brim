@@ -38,8 +38,13 @@ pin older than about 30 days at the moment of vendoring.
   vendoring time**. Re-verify with `gh api` and read the release notes
   since the version named in the ticket. If they differ, update that
   ticket's ADR pin. Other addons still need approval per ticket.
-- **Feel gate:** hand-tested, needs tuning. The gate is not passed.
-  Phases 3-4 stay blocked.
+- **Feel gate:** hand-tested, not passed. Steering response, drift,
+  camera and ramps/air/landing all feel wrong. **The current handling and
+  camera values are not a reference baseline.** Tickets must not try to
+  preserve them for comparison. Phase 1 builds the tools (physics pin,
+  correct input, a real camera rig, debug vectors) for a handling rework.
+  The rework itself is self-implemented (ADR-012) and is not covered by
+  this plan. Phases 3-4 stay blocked.
 - **Test hardware available:**
   - 2+ gamepads: T-003 does a real isolation check.
   - A Windows or Linux machine: T-006 launches non-host desktop exports.

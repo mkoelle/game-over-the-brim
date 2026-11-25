@@ -10,15 +10,17 @@
 ### Goal
 
 Run the gameplay chase camera on Phantom Camera, with geometry collision
-avoidance and damping. Keep the current framing so feel-test results stay
-comparable.
+avoidance and damping. The current framing is **not** a reference: the
+owner's 2026-11-24 feel-test found the camera wrong. Start from the old
+values only as a first guess, then tune by feel.
 
 ### Acceptance Criteria
 
 - [ ] `main.tscn` has a `Camera3D` with a `PhantomCameraHost` child, plus a
       `PhantomCamera3D` (`CarFollowCam`) following the car.
-- [ ] The framing matches today's: about 4.5 m behind, 1.8 m up, snappy
-      low-lag follow, and the camera turns with the car's heading.
+- [ ] Kart-racer framing: close behind and slightly above, low-lag
+      follow, and the camera turns with the car's heading. Start from
+      4.5 m / 1.8 m, then tune by feel. Record the final values in the PR.
 - [ ] The camera never ends up inside a wall while hugging walls on
       `test_track.tscn`. Collision checks only the **Track** layer (1),
       never Vehicles (2).
