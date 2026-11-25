@@ -25,7 +25,10 @@ assets/
 
 ## Import Settings
 
-- Do not commit .import files
+- **Commit `.import` and `.uid` files.** They hold import settings and
+  resource UIDs. Without them, every clone regenerates UIDs and scene
+  references break ("invalid UID" warnings). Ignore only `.godot/`.
+  See the Godot docs on version control and the 4.4 UID changes.
 - Document custom import presets in this file as they are created
 
 Details to be expanded as the asset pipeline matures.

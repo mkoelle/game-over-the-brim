@@ -10,6 +10,16 @@ Versioning follows the tag pushed to trigger a release (see
 
 ## [Unreleased]
 
+### Fixed
+
+- `.import` files are now committed. `.gitignore` used to exclude them, so
+  every clone regenerated resource UIDs and `test_track.tscn` loaded
+  `dev_grid.png` through an invalid UID. Ignore only `.godot/`, per
+  Godot 4.4+ guidance.
+- `task export:*` creates `build/<platform>/` (Godot fails on a missing
+  output folder). `task test` and the exports add `.gdignore` to
+  `reports/` and `build/`, so Godot stops importing generated files.
+
 ### Changed
 
 - Dev toolchain is now managed by mise. `mise.toml` pins Godot 4.7.2,
