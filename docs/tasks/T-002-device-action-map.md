@@ -3,7 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P1
-**Status:** Todo
+**Status:** Done
 **Estimate:** 3h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-014](../adr/ADR-014-per-device-input-action-map.md)
@@ -17,21 +17,21 @@ with one binding source for every device.
 
 ### Acceptance Criteria
 
-- [ ] `DeviceActionMap.action_name(device, &"throttle")` returns a
+- [x] `DeviceActionMap.action_name(device, &"throttle")` returns a
       device-scoped action name for the keyboard
       (`InputEvent.DEVICE_ID_KEYBOARD`) and for every connected joypad
       (0–15).
-- [ ] The keyboard copy contains only keyboard events. Each joypad copy
+- [x] The keyboard copy contains only keyboard events. Each joypad copy
       contains only joypad events, re-targeted to that device ID. Core
       actions are unchanged.
-- [ ] A disconnected or unknown device returns an empty `StringName`. It
+- [x] A disconnected or unknown device returns an empty `StringName`. It
       never asserts or crashes.
-- [ ] `rebuild()` erases and re-derives all copies. `clear()` erases them
+- [x] `rebuild()` erases and re-derives all copies. `clear()` erases them
       (used by tests).
-- [ ] Analog action deadzones in `project.godot` are lowered from `0.5` to
+- [x] Analog action deadzones in `project.godot` are lowered from `0.5` to
       `0.08` (`throttle`, `brake`, `steer_left`, `steer_right`). `drift`
       may stay at `0.5`.
-- [ ] A new GdUnit4 suite covers isolation, and `task ci` is green.
+- [x] A new GdUnit4 suite covers isolation, and `task ci` is green.
 
 ### Context
 
@@ -139,3 +139,37 @@ None.
   listener held in a static var.
 - Tests mutate global `InputMap`, so `clear()` in `after_test` is mandatory
   to avoid leaking actions into other suites.
+
+### Outcome
+
+- Keyboard events carry device **16** (`DEVICE_ID_KEYBOARD`), not 0 or -1.
+  `InputEventKey`'s constructor calls `set_device(DEVICE_ID_KEYBOARD)`
+  (`core/input/input_event.cpp:669-671`, tag `4.7.2-stable`). Keyboard
+  copies use 16. The `-1` in `project.godot` key bindings is
+  `InputMap::ALL_DEVICES`, a wildcard on the binding side
+  (`input_map.cpp:152-153`). No fallback to `-1` was needed.
+- Joypad IDs are 0..15 (`input.h:104`), assigned by
+  `Input::get_unused_joy_id()` (`input.cpp:2303-2310`) from
+  `drivers/sdl/joypad_sdl.cpp:128`.
+- Public handler is `on_joy_connection_changed` (not underscore-prefixed),
+  because the project linter rejects tests calling private methods.
+- Deadzones for `throttle`, `brake`, `steer_left`, `steer_right` set to
+  `0.08` through `ProjectSettings` (`git diff project.godot` is those four
+  lines only). `drift` stays `0.5`.
+- No hardware step in this ticket. The real multi-gamepad check is in
+  T-003.
+
+### Assumptions (owner to validate)
+
+- **Assumption:** The SDL3 driver reports joypad connect and disconnect
+  through `Input.joy_connection_changed` on macOS, Windows and Linux, so
+  the static handler keeps copies current.
+  **Evidence:** `joypad_sdl.cpp` routes add and remove events through
+  `Input` (`joy_id` assignment at line 128). The handler is unit-tested by
+  calling it directly; no hotplug was exercised.
+  **Owner check:** With 2+ gamepads, run T-003's scene, unplug and replug
+  one pad, and confirm that car responds again and the other is unaffected.
+- **Assumption:** A deadzone of `0.08` is a good default for analog
+  steering and triggers.
+  **Evidence:** ADR-014 and the old `InputSource.AXIS_DEADZONE`.
+  **Owner check:** In T-003, check for stick drift at rest on each pad.
