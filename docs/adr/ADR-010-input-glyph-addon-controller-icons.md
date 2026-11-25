@@ -22,7 +22,10 @@ bearing on driving feel or spectator chaos.
 
 ### Decision
 
-Adopt **Controller Icons** (ExpressoBits) for input-prompt glyph rendering.
+Adopt **Controller Icons** (`rsubtil/controller_icons`, MIT) for
+input-prompt glyph rendering. Latest release v3.1.8 (2026-07-28), verified
+via `gh api` on 2026-11-24. Re-verify at adoption time per AGENTS.md
+"Dependency & Tooling Versions".
 
 Adopt it when the first real input-prompt UI is built (slot-assignment
 screen, pause menu, or HUD prompts) — not before. Nothing in Phase A's
@@ -50,3 +53,23 @@ screen, pause menu, or HUD prompts) — not before. Nothing in Phase A's
 1. **Hand-roll a device-type → icon-set mapping**: Rejected — this is
    exactly the kind of undifferentiated plumbing this addon already
    solves well; no gameplay or identity value in owning it.
+2. **G.U.I.D.E** (`godotneers/G.U.I.D.E`, MIT, v0.15.1): includes
+   device-aware input prompts *and* a remapping system. It was rejected
+   for driving input in
+   [ADR-014](ADR-014-per-device-input-action-map.md), because it has no
+   per-player action model. When the first remap menu and prompt UI are
+   built, compare it with Controller Icons plus Maaack's remap screen
+   ([ADR-018](ADR-018-menu-framework-maaack-menus-template.md)). Pick one
+   prompt solution, not both.
+
+---
+
+### Amendment — 2026-11-24
+
+- Corrected the addon author. Controller Icons is maintained by `rsubtil`,
+  not ExpressoBits (ExpressoBits maintains an unrelated inventory addon).
+- Godot 4.7 changed device IDs: joypads are 0–15,
+  `InputEvent.DEVICE_ID_KEYBOARD` is 16 and `DEVICE_ID_MOUSE` is 32.
+  Glyph selection must key off the slot's device from
+  [ADR-014](ADR-014-per-device-input-action-map.md)'s `InputSource`. At
+  adoption, confirm the addon's per-device API handles the 4.7 IDs.

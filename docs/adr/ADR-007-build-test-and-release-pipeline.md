@@ -239,3 +239,17 @@ someone provisions a real keystore and sets the three GitHub Secrets above.
   round-trips locally is never the one CI actually uses, inviting drift.
   Rejected in favor of committing it and being disciplined about never
   hand-typing secrets into it.
+
+---
+
+### Amendment — 2026-11-24
+
+- GdUnit4 upstream now lives at `godot-gdunit-labs/gdUnit4`. The latest
+  release is **v6.2.3** (2026-11-01, verified via `gh api`). The vendored
+  copy is v6.2.0. Bump tracked in
+  [T-009](../tasks/T-009-bump-gdunit4.md). Read the 6.2.1–6.2.3 release
+  notes before bumping.
+- Native (GDExtension) addons add export-pipeline obligations: binaries
+  for all four platforms, macOS signing inside the bundle, and
+  `.gitattributes` binary entries. These are now governed by
+  [ADR-015](ADR-015-native-gdextension-addon-policy.md).

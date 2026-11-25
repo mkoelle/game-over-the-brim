@@ -1,7 +1,7 @@
 # Development State
 
 ## Active Milestone
-**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-9 complete, PR open from `feature/drivable-prototype`. Blocking gate before merge: hand feel-test (see "Next action" below) — headless CI passing is necessary, not sufficient, per Guardrail 1.**
+**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-9 complete, merged to `main` (#1). Hand feel-test done 2026-11-24: drivable, but steering response, drift, camera and ramps/air/landing all feel wrong. The current tuning is **not a usable reference baseline**. The "1-Car Fun" gate (Guardrail 3) is NOT passed. Handling needs a rework pass (self-implemented per ADR-012), not small tuning. Phase 1 of the [addon adoption plan](docs/plans/addon-adoption-plan.md) (physics pin, per-device input fix, Phantom Camera, debug vectors) supports the tuning pass. Phases 3-4 stay blocked until the gate passes.**
 
 ---
 
@@ -20,6 +20,11 @@
 ---
 
 ## Recent Progress
+- Addon and third-party evaluation (2026-11-24):
+  - ADR-013 to ADR-020 added. ADR-007, ADR-010 and ADR-011 amended.
+  - Adoption plan and 16 sized tickets written (see "Deferred" below).
+  - Key finding: MultiplayerInput is incompatible with Godot 4.7's new
+    device IDs, so per-device input is self-implemented instead (ADR-014).
 - Adopted official project title: **Over The Brim** (replacing provisional title).
 - Established full vehicle archetype roster (Stovepipe Speedster, Bowler Bruiser, Fez Drifter, Sombrero Brawler, Flat Cap Scrapper).
 - Initialized Godot 4.7 project, display settings, and 3D collision layer mapping.
@@ -136,9 +141,12 @@ before it unless marked parallel.
    itself, keeping Architecture Decision 01 intact. See
    `docs/standards/manual-testing.md`.
 
-**Tasks 1-9 are all complete** (`feature/drivable-prototype`, PR open,
-not yet merged). Next action: open the project in the editor and actually
-feel-test the handling by hand (headless verification confirms
+**Tasks 1-9 are all complete** and merged (#1). The hand feel-test ran
+2026-11-24. Steering, drift, camera and ramps/air/landing all felt wrong,
+and the current values are not a reference baseline. Next action: the Phase 1 tickets
+in `docs/plans/addon-adoption-plan.md`, then another tuning pass. The
+original instruction for the feel-test follows: open the project in the
+editor and actually feel-test the handling by hand (headless verification confirms
 correctness, not fun — see Guardrail 1 in game-pillars.md) — press F3 for
 live telemetry while doing it — then decide on real hat-car art vs. the
 Iteration 02 drift-boost candidate below before starting the next
@@ -193,6 +201,17 @@ track is confirmed fun.
   ([ADR-011](file:///docs/adr/ADR-011-ai-state-machine-addon-limboai.md)).
   See [ADR-012](file:///docs/adr/ADR-012-self-implementation-boundary.md)
   for what must never move to an addon.
+- **Addon adoption plan** (2026-11-24):
+  [docs/plans/addon-adoption-plan.md](docs/plans/addon-adoption-plan.md),
+  with tickets in `docs/tasks/T-001`…`T-016` and ADR-013 to ADR-020.
+  - Phase 1 is in scope **now**, because it supports the hand feel-test:
+    - pin the physics engine
+    - per-device input action map (fixes joypad 0 also driving the
+      keyboard slot)
+    - Phantom Camera chase cam
+    - Debug Draw 3D vectors
+  - Phases 2–5 (assets, track tooling, menus, Steam Remote Play Together
+    decision) wait for their triggers in the plan.
 - **Test coverage reporting** — evaluated `gdUnit4-coverage`
   (godot-gdunit-labs), the only real GDScript coverage tool for Godot 4.
   As of 2026-09-14 it's v0.1.4 open beta: closed-source GDExtension + a
