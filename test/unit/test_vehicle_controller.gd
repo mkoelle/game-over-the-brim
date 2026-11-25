@@ -9,7 +9,8 @@ extends GdUnitTestSuite
 ## uses for scene_runner()/simulate_frames(). Under the hood
 ## GdUnitSceneRunnerImpl calls Input.action_press("throttle", 1.0) /
 ## Input.action_release("throttle") on the shared global action map
-## (see addons/gdUnit4/src/core/GdUnitSceneRunnerImpl.gd:126-143,554-561) —
+## (see simulate_action_press()/simulate_action_release() and _handle_actions()
+## in addons/gdUnit4/src/core/GdUnitSceneRunnerImpl.gd) —
 ## which is exactly the action map InputSource._get_input_from_action_map()
 ## reads via Input.get_action_strength()/is_action_pressed() for the default
 ## keyboard device (input_source.gd:66-75). That means this exercises the
@@ -17,7 +18,7 @@ extends GdUnitTestSuite
 ## and is more reliable under scene_runner than calling global
 ## Input.action_press() directly, since the runner also tracks and
 ## auto-releases any action left pressed when it is disposed
-## (GdUnitSceneRunnerImpl.gd:592-608). We still explicitly release the
+## (_reset_input_to_default() in GdUnitSceneRunnerImpl.gd). We still explicitly release the
 ## action at the end of every test as a belt-and-suspenders guard against
 ## state leaking into the next test case, per this project's convention of
 ## deterministic per-test cleanup.
