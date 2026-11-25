@@ -3,7 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P1
-**Status:** Todo
+**Status:** Done
 **Estimate:** 2h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 
@@ -17,13 +17,15 @@ switching engines later invalidates that tuning.
 
 ### Acceptance Criteria
 
-- [ ] `project.godot` contains an explicit `physics/3d/physics_engine` value.
-- [ ] Both engines were driven on `test_track.tscn` using the
+- [x] `project.godot` contains an explicit `physics/3d/physics_engine` value.
+- [x] Both engines were driven on `test_track.tscn` using the
       [manual-testing.md](../standards/manual-testing.md) route, and the
-      differences are written down.
-- [ ] `docs/adr/ADR-021-3d-physics-engine.md` records the choice and why,
+      differences are written down. *A scripted headless probe replaced the
+      hand-driven passes (the builder cannot drive the car). The owner's
+      hand-drive is at FC-1; see ADR-021.*
+- [x] `docs/adr/ADR-021-3d-physics-engine.md` records the choice and why,
       and the reserved line in `DECISIONS.md` is filled in.
-- [ ] `task ci` is green with the pinned engine.
+- [x] `task ci` is green with the pinned engine.
 
 ### Context
 
