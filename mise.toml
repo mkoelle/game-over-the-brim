@@ -1,0 +1,15 @@
+# Project toolchain: the single source of truth for dev tool versions,
+# locally (`mise install`) and in CI (`jdx/mise-action` in ci.yml).
+#
+# Pin exact versions, and verify each one is the latest release before
+# bumping (AGENTS.md "Dependency & Tooling Versions").
+# `task check:versions` fails if the Godot pin here drifts from
+# release.yml's GODOT_VERSION / container tag or project.godot's
+# config/features.
+
+[tools]
+godot = "4.7.2-stable"
+task = "3.54.0"
+uv = "0.13.9"
+"pypi:gdtoolkit" = "4.5.0"
+"pypi:pre-commit" = "4.7.0"

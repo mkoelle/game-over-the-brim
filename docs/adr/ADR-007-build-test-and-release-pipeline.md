@@ -147,6 +147,13 @@ custom render pipeline; no live-ops backend).
   was briefly out of sync (a `mise`-managed `4.6.2` shim shadowed the intended
   `4.7.2` from Homebrew on PATH) and corrected to `"4.7"` / `4.7.2`. Confirm
   which `godot` resolves first on PATH before touching this again.
+  **Update 2026-11-24:** the toolchain is now mise-managed on purpose.
+  `mise.toml` pins Godot, Task, gdtoolkit, pre-commit and uv for local use
+  and for CI (`jdx/mise-action` replaces `chickensoft-games/setup-godot`,
+  `arduino/setup-task` and the pip install step). `task check:versions`
+  (run first in `task ci`) fails if `mise.toml`, `release.yml`
+  (`GODOT_VERSION` and the `barichello/godot-ci` tag) and
+  `project.godot`'s `config/features` disagree.
 - **No double-zipping macOS/Android.** The `v0.0.1-alpha` macOS asset failed
   to unzip on download. Cause: Godot's macOS export already produces a single
   `.zip` (the `.app` bundle), and the release workflow's old single "Zip
