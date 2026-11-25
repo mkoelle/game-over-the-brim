@@ -13,6 +13,8 @@ pin older than about 30 days at the moment of vendoring.
 
 ## Ground rules (apply to every ticket)
 
+Process, tracking and model tiering: [ADR-022](../adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md).
+
 1. **Vendoring needs owner approval.** AGENTS.md Boundaries forbid
    modifying `addons/` without approval. Approval of a ticket counts as
    approval to vendor that one addon at the pinned version. Never edit
@@ -70,9 +72,23 @@ pin older than about 30 days at the moment of vendoring.
 | [T-008](../tasks/T-008-impact-camera-shake.md) | Impact camera shake | P2 | 3h | T-005 | 013 |
 | [T-009](../tasks/T-009-bump-gdunit4.md) | Bump GdUnit4 6.2.0 → 6.2.3 | P3 | 1h | — | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
 
-**Suggested order:** T-001 first. Changing the physics engine after tuning
-invalidates the tuning. Then T-002 → T-003 and T-004 → T-005 in parallel,
-then T-006 → T-007. T-008 and T-009 whenever convenient.
+**Execution order** (ADR-022; tickets run one at a time, because most of
+them touch `project.godot`):
+
+1. T-001 physics pin. Switching engines later would invalidate tuning.
+2. T-009 GdUnit4 bump, so the new tests are written on 6.2.3.
+3. T-004 → T-005 camera. The camera was flagged in the feel-test, and
+   T-005 is also the `godot-ai` MCP spike.
+4. T-002 → T-003 input fix.
+5. T-006 → T-007 debug vectors.
+6. **FC-1 (feel checkpoint 1):** the owner drives with the new camera,
+   correct input and F3 vectors on. Checks: does the camera feel right,
+   and can drift and air problems now be seen and described?
+7. T-008 impact shake.
+
+[T-017](../tasks/T-017-handling-genre-research.md) (handling genre
+research, no code) runs in parallel. The handling rework tickets are
+written from its results after FC-1.
 
 ## Phase 2 — Assets (any time; T-010 early)
 

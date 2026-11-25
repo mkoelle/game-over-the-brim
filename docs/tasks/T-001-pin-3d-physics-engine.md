@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P1
+**Status:** Todo
 **Estimate:** 2h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md))
 

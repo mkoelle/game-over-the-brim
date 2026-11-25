@@ -6,9 +6,18 @@
 ---
 
 ## Current Priorities
-1. **Core Vehicle Feel**: Implement `CharacterBody3D` vehicle controller with arcade acceleration, steering bite, and responsive drift dynamics.
-2. **Data-Driven Tuning**: Expose vehicle physics parameters via a `VehicleStats.tres` custom Resource for rapid iteration.
-3. **Test Track Sandbox**: Construct an initial prototype circuit in `scenes/arenas/test_track.tscn` with corners, ramps, and barriers to evaluate handling.
+1. **Phase 1 tooling**: physics pin, camera, input fix and debug vectors
+   ([addon adoption plan](docs/plans/addon-adoption-plan.md), in its
+   execution order), ending at feel checkpoint FC-1.
+2. **Handling genre research**: [T-017](docs/tasks/T-017-handling-genre-research.md),
+   in parallel. It gives target numbers for steering, drift, air and
+   camera.
+3. **Handling rework**: self-implemented (ADR-012). Tickets are written
+   from T-017 after FC-1. This is the path to passing the 1-Car Fun gate.
+
+Process: [ADR-022](docs/adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md)
+(lean trunk, one tracker in `docs/tasks`, feel gates, Sonnet builder with
+Opus checker).
 
 ---
 

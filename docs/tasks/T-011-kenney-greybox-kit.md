@@ -3,6 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P2
+**Status:** Todo
 **Estimate:** 3h
 **Phase:** 2 — Assets ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-019](../adr/ADR-019-third-party-asset-sourcing-and-licensing.md)

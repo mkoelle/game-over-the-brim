@@ -258,9 +258,26 @@ Do not place large documentation in AGENTS.md.
 
 # Task Tracking
 
-Use `.squad/tasks.json` (via `/squad:tasks`, `/squad:next`, `/squad:task <id>`)
-as the source of truth for task-level backlog: atomic tasks, dependencies,
-status. Size each task per `docs/standards/task-sizing.md` before recording it.
+Tickets live in `docs/tasks/T-*.md` (one file per ticket, using
+`docs/templates/task-template.md`), and that file is the single source of
+truth. Each ticket has a `**Status:**` line (`Todo`, `In progress`, `Done`,
+`Blocked (reason)`), and the PR that implements a ticket also flips its
+status. Order and dependencies are in the plan that owns the tickets (for
+example `docs/plans/addon-adoption-plan.md`). Size each ticket per
+`docs/standards/task-sizing.md`. `.squad/tasks.json` is no longer used
+(ADR-022).
+
+Workflow (ADR-022):
+
+- One short-lived branch + one PR per ticket. Enable auto-merge (squash)
+  right away; it lands when `QC` passes. Keep vendored-addon tickets
+  separate from integration tickets.
+- The PR body states the verification evidence: the `task ci` result,
+  tests, and a screenshot or log for scene or camera work. "It compiles"
+  is not evidence.
+- The owner is pulled in at the plan's feel checkpoints, and for
+  decisions only the owner can make (product intent, money, accounts,
+  licenses). Before asking, try a reversible probe.
 
 STATE.md stays at milestone/phase level only — current priorities and recent
 progress, not individual tasks.
@@ -269,30 +286,23 @@ progress, not individual tasks.
 
 # Agent Delegation
 
-OpenRouter MCP server (`.mcp.json`, gitignored) is available for delegating
-work to cheaper/faster models instead of doing it directly.
+Model tiering inside Claude Code, per
+[ADR-022](docs/adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md).
+ADR-008's OpenRouter delegation is superseded.
 
-Delegate when:
-
-- work is mechanical or high-volume: renames, boilerplate GDScript, bulk doc
-  generation, repetitive refactors
-- task carries low architectural risk
-
-Keep in Claude Code (do not delegate) when:
-
-- work touches architecture, ADR-governed systems, or gameplay feel
-- correctness on Godot/GDScript specifics matters and hasn't been verified
-  for the chosen delegate model
-- work involves anything under Boundaries below
-
-Model choices, per-model Godot-specific evidence, and rationale: see
-[ADR-008](docs/adr/ADR-008-llm-delegation-model-selection.md). Do not pick a
-delegate model ad hoc — use the primary/secondary lists there, and treat
-models with no Godot-specific evidence (secondary list) as higher-review
-output.
-
-$5 spend cap is set on the OpenRouter API key. If a delegated task appears to
-be failing or looping, stop and escalate rather than retrying blindly.
+- **Builder:** a Sonnet 5.5 subagent per ticket, in an isolated git
+  worktree, with the ticket file as its prompt. In a new worktree, run
+  `mise trust && mise install && task import` first.
+- **Checker:** the main session (Opus) reviews the real diff, re-runs
+  `task ci`, and opens the PR. Never accept a subagent's self-reported
+  success without checking.
+- **Lookups:** read-only search and inventory go to Haiku 5.5 subagents.
+- **Opus does it directly:** ADR-012 self-implemented systems,
+  gameplay-feel tuning, and any ticket the builder failed twice.
+- **Fresh session per ticket batch.** Carry state between sessions in the
+  ticket files, not in chat history.
+- **Godot editor MCP (`godot-ai`):** being spiked on T-005 for scene
+  edits and screenshot checks. See ADR-022 for the outcome.
 
 ---
 

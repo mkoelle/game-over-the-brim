@@ -1,6 +1,6 @@
 # ADR-008: LLM Delegation Model Selection (OpenRouter)
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-022](ADR-022-dev-workflow-lean-trunk-and-model-tiering.md) (2026-11-24). In-harness Haiku 5.5 / Sonnet 5.5 subagents cost less than the OpenRouter defaults below and can run tools and tests.
 
 **Date:** 2026-09-14
 
