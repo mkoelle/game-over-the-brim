@@ -30,6 +30,13 @@ assets/
   references break ("invalid UID" warnings). Ignore only `.godot/`.
   See the Godot docs on version control and the 4.4 UID changes.
 - Document custom import presets in this file as they are created
+- **Kenney Racing Kit models** (`assets/art/tracks/kenney_racing_kit/`): set
+  `nodes/root_scale=8.0` in each `.gltf.import`. The kit is about 1/8 of our
+  scale (a barrier is 0.13 high in the file, 1.05 m in game). Import scale is
+  the only scaling. Never scale nodes in scenes (Jolt, T-001). The kit's
+  glTF files keep each mesh at an offset from the origin, so each wrapper
+  scene shifts its `Model` node to centre the footprint. Collision is a
+  hand-sized box or convex shape in the wrapper scene.
 
 Details to be expanded as the asset pipeline matures.
 

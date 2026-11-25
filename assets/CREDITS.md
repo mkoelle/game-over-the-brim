@@ -15,6 +15,16 @@ A row with `placeholder: yes` must be replaced or confirmed before release.
 | Path(s) | Source URL | Author | License (SPDX) | Date added | Placeholder |
 | --- | --- | --- | --- | --- | --- |
 | `assets/art/tracks/dev_grid.png` (copy of `PNG/Light/texture_07.png`, 1024x1024) | <https://kenney.nl/assets/prototype-textures> (zip mirrored at <https://opengameart.org/content/prototype-textures>) | Kenney (kenney.nl) | CC0-1.0 | 2026-11-25 | yes |
+| `assets/art/tracks/kenney_racing_kit/barrierWall.gltf`, `barrierWall.bin` (from `Models/glTF format/`; Racing Kit 1.2) | <https://kenney.nl/assets/racing-kit> (zip from <https://opengameart.org/content/racing-kit>, uploaded by Kenney 2017-04-18) | Kenney (kenney.nl) | CC0-1.0 | 2026-11-25 | yes |
+| `assets/art/tracks/kenney_racing_kit/barrierRed.gltf`, `barrierRed.bin` (Racing Kit 1.2) | same as above | Kenney (kenney.nl) | CC0-1.0 | 2026-11-25 | yes |
+| `assets/art/tracks/kenney_racing_kit/pylon.gltf`, `pylon.bin` (Racing Kit 1.2) | same as above | Kenney (kenney.nl) | CC0-1.0 | 2026-11-25 | yes |
+| `assets/art/tracks/kenney_racing_kit/roadRampLong.gltf`, `roadRampLong.bin` (Racing Kit 1.2) | same as above | Kenney (kenney.nl) | CC0-1.0 | 2026-11-25 | yes |
+| `assets/art/tracks/kenney_racing_kit/License.txt` (the pack's own license file, Racing Kit 1.2) | same as above | Kenney (kenney.nl) | CC0-1.0 | 2026-11-25 | yes |
+
+The Racing Kit models are unmodified Kenney files. Our wrapper scenes
+(`barrier_wall.tscn`, `barrier_red.tscn`, `pylon.tscn`, `road_ramp_long.tscn`)
+are in-house and add only collision. The import scale (`nodes/root_scale=8.0`
+in each `.gltf.import`) is a project setting, not an edit of the model.
 
 ## Third-party code (vendored addons)
 

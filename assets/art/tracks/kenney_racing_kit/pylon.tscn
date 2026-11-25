@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" uid="uid://cwmrjbs304chi" path="res://assets/art/tracks/kenney_racing_kit/pylon.gltf" id="1_model"]
+
+[sub_resource type="BoxShape3D" id="Shape_1"]
+size = Vector3(0.96, 1.056, 0.96)
+
+[node name="Pylon" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 0
+
+[node name="Model" parent="." instance=ExtResource("1_model")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21.658784, 0, 14.92614456)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.528, 0)
+shape = SubResource("Shape_1")
