@@ -171,10 +171,11 @@ All times are seconds at 60 Hz. Percentages are of top speed (24 m/s).
 | Max slide angle | 25-45 degrees | MKW 45 degrees [S]; lower bound [E] for couch readability | not tracked |
 | Tier 1 charge time | 0.9-1.0 s | MKW best 0.9 s [S]; STK 1.0 s [P] | none |
 | Tier 2 charge time | 1.9-2.5 s total | MKW best 1.9 s [S] | none |
-| Tier 3 (optional) | 3.0 s total | later entry tutorial [S], STK tier 2 at 3 s [P] | none |
+| Tier 3 (owner: yes, FC-1) | 3.0 s total | later entry tutorial [S], STK tier 2 at 3 s [P] | none |
 | Charge rate when steering out | about 40% of in-turn rate | MKW 2 vs 5 per frame [S] | none |
 | Boost duration, tier 1 | 0.5-0.8 s | MKW 0.25-0.8 s [S]; later entry 0.62 s [S] | none |
 | Boost duration, tier 2 | 1.2-1.7 s | later entry 1.67 s [S] | none |
+| Boost duration, tier 3 | 2.0-2.6 s | later entry 2.63 s [S] | none |
 | Boost strength | +15-25% of top speed (3.6-6 m/s) | MKW +20% [S]; STK 4.5-6.5 m/s [P] | none |
 | Cancel | release pays out; below minimum speed or crash cancels with no payout | STK [P] | none |
 | Slide grip (lateral velocity decay) | frame-rate independent, about 0.3-0.6 s time constant | [E] see below | `drift_grip = 0.55` per tick |
@@ -196,7 +197,7 @@ drifting and 0.05-0.08 s while gripping.
 - Slide strength is per tick, not per second.
 - STATE.md says "regular/super/ultra" tiers. Research agrees for the
   newest entries only. The Wii-era and open-source references use
-  **two tiers**. Start with two and treat a third as optional.
+  **two tiers**. **Owner decision (FC-1, 2026-11-25): three tiers.**
 
 ## 3. Ramps, air, landing
 
@@ -461,7 +462,9 @@ These tie to [game-pillars.md](game-pillars.md).
   - FOV drops by player count (STK does this [P]).
   - Keep tiers visible by **sparks and body colour**, not by small UI.
   - Boost cues use camera FOV and trailing effects, large and clear.
-  - Prefer **two tiers** over three so a spectator can tell them apart.
+  - **Three tiers** (owner decision, FC-1). Make each step obvious, with
+    a different spark colour and body tint per tier, so a spectator can
+    still tell them apart in a quarter-screen viewport.
   - Camera shake is off by default in splitscreen.
 - **Guardrail 3 ("1-Car Fun").** One car on one flat corner must feel
   good before anything else. So:
@@ -490,7 +493,7 @@ reflects dependencies. Not written until the owner reviews this doc.
 2. **Frame-rate independent grip and drift slide.** Replace per-tick
    lerps with time constants. Drift entry, direction lock, reduced steer
    range, slide angle. Depends on 1.
-3. **Drift charge tiers and boost.** Charge timer, two tiers, release
+3. **Drift charge tiers and boost.** Charge timer, three tiers, release
    payout, cancel rules, boost speed and duration in `VehicleStats`.
    Depends on 2.
 4. **Ramp launch, air behavior and landing.** Keep velocity off ramps,
@@ -503,6 +506,24 @@ reflects dependencies. Not written until the owner reviews this doc.
 7. **Chase camera tuning pass (follows T-005).** Apply section 4 values
    in the Phantom Camera rig: speed distance, FOV boost, drift and air
    behavior, splitscreen FOV by player count.
+8. **Wall contact response (owner request, FC-1 2026-11-25).** The owner
+   said of wall slides: "slow, boring, would like car to bounce off or
+   keep momentum some".
+   - Today, `move_and_slide()` removes the into-wall part of the
+     velocity. Then the next tick rebuilds the velocity as
+     `forward * current_speed`, which points back into the wall. So the
+     car grinds and loses speed every tick, and a head-on hit stops it
+     dead.
+   - Scope: on glancing contact, keep the speed along the wall and nudge
+     the yaw away from it. On a hard hit, bounce back with restitution.
+     Reuse the `impacted` signal for the shake.
+   - Starting targets [E], to tune by feel:
+     - a 30-degree glancing contact keeps at least 85% of its speed
+     - a head-on hit above 3 m/s bounces back with 0.3-0.5 of the
+       into-wall speed
+   - Check: a probe at 15, 30, 45 and 90 degrees logs the speed kept and
+     the bounce.
+   - Depends on 2.
 
 ## 8. Sources
 

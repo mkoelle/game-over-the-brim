@@ -73,24 +73,38 @@ Debug vectors ([T-007](../tasks/T-007-vehicle-debug-vectors.md)), F3 on:
           nose almost at once). The genre goes up to about 45 degrees
           (`handling-reference.md` §2). This is input for the handling
           rework, not a debug-vector bug. It is added to §5.
-- [ ] Up `Ramp2`: the yellow arrow tilts (30° measured).
+- [x] Up `Ramp2`: the yellow arrow tilts (30° measured).
 - [x] Press F3 again: everything disappears.
 
 Track ([T-011](../tasks/T-011-kenney-greybox-kit.md),
 [T-010](../tasks/T-010-asset-credits-manifest.md)):
 
 - [x] Barriers and cones read as the right size next to the car.
-- [ ] The car does not hop an inner 1.05 m wall off Ramp2.
+- [x] The car does not hop an inner 1.05 m wall off Ramp2.
+      - making a right turn while driving off the second ramp can allow you to jump out of the level
+        - *Agent:* Reproduced. 13 of 40 scripted turns off a ramp cleared
+          the 3 m west wall, about 6 m up, into an endless fall. Fixed in
+          [T-024](../tasks/T-024-level-bounds.md): the boundary walls are
+          now 12 m (0 of 40 escape), and a car that falls below the level
+          is reset to spawn.
 - [ ] Clipping a pylon's top edge feels fair (box collider).
-- [ ] Sliding along inner walls at an angle has no seam bumps.
-- [ ] The floor still reads at speed. The Kenney light texture is low
+- [x] Sliding along inner walls at an angle has no seam bumps.
+      - slow ,boring, would like car to bounce off or keep momentum some
+        - *Agent:* Recorded as rework ticket 8, "Wall contact response",
+          in `handling-reference.md` §7. The car grinds because each tick
+          rebuilds its velocity pointing back into the wall. Added to §5.
+- [x] The floor still reads at speed. The Kenney light texture is low
       contrast. Say if you want `Dark/texture_07.png`.
 
 Handling targets ([T-017](../tasks/T-017-handling-genre-research.md)):
 
-- [ ] Read `docs/design/handling-reference.md` before or after the drive.
+- [x] Read `docs/design/handling-reference.md` before or after the drive.
       Mark any target that feels wrong.
-- [ ] Say whether two drift tiers are enough, or you want three.
+- [x] Say whether two drift tiers are enough, or you want three.
+      - 3
+        - *Agent:* Recorded. `handling-reference.md` §2 now targets three
+          tiers (3rd at about 3.0 s, boost 2.0-2.6 s), and rework ticket 3
+          builds three.
 
 ## 2. Hardware checks
 
@@ -138,7 +152,14 @@ Exports ([T-006](../tasks/T-006-vendor-debug-draw-3d.md)):
       ADR-020 to Accepted or Rejected
       ([T-016](../tasks/T-016-evaluate-steam-remote-play-together.md)).
       The ADR-020 hands-on test needs an app ID.
-- [ ] Confirm the project made `icon.svg` ([T-010](../tasks/T-010-asset-credits-manifest.md)).
+- [X] Confirm the project made `icon.svg` ([T-010](../tasks/T-010-asset-credits-manifest.md)).
+      - feel free to generate a better one, this one is meh, create 8 samples with differing options, getting increasingly creative
+        - *Agent:* Done in [T-025](../tasks/T-025-app-icon-concepts.md).
+          There are eight concepts in `docs/design/icon-concepts/`, from a
+          cleaned-up classic topper to a fez-car moonshot.
+          `contact-sheet.png` shows each one at 256, 48, 32 and 16 px.
+          Pick one, or two to combine. `icon.svg` changes only after
+          that.
 - [ ] Phantom Camera's bundled Nunito fonts have no license file in the
       addon. Upstream says OFL-1.1. Confirm this, or exclude the fonts from
       exports ([T-004](../tasks/T-004-vendor-phantom-camera.md)).
@@ -190,3 +211,5 @@ camera and shake. They feed the rework tickets written from T-017:
     (rule 3 in [track-geometry.md](../design/track-geometry.md)).
 - Drift slip is barely visible with F3 on (about 2-3.5 degrees in a held
   drift). The drift needs much more slip in the handling rework.
+- Wall slides are slow and boring. The owner wants the car to bounce off
+  or keep some momentum (rework ticket 8).
