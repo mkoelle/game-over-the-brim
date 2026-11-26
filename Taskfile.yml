@@ -10,7 +10,7 @@ version: "3"
 vars:
   # First-party GDScript only. addons/ is vendored code: we never reformat
   # or lint it.
-  GD_PATHS: scripts/ test/
+  GD_PATHS: scripts/ test/ tools/
 
 tasks:
   default:
@@ -118,6 +118,13 @@ tasks:
     desc: Lint first-party GDScript (gdscript-formatter lint, official style guide rules).
     cmds:
       - gdscript-formatter lint {{.GD_PATHS}}
+
+  icons:
+    desc: >-
+      Regenerate the Windows .ico, macOS .icns and Android launcher icons
+      from icon.svg (tools/make_icons.gd). Commit the results.
+    cmds:
+      - godot --headless --path . -s res://tools/make_icons.gd
 
   ci:
     desc: Everything the GitHub Actions CI job runs, in the same order.

@@ -82,6 +82,7 @@ Process, tracking and model tiering: [ADR-022](../adr/ADR-022-dev-workflow-lean-
 | [T-023](../tasks/T-023-kenney-ramp-visible-body.md) | Visible solid body for the Kenney ramp (FC-1: invisible wall) | P2 | 1h | T-011 | [019](../adr/ADR-019-third-party-asset-sourcing-and-licensing.md) |
 | [T-024](../tasks/T-024-level-bounds.md) | Keep the car inside the test track (FC-1: escape off Ramp2) | P1 | 2h | T-021 | — |
 | [T-025](../tasks/T-025-app-icon-concepts.md) | Eight app icon concepts (FC-1 owner request) | P3 | 2h | — | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
+| [T-026](../tasks/T-026-adopt-full-throttle-icon.md) | Adopt concept 02 as the app icon, `task icons` | P3 | 1h | T-025 | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
 
 **Execution order** (ADR-022; tickets run one at a time, because most of
 them touch `project.godot`):

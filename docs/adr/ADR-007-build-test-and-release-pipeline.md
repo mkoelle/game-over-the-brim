@@ -142,6 +142,13 @@ custom render pipeline; no live-ops backend).
   top-hat/wheel motif) — swap for real art in `assets/art/ui/` once available;
   update the `config/icon` path and `export_presets.cfg`'s
   `application/icon` / `launcher_icons/*` fields to match.
+  *Update 2026-11-25 (T-026):* `icon.svg` is now concept 02 "Full
+  Throttle". `task icons` (`tools/make_icons.gd`) regenerates the `.ico`,
+  `.icns` and Android launcher PNGs from it with Godot alone, so no
+  Pillow or iconutil is needed. The Android adaptive foreground drops
+  the `id="background"` element and fits the art into the 66/108 safe
+  zone. The background is that element's fill colour. Run it after any
+  edit to `icon.svg`.
 - `project.godot`'s `config/features` and the CI/release pins (`GODOT_VERSION`,
   `barichello/godot-ci` tag) must match the actually-installed engine — this
   was briefly out of sync (a `mise`-managed `4.6.2` shim shadowed the intended

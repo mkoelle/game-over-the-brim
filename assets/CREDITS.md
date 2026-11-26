@@ -51,14 +51,15 @@ These files are made by the project. No third-party license applies.
 
 | Path(s) | Source URL | Author | License (SPDX) | Date added | Placeholder |
 | --- | --- | --- | --- | --- | --- |
-| `icon.svg`, `icon.svg.import` | n/a | in-house | original (in-house) | 2026-09-09 | yes |
-| `assets/art/ui/icon.ico` | n/a (rendered from `icon.svg`) | in-house | original (in-house) | 2026-09-10 | yes |
-| `assets/art/ui/icon.icns` | n/a (rendered from `icon.svg`) | in-house | original (in-house) | 2026-09-10 | yes |
-| `assets/art/ui/android/main_192x192.png` | n/a (rendered from `icon.svg`) | in-house | original (in-house) | 2026-09-10 | yes |
-| `assets/art/ui/android/adaptive_foreground_432x432.png` | n/a (rendered from `icon.svg`) | in-house | original (in-house) | 2026-09-10 | yes |
-| `assets/art/ui/android/adaptive_background_432x432.png` | n/a (rendered from `icon.svg`) | in-house | original (in-house) | 2026-09-10 | yes |
+| `icon.svg`, `icon.svg.import` | n/a (concept 02 "Full Throttle", T-026) | in-house | original (in-house) | 2026-11-25 | yes |
+| `assets/art/ui/icon.ico` | n/a (rendered from `icon.svg` by `task icons`) | in-house | original (in-house) | 2026-11-25 | yes |
+| `assets/art/ui/icon.icns` | n/a (rendered from `icon.svg` by `task icons`) | in-house | original (in-house) | 2026-11-25 | yes |
+| `assets/art/ui/android/main_192x192.png` | n/a (rendered from `icon.svg` by `task icons`) | in-house | original (in-house) | 2026-11-25 | yes |
+| `assets/art/ui/android/adaptive_foreground_432x432.png` | n/a (rendered from `icon.svg` by `task icons`) | in-house | original (in-house) | 2026-11-25 | yes |
+| `assets/art/ui/android/adaptive_background_432x432.png` | n/a (rendered from `icon.svg` by `task icons`) | in-house | original (in-house) | 2026-11-25 | yes |
 
-The icon set is a stand-in until final key art exists, so it is marked as a placeholder.
+The icon set is a stand-in until final key art exists, so it is marked as a placeholder. The owner chose concept 02 "for now" (FC-1).
+`docs/design/icon-concepts/` keeps concepts 02 and 04. It is `.gdignore`d, so it never ships.
 Files named `.gitkeep` and Godot `.import` files are not assets and are not listed.
 
 ## Open items
