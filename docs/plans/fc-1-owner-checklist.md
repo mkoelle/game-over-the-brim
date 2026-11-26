@@ -46,28 +46,35 @@ Camera ([T-005](../tasks/T-005-replace-chase-camera-with-phantom-camera.md)):
           backing into Ramp2 from both ends.
 - [x] Framing: the car is not too small or too high in frame. If it is,
       try `spring_length` 4.0–5.0 or `follow_offset.y` 0.8–1.4.
-- [ ] Full-throttle straight: the car keeps a steady size.
-- [ ] Ramp2 landing does not jolt (Y damping 0.2 s; try 0.25 or 0.15).
-- [ ] Hard corners: yaw smoothing of 0.15 s is neither loose nor twitchy.
+- [x] Full-throttle straight: the car keeps a steady size.
+- [x] Ramp2 landing does not jolt (Y damping 0.2 s; try 0.25 or 0.15).
+- [x] Hard corners: yaw smoothing of 0.15 s is neither loose nor twitchy.
 
 Impact shake ([T-008](../tasks/T-008-impact-camera-shake.md)):
 
-- [ ] Low-speed taps (under 3 m/s) do not shake.
-- [ ] Five full-speed head-on hits give a clear jolt that is not harsh
+- [x] Low-speed taps (under 3 m/s) do not shake.
+- [x] Five full-speed head-on hits give a clear jolt that is not harsh
       (peak about 2.5°; `max_amplitude` 14 if weak, 6–7 if harsh).
-- [ ] A 45° hit shakes less than head-on.
-- [ ] The shake is not a buzz (`frequency` 10) or a wobble (20).
-- [ ] A 3 s wall scrape shakes once, not continuously.
+- [x] A 45° hit shakes less than head-on.
+- [x] The shake is not a buzz (`frequency` 10) or a wobble (20).
+- [x] A 3 s wall scrape shakes once, not continuously.
 
 Debug vectors ([T-007](../tasks/T-007-vehicle-debug-vectors.md)), F3 on:
 
-- [ ] The arrows and the slip label are readable at chase distance. If
+- [x] The arrows and the slip label are readable at chase distance. If
       not, change the constants at the top of `vehicle_debug_draw.gd`.
-- [ ] Straight driving: the blue and green arrows overlap.
-- [ ] A held drift through a corner: green swings off blue, and the slip
+- [x] Straight driving: the blue and green arrows overlap.
+- [x] A held drift through a corner: green swings off blue, and the slip
       sign reads sensibly.
+      - barely noticable
+        - *Agent:* The arrows are right; the drift itself is weak. Earlier
+          probes measured about 2-3.5 degrees of slip in a held drift
+          (`drift_grip` 0.55 per physics tick pulls the velocity back to the
+          nose almost at once). The genre goes up to about 45 degrees
+          (`handling-reference.md` §2). This is input for the handling
+          rework, not a debug-vector bug. It is added to §5.
 - [ ] Up `Ramp2`: the yellow arrow tilts (30° measured).
-- [ ] Press F3 again: everything disappears.
+- [x] Press F3 again: everything disappears.
 
 Track ([T-011](../tasks/T-011-kenney-greybox-kit.md),
 [T-010](../tasks/T-010-asset-credits-manifest.md)):
@@ -164,3 +171,20 @@ camera and shake. They feed the rework tickets written from T-017:
     speed. Fixed in
     [T-020](../tasks/T-020-enable-physics-interpolation.md), which turns on
     physics interpolation (now 0.09 px). Re-check on the next drive.
+- Turns cause the debug text to vibrate and turn fuzzy
+      - sometimes the text jumps or pops , large and off center
+  - *Agent:* Reproduced. It is a side effect of T-020. Debug Draw 3D draws
+    text with pooled `Label3D` nodes and uses a different one each frame.
+    With physics interpolation on, each label blended from where it was
+    last used: 300 px RMS off its anchor in a turn, with pops up to
+    4,248 px. Fixed in
+    [T-022](../tasks/T-022-debug-text-interpolation.md), which turns
+    interpolation off for the addon's nodes (now 0.0 px).
+- driving under ramp one hits invisible wall
+  - *Agent:* Reproduced. Kenney's `roadRampLong` model is only a one-sided
+    road deck. From the side or the high end it is almost invisible, and
+    the space under it looks open. Its collision is a solid wedge (T-011),
+    so that "open" space is an invisible wall. Fix tracked in T-023: give
+    it a visible solid body that matches the collision.
+- Drift slip is barely visible with F3 on (about 2-3.5 degrees in a held
+  drift). The drift needs much more slip in the handling rework.

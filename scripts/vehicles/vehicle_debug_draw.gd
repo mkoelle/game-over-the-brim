@@ -10,6 +10,13 @@ extends Node
 ## - text: slip angle in degrees and grounded state
 ##
 ## Reads public VehicleController state only, like DebugOverlay.
+##
+## Debug Draw 3D draws text with pooled Label3D nodes under its own
+## `_DD3D_WorldWatcher` node, and moves them every rendered frame. With
+## project physics interpolation on (T-020), they would inherit it and blend
+## from wherever each pooled label was last used, so the text shook and
+## popped across the screen in turns. This node turns interpolation off for
+## those nodes (T-022). The addon itself stays unmodified (ADR-015).
 
 const FACING_LENGTH: float = 2.0
 const VELOCITY_MAX_LENGTH: float = 3.0
@@ -24,6 +31,8 @@ const ARROW_HEAD_SIZE: float = 0.2
 const FACING_COLOR: Color = Color.BLUE
 const VELOCITY_COLOR: Color = Color.GREEN
 const NORMAL_COLOR: Color = Color.YELLOW
+## Debug Draw 3D's per-world root node name contains this.
+const DD3D_NODE_MARKER: String = "_DD3D_"
 
 var target: VehicleController
 
@@ -41,6 +50,33 @@ static func velocity_arrow_length(speed: float, max_speed: float) -> float:
 	if max_speed <= 0.0:
 		return 0.0
 	return clampf(speed / max_speed, 0.0, 1.0) * VELOCITY_MAX_LENGTH
+
+
+## True for Debug Draw 3D's own nodes, which move every frame and must not be
+## physics-interpolated.
+static func is_dd3d_node(node: Node) -> bool:
+	return String(node.name).contains(DD3D_NODE_MARKER)
+
+
+## Turns physics interpolation off for `node` if it is a Debug Draw 3D node.
+## Its pooled Label3D children inherit the setting.
+static func disable_dd3d_interpolation(node: Node) -> void:
+	if is_dd3d_node(node):
+		node.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+
+
+func _ready() -> void:
+	var tree: SceneTree = get_tree()
+	for child: Node in tree.root.get_children(true):
+		disable_dd3d_interpolation(child)
+	# Debug Draw 3D may create its world node later (for example per world
+	# in split screen), so also catch it when it enters the tree.
+	tree.node_added.connect(_on_node_added)
+
+
+# An instance method, so the connection ends when this node is freed.
+func _on_node_added(node: Node) -> void:
+	disable_dd3d_interpolation(node)
 
 
 func _process(_delta: float) -> void:
