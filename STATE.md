@@ -6,12 +6,11 @@
 ---
 
 ## Current Priorities
-1. **Handling rework**: [handling rework plan](docs/plans/handling-rework-plan.md),
-   tickets T-027 to T-034. These are self-implemented (ADR-012), with
-   targets from [handling-reference.md](docs/design/handling-reference.md).
-2. **FC-2 (the "1-Car Fun" gate)**: the owner works through the
-   [FC-2 owner checklist](docs/plans/fc-2-owner-checklist.md) after
-   T-034. Items not answered at FC-1 are deferred into it.
+1. **FC-2 (the "1-Car Fun" gate)**: the handling rework is done (T-027
+   to T-034, [plan](docs/plans/handling-rework-plan.md)). The owner works
+   through the [FC-2 owner checklist](docs/plans/fc-2-owner-checklist.md).
+   Items not answered at FC-1 are deferred into it.
+2. **Next tuning round**: FC-2 comments become tickets, as at FC-1.
 3. **Blocked until later:** T-018 (Godot 4.8 is not stable yet) and
    T-012 to T-015 (they wait for the gate).
 
@@ -29,6 +28,18 @@ Opus checker).
 ---
 
 ## Recent Progress
+- Handling rework done (2026-11-25), PRs #32 to #39, self-implemented per
+  ADR-012:
+  - a flat yaw-rate steering curve and a steer ramp
+  - a speed and travel-direction model with frame-rate independent grip
+  - a locked drift with a 35-degree slide
+  - walls that keep momentum and bounce
+  - ramp launches (Ramp2 reshaped to 20 degrees)
+  - a three-tier drift boost
+  - a visual body with roll, tilt, hop and tier sparks
+  - a trick boost
+  - camera FOV and drift heading
+  Each ticket's measured numbers are in its file. Tests: 111, all green.
 - FC-1 closed (2026-11-25) after three rounds of owner comments. All the
   fixes are merged (#23 to #30):
   - physics interpolation for 120 Hz displays

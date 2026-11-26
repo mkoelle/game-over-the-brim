@@ -29,6 +29,22 @@ extends Node
 ## wall hit, which swings the camera into the wall (T-005 drive probe).
 @export_range(0.0, 1.0, 0.05) var velocity_heading_weight: float = 0.0
 
+## While the car drifts (T-028), the camera follows this share of the velocity
+## heading instead, so the road stays in view in a 20-35 degree slide
+## (T-034, handling-reference.md section 4: 50-70%).
+@export_range(0.0, 1.0, 0.05) var drift_velocity_heading_weight: float = 0.6
+
+## Yaw smoothing time constant while drifting, in seconds. Section 4 suggests
+## 0.35-0.5 s, but the drift yaw rate (about 1.7 rad/s) times 0.4 s lagged the
+## camera 38 degrees behind, so it pointed 55 degrees off the body, past the
+## travel direction (T-034 probe). At 0.15 s the camera sits on the travel
+## direction. drift_blend_time already keeps drift entry from snapping.
+@export_range(0.01, 1.0, 0.01, "suffix:s") var drift_yaw_smooth_time: float = 0.15
+
+## Time constant, in seconds, for blending between the normal and drift
+## settings, so the camera never switches abruptly.
+@export_range(0.01, 1.0, 0.01, "suffix:s") var drift_blend_time: float = 0.2
+
 ## Below this flat speed, in m/s, only the body heading is used.
 @export var min_heading_speed: float = 2.0
 
@@ -44,6 +60,7 @@ var _base_offset_y: float = 0.0
 var _yaw: float = NAN
 var _takeoff_y: float = NAN
 var _air_lift: float = 0.0
+var _drift_blend: float = 0.0
 
 
 func _ready() -> void:
@@ -55,10 +72,19 @@ func _process(delta: float) -> void:
 	var target: Node3D = _pcam.follow_target
 	if target == null:
 		return
-	var heading: float = _heading(target)
+	var car: VehicleController = target as VehicleController
+	var drifting: bool = car != null and car.is_drifting
+	_drift_blend = lerpf(
+		_drift_blend,
+		1.0 if drifting else 0.0,
+		1.0 - exp(-delta / drift_blend_time),
+	)
+	var weight: float = lerpf(velocity_heading_weight, drift_velocity_heading_weight, _drift_blend)
+	var smooth: float = lerpf(yaw_smooth_time, drift_yaw_smooth_time, _drift_blend)
+	var heading: float = _heading(target, weight)
 	if is_nan(_yaw):
 		_yaw = heading
-	_yaw = lerp_angle(_yaw, heading, 1.0 - exp(-delta / yaw_smooth_time))
+	_yaw = lerp_angle(_yaw, heading, 1.0 - exp(-delta / smooth))
 	_pcam.set_third_person_rotation(Vector3(-_pcam.vertical_rotation_offset, _yaw, 0.0))
 	var body: CharacterBody3D = target as CharacterBody3D
 	if hold_height_in_air and body != null:
@@ -66,17 +92,17 @@ func _process(delta: float) -> void:
 		_pcam.follow_offset.y = _base_offset_y - _air_lift
 
 
-func _heading(target: Node3D) -> float:
+func _heading(target: Node3D, weight: float) -> float:
 	var back: Vector3 = target.get_global_transform_interpolated().basis.z
 	var body_yaw: float = atan2(back.x, back.z)
 	var body: CharacterBody3D = target as CharacterBody3D
-	if body == null or velocity_heading_weight <= 0.0:
+	if body == null or weight <= 0.001:
 		return body_yaw
 	var flat: Vector3 = Vector3(body.velocity.x, 0.0, body.velocity.z)
 	# Ignore velocity when slow or reversing, so the camera stays behind.
 	if flat.length() < min_heading_speed or flat.dot(back) > 0.0:
 		return body_yaw
-	return lerp_angle(body_yaw, atan2(-flat.x, -flat.z), velocity_heading_weight)
+	return lerp_angle(body_yaw, atan2(-flat.x, -flat.z), weight)
 
 
 func _update_air_lift(body: CharacterBody3D, delta: float) -> void:
