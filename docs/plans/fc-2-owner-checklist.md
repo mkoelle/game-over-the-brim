@@ -1,15 +1,23 @@
 # FC-2 Owner Checklist
 
-**Date:** 2026-11-25 (built up while the handling rework lands)
+**Date:** 2026-11-25. **Ready:** all eight handling tickets are merged
+(T-027 to T-034).
 **Plan:** [Handling rework plan](handling-rework-plan.md)
 
 FC-2 is the "1-Car Fun" gate (Guardrail 3). Drive the test track with
 the reworked handling, then answer one question: **is one car on one
 track fun?**
 
-Each handling ticket adds its owner checks below once it merges. The
-agents recorded a researched assumption, with evidence and a probe, for
-each one in the ticket's `### Assumptions (owner to validate)` section.
+Each section below comes from one handling ticket. The agents recorded a
+researched assumption, with evidence and a probe, for each check in that
+ticket's `### Assumptions (owner to validate)` section. Every tuning knob
+named here lives in `resources/vehicles/stovepipe_speedster.tres`, or in
+the named scene node, so a change needs no code.
+
+**Controls:**
+- throttle and brake
+- steer
+- the drift button, which also tricks just after a ramp launch
 Tick a box when it is confirmed. Comment under any item like FC-1, and
 the next round fixes or tunes it.
 
@@ -99,9 +107,16 @@ the next round fixes or tunes it.
       landing.
 - [ ] A trick landing feels worth it next to a tier-2 drift boost.
 
-## 8. Camera (T-034)
+## 8. Camera ([T-034](../tasks/T-034-chase-camera-tuning-pass.md))
 
-_Added when T-034 merges._
+- [ ] Speed reads on the straight: the FOV widens a little at top speed
+      (+4 degrees).
+- [ ] A boost widens it more (+8 to +12 by tier) and pulls the camera back
+      a little. It feels fast, not like a fish-eye.
+- [ ] In a drift the camera looks down the travel direction, so the road
+      stays in view and the car is angled across the screen. It does not
+      look too sideways.
+- [ ] Entering and leaving a drift never snaps the camera.
 
 ## 9. The gate
 

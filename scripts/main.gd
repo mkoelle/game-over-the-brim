@@ -26,6 +26,9 @@ extends Node
 ## with `load()` and set through `set()`, so no scene and no release build
 ## references the script statically.
 ##
+## GameCamera/SpeedFx (T-034) widens the FOV with speed and boost, and pulls
+## the camera back on a boost. In split screen each camera needs its own.
+##
 ## An OutOfBoundsReset puts the car back at its spawn pose if it ever falls
 ## out of the level (T-024), and the follow camera teleports with it.
 
@@ -33,12 +36,15 @@ extends Node
 @onready var _follow_cam: PhantomCamera3D = $CarFollowCam
 @onready var _impact_shake: ImpactShakeDriver = $ImpactShake/ImpactShakeDriver
 @onready var _debug_overlay: DebugOverlay = $DebugOverlay
+@onready var _speed_fx: ChaseCamSpeedFx = $GameCamera/SpeedFx
 
 
 func _ready() -> void:
 	_follow_cam.follow_target = _car
 	_car.impacted.connect(_on_car_impacted)
 	_debug_overlay.target = _car
+	_speed_fx.target = _car
+	_speed_fx.follow_cam = _follow_cam
 	var bounds_reset := OutOfBoundsReset.new()
 	bounds_reset.name = "OutOfBoundsReset"
 	bounds_reset.target = _car
