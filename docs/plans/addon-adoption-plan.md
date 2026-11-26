@@ -52,7 +52,10 @@ Process, tracking and model tiering: [ADR-022](../adr/ADR-022-dev-workflow-lean-
   - A Windows or Linux machine: T-006 launches non-host desktop exports.
   - An Android device: T-006 installs and launches the APK.
   - **No** high-refresh monitor: skip T-005's physics-interpolation
-    comparison.
+    comparison. *(Corrected 2026-11-25: the owner's MacBook Pro built-in
+    display is 120 Hz ProMotion. FC-1 found the resulting vibration.
+    [T-020](../tasks/T-020-enable-physics-interpolation.md) enables
+    interpolation.)*
 - **Toolchain:** move dev tools to mise. Separate branch
   `chore/mise-toolchain`.
 
@@ -73,6 +76,7 @@ Process, tracking and model tiering: [ADR-022](../adr/ADR-022-dev-workflow-lean-
 | [T-009](../tasks/T-009-bump-gdunit4.md) | Bump GdUnit4 6.2.0 → 6.2.3 | P3 | 1h | — | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
 | [T-019](../tasks/T-019-vendor-godot-ai.md) | Vendor godot-ai 4.4.2 (project scope, telemetry off) | P1 | 2h | — | [022](../adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md) |
 | [T-018](../tasks/T-018-upgrade-godot-4-8.md) | Upgrade to Godot 4.8 stable | P2 | 3h | 4.8 stable + addon support | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
+| [T-020](../tasks/T-020-enable-physics-interpolation.md) | Enable physics interpolation (FC-1: car vibration at 120 Hz) | P1 | 1h | T-005 | [013](../adr/ADR-013-camera-addon-phantom-camera.md) |
 
 **Execution order** (ADR-022; tickets run one at a time, because most of
 them touch `project.godot`):

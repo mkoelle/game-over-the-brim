@@ -15,8 +15,8 @@ ticket's Assumptions section and open a follow-up ticket.
 
 ## 0. Setup
 
-- [ ] Pull `main`, run `mise install && task import`, then `task run`.
-- [ ] Press F3. The debug overlay appears. The car shows blue, green and
+- [x] Pull `main`, run `mise install && task import`, then `task run`.
+- [x] Press F3. The debug overlay appears. The car shows blue, green and
       yellow arrows and a slip label
       ([T-007](../tasks/T-007-vehicle-debug-vectors.md)).
 
@@ -33,9 +33,14 @@ Physics ([T-001](../tasks/T-001-pin-3d-physics-engine.md), ADR-021):
 
 Camera ([T-005](../tasks/T-005-replace-chase-camera-with-phantom-camera.md)):
 
-- [ ] The camera turns with the car and never goes through a wall. Hug
+- [x] The camera turns with the car and never goes through a wall. Hug
       every wall, including the corners.
-- [ ] Framing: the car is not too small or too high in frame. If it is,
+      - camera can jump through blue ramp when backing up into the base of the ramp
+        - *Agent:* Reproduced. Reversing under Ramp2's high end wedges the
+          car in the gap under the slab. The camera's collision start point
+          ends up inside the slab, so the camera pops to the top side.
+          Fix tracked in T-021.
+- [x] Framing: the car is not too small or too high in frame. If it is,
       try `spring_length` 4.0–5.0 or `follow_offset.y` 0.8–1.4.
 - [ ] Full-throttle straight: the car keeps a steady size.
 - [ ] Ramp2 landing does not jolt (Y damping 0.2 s; try 0.25 or 0.15).
@@ -63,7 +68,7 @@ Debug vectors ([T-007](../tasks/T-007-vehicle-debug-vectors.md)), F3 on:
 Track ([T-011](../tasks/T-011-kenney-greybox-kit.md),
 [T-010](../tasks/T-010-asset-credits-manifest.md)):
 
-- [ ] Barriers and cones read as the right size next to the car.
+- [x] Barriers and cones read as the right size next to the car.
 - [ ] The car does not hop an inner 1.05 m wall off Ramp2.
 - [ ] Clipping a pylon's top edge feels fair (box collider).
 - [ ] Sliding along inner walls at an angle has no seam bumps.
@@ -113,7 +118,7 @@ Exports ([T-006](../tasks/T-006-vendor-debug-draw-3d.md)):
       call `scene_get_hierarchy`. Do not press the plugin's Configure
       button. Do not run this project and another godot-ai project in the
       editor at the same time (both use ports 8000/9500).
-- [ ] T-019 set the global editor setting `godot_ai/telemetry_enabled` to
+- [x] T-019 set the global editor setting `godot_ai/telemetry_enabled` to
       `false`. Keep it, or restore it from the backup that T-019 names.
 
 ## 4. Decisions only the owner can make
@@ -149,3 +154,9 @@ camera and shake. They feed the rework tickets written from T-017:
   speed and turns fastest at top speed. In the genre, yaw rate stays
   roughly flat while the turn radius grows with speed
   (`handling-reference.md` §1).
+- While driving car/box looks like it is vibrating, and is blurry because of it
+  - *Agent:* The cause is 60 Hz physics on a 120 Hz display: the car is
+    drawn still every other frame, about 8 px of judder per frame at top
+    speed. Fixed in
+    [T-020](../tasks/T-020-enable-physics-interpolation.md), which turns on
+    physics interpolation (now 0.09 px). Re-check on the next drive.

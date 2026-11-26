@@ -90,6 +90,11 @@ only *set priorities* on Phantom Camera nodes.
   acceleration on the straight, which is smooth. Above 60 Hz the camera may
   step, because the car only moves in `_physics_process`. Follow-up:
   compare interpolation on and off on a 120 Hz+ display.
+  **Closed by [T-020](../tasks/T-020-enable-physics-interpolation.md)
+  (2026-11-25).** The owner's MacBook Pro has a 120 Hz ProMotion display,
+  and FC-1 found the car vibrating. That was about 8 px of per-frame
+  stepping. `physics/common/physics_interpolation` is now `true`, which
+  brings it to 0.09 px.
 - **No jitter tip printed.** The tip never fired in any run.
   `set_follow_target` resets `_follow_target_physics_based` to false
   (`phantom_camera_3d.gd:2291`) before `_check_physics_body` (`:2300`).

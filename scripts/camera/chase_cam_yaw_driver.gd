@@ -15,6 +15,10 @@ extends Node
 ##
 ## Default process_priority (0) runs before PhantomCameraHost (300), so the
 ## camera uses this frame's yaw, not last frame's.
+##
+## The car moves in `_physics_process` (60 Hz) but this runs every rendered
+## frame, so it reads the car's interpolated transform, like Phantom Camera
+## does. With physics interpolation on (T-020) that is where the car is drawn.
 
 ## Yaw smoothing time constant, in seconds. Steady-cornering lag is about
 ## yaw rate x this value (21 degrees at full lock and top speed).
@@ -63,7 +67,7 @@ func _process(delta: float) -> void:
 
 
 func _heading(target: Node3D) -> float:
-	var back: Vector3 = target.global_basis.z
+	var back: Vector3 = target.get_global_transform_interpolated().basis.z
 	var body_yaw: float = atan2(back.x, back.z)
 	var body: CharacterBody3D = target as CharacterBody3D
 	if body == null or velocity_heading_weight <= 0.0:
@@ -76,7 +80,7 @@ func _heading(target: Node3D) -> float:
 
 
 func _update_air_lift(body: CharacterBody3D, delta: float) -> void:
-	var y: float = body.global_position.y
+	var y: float = body.get_global_transform_interpolated().origin.y
 	if body.is_on_floor():
 		_takeoff_y = NAN
 		_air_lift *= exp(-delta / air_release_time)

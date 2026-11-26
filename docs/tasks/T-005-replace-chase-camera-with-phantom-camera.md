@@ -214,7 +214,8 @@ Sweeps behind the choices:
 
 **Follow-ups:**
 - Compare `physics_interpolation` on and off on a 120 Hz+ display
-  (ADR-013 Consequences).
+  (ADR-013 Consequences). *Done in
+  [T-020](T-020-enable-physics-interpolation.md): interpolation is now on.*
 - The addon does not smooth the boom after a collision pull-in, so a
   corner crash gives a 1-3 frame jolt. If FC-1 finds it jarring, ease the
   boom back out. That needs a small driver-side change, or an upstream
