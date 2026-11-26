@@ -78,6 +78,13 @@ extends Resource
 ## Acceleration, in m/s^2, toward the boosted top speed while boosting.
 @export var boost_acceleration: float = 25.0
 
+## Trick boost (T-033): extra top speed, in m/s, and length, in seconds, paid
+## on landing after a trick. 6.7 m/s is +28% of 24, stronger than a drift
+## boost because it needs a ramp (handling-reference.md section 3: +25-30%,
+## 0.6-1.2 s).
+@export var trick_boost_speed: float = 6.7
+@export var trick_boost_time: float = 0.9
+
 ## Share of the into-wall speed the car bounces back with on a hard hit
 ## (T-029). 0 is a dead stop, 1 a perfect bounce. The target is 0.3-0.5.
 @export_range(0.0, 1.0) var wall_restitution: float = 0.4

@@ -14,6 +14,8 @@ extends CharacterBody3D
 ##   the body heading and the travel direction
 ## - T-029: wall contact response (keep momentum, bounce on hard hits)
 ## - T-031: drift charge in three tiers, paid out as a boost on release
+## - T-033: a trick (the drift button just after a ramp launch) boosts on
+##   landing
 ## - T-032: the mesh lives under a VehicleVisualBody child, which rolls, tilts,
 ##   hops and shows the tier; this script never touches it
 ## - T-030: ramps launch the car with the slope's upward speed; no throttle
@@ -42,8 +44,12 @@ signal drift_ended
 ## Emitted when the drift charge reaches a new boost tier (1, 2 or 3, T-031).
 signal drift_tier_reached(tier: int)
 
-## Emitted when a boost starts: a drift released at `tier` (T-031).
+## Emitted when a boost starts: a drift released at `tier` 1-3 (T-031), or
+## tier 0 for a trick boost on landing (T-033).
 signal boost_started(tier: int)
+
+## Emitted when a trick fires in the air (T-033). The boost follows on landing.
+signal trick_performed
 
 ## Emitted when a boost runs out.
 signal boost_ended
@@ -91,6 +97,22 @@ const DRIFT_IN_TURN_STEER: float = 0.1
 ## Above the top speed (after a boost), speed falls back at this rate, in
 ## m/s^2, instead of snapping down.
 const OVERSPEED_DECAY: float = 8.0
+
+## Trick (T-033, handling-reference.md section 3, MKW [S]): the drift button
+## counts as the trick button from TRICK_WINDOW_START to TRICK_WINDOW_END
+## seconds after a ramp launch. A press up to TRICK_BUFFER before takeoff is
+## buffered.
+const TRICK_WINDOW_START: float = 0.05
+const TRICK_WINDOW_END: float = 0.2
+const TRICK_BUFFER: float = 0.2
+
+## A trick needs at least this share of top speed, and a launch with at least
+## TRICK_MIN_LAUNCH_SPEED m/s of upward speed (a real ramp, not a bump).
+const TRICK_MIN_SPEED_SHARE: float = 0.5
+const TRICK_MIN_LAUNCH_SPEED: float = 1.0
+
+## After a trick fires, its landing boost waits at least this long.
+const TRICK_COOLDOWN: float = 0.08
 
 ## Smallest steer input that starts a drift (T-028).
 const DRIFT_ENTRY_STEER: float = 0.3
@@ -143,6 +165,9 @@ var drift_direction: int = 0
 ## around +Y. It is positive when the car travels to the left of its nose.
 var slide_angle_deg: float = 0.0
 
+## True after a trick fired in the air, until the landing pays it (T-033).
+var has_trick: bool = false
+
 ## Boost tier the current drift has charged to: 0 (none) to 3 (T-031).
 var drift_tier: int = 0
 
@@ -166,6 +191,12 @@ var _time_since_wall_contact: float = INF
 var _contact_peak_speed: float = 0.0
 var _drift_air_time: float = 0.0
 var _drift_charge: int = 0
+var _boost_extra: float = 0.0
+var _drift_was_held: bool = false
+var _since_press: float = INF
+var _air_time: float = 0.0
+var _trick_eligible: bool = false
+var _trick_cooldown: float = 0.0
 var _was_grounded: bool = false
 var _ground_ray: RayCast3D
 var _ground_normal: Vector3 = Vector3.UP
@@ -192,6 +223,8 @@ func _physics_process(delta: float) -> void:
 	var raw_steer: float = clampf(float(input.get("steer", 0.0)), -1.0, 1.0)
 	var steer: float = _ramped_steer(raw_steer, delta)
 	var drift_held: bool = bool(input.get("drift", false))
+	_since_press = 0.0 if drift_held and not _drift_was_held else _since_press + delta
+	_drift_was_held = drift_held
 	var grounded: bool = is_on_floor()
 
 	# --- Air (T-030): no throttle in the air, and only a share of the yaw,
@@ -219,7 +252,7 @@ func _physics_process(delta: float) -> void:
 		speed += throttle * stats.braking_force * throttle_factor * delta
 	var top: float = stats.max_speed
 	if boost_time_left > 0.0:
-		top += stats.boost_speed
+		top += _boost_extra
 		if speed < top:
 			speed = minf(speed + stats.boost_acceleration * throttle_factor * delta, top)
 	var limit: float = maxf(top, move_toward(before, top, OVERSPEED_DECAY * delta))
@@ -282,10 +315,19 @@ func _physics_process(delta: float) -> void:
 		# Past a ramp's top edge the centre ray misses while the rear still
 		# touches; keep the slope seen last, so the launch uses it.
 		_ground_normal = _surface_normal(_ground_normal)
+		if not _was_grounded:
+			_land()
 	else:
 		if _was_grounded:
-			velocity.y = maxf(velocity.y, launch_vertical_speed(travel, _ground_normal, speed))
+			var launch: float = launch_vertical_speed(travel, _ground_normal, speed)
+			velocity.y = maxf(velocity.y, launch)
+			_air_time = 0.0
+			_trick_eligible = (
+				launch >= TRICK_MIN_LAUNCH_SPEED
+				and speed >= stats.max_speed * TRICK_MIN_SPEED_SHARE
+			)
 		velocity.y -= _gravity * stats.air_gravity_scale * delta
+		_air_tick(delta)
 	_was_grounded = grounded
 
 	# The slide removes the into-wall part of velocity, so read it before.
@@ -354,6 +396,16 @@ static func clamp_slide(travel: Vector3, body: Vector3, max_angle: float) -> Vec
 ## -1 is full out-turn, +1 full in-turn (T-028).
 static func drift_steer_share(relative_steer: float) -> float:
 	return lerpf(DRIFT_STEER_MIN, DRIFT_STEER_MAX, (clampf(relative_steer, -1.0, 1.0) + 1.0) * 0.5)
+
+
+## Whether a trick fires `air_time` seconds after takeoff, given the last
+## button press was `since_press` seconds ago (T-033). It must be inside the
+## window, and the press no earlier than TRICK_BUFFER before takeoff.
+static func trick_window_open(air_time: float, since_press: float) -> bool:
+	return (
+		air_time >= TRICK_WINDOW_START and air_time <= TRICK_WINDOW_END
+		and since_press <= air_time + TRICK_BUFFER
+	)
 
 
 ## Boost tier, 0-3, for a drift charge (T-031). `tier_times` are the seconds
@@ -458,9 +510,34 @@ func _end_drift(pay_out: bool) -> void:
 	_drift_charge = 0
 	drift_ended.emit()
 	if pay_out and tier > 0:
-		boost_tier = tier
-		boost_time_left = stats.boost_times[tier - 1]
-		boost_started.emit(tier)
+		_start_boost(tier, stats.boost_speed, stats.boost_times[tier - 1])
+
+
+func _start_boost(tier: int, extra_speed: float, seconds: float) -> void:
+	boost_tier = tier
+	_boost_extra = extra_speed
+	boost_time_left = seconds
+	boost_started.emit(tier)
+
+
+## Air time and the trick window (T-033).
+func _air_tick(delta: float) -> void:
+	_air_time += delta
+	_trick_cooldown = maxf(_trick_cooldown - delta, 0.0)
+	if _trick_eligible and not has_trick and trick_window_open(_air_time, _since_press):
+		has_trick = true
+		_trick_cooldown = TRICK_COOLDOWN
+		trick_performed.emit()
+
+
+## Landing pays a trick boost (T-033). If the car lands within the cooldown,
+## the boost is simply not delayed further: windows end at 0.2 s, and real
+## jumps last 0.6 s or more.
+func _land() -> void:
+	_trick_eligible = false
+	if has_trick:
+		has_trick = false
+		_start_boost(0, stats.trick_boost_speed, stats.trick_boost_time)
 
 
 func _tick_boost(delta: float) -> void:

@@ -36,6 +36,12 @@ const TIER_COLORS: Array[Color] = [
 	Color(1.0, 0.31, 0.85),
 ]
 
+## Trick boost colour (T-033): white, apart from the three tier hues.
+const TRICK_COLOR: Color = Color(1.0, 1.0, 1.0)
+
+## Trick animation (T-033): one barrel roll, in seconds.
+const TRICK_SPIN_TIME: float = 0.45
+
 ## Tint strength (emission energy) per tier, and while boosting.
 const TIER_TINT_ENERGY: float = 0.3
 const BOOST_TINT_ENERGY: float = 0.6
@@ -47,6 +53,7 @@ var _car: VehicleController
 var _roll: float = 0.0
 var _align: Basis = Basis.IDENTITY
 var _hop_left: float = 0.0
+var _trick_left: float = 0.0
 var _material: StandardMaterial3D
 var _sparks: Array[GPUParticles3D] = []
 var _spark_material: ParticleProcessMaterial
@@ -59,6 +66,7 @@ func _ready() -> void:
 		set_physics_process(false)
 		return
 	_car.drift_started.connect(_on_drift_started)
+	_car.trick_performed.connect(_on_trick_performed)
 	_take_own_material()
 	_make_sparks()
 
@@ -114,12 +122,29 @@ func _physics_process(delta: float) -> void:
 	_align = _align.slerp(target_tilt, 1.0 - exp(-delta / tilt_time)).orthonormalized()
 
 	_hop_left = maxf(_hop_left - delta, 0.0)
-	transform = Transform3D(_align * Basis(Vector3.BACK, _roll), Vector3.UP * hop_offset(_hop_left))
+	_trick_left = maxf(_trick_left - delta, 0.0)
+	var spin: float = trick_spin(_trick_left)
+	transform = Transform3D(
+		_align * Basis(Vector3.BACK, _roll + spin),
+		Vector3.UP * hop_offset(_hop_left),
+	)
 	_update_tier_cues()
 
 
 func _on_drift_started(_direction: int) -> void:
 	_hop_left = HOP_TIME
+
+
+func _on_trick_performed() -> void:
+	_trick_left = TRICK_SPIN_TIME
+
+
+## Barrel-roll angle, in radians, with `left` seconds of the trick spin left:
+## 0 to a full turn, eased in and out.
+static func trick_spin(left: float) -> float:
+	if left <= 0.0:
+		return 0.0
+	return TAU * smoothstep(0.0, 1.0, 1.0 - left / TRICK_SPIN_TIME)
 
 
 ## The tint is set on a copy of the mesh's material, so one car's tier never
@@ -169,7 +194,10 @@ func _update_tier_cues() -> void:
 	var boosting: bool = _car.boost_time_left > 0.0
 	var cue_tier: int = _car.boost_tier if boosting else tier
 	if _material != null:
-		if cue_tier > 0:
+		if boosting and cue_tier == 0:
+			_material.emission = TRICK_COLOR
+			_material.emission_energy_multiplier = BOOST_TINT_ENERGY
+		elif cue_tier > 0:
 			_material.emission = TIER_COLORS[cue_tier - 1]
 			_material.emission_energy_multiplier = (
 				BOOST_TINT_ENERGY if boosting else TIER_TINT_ENERGY
