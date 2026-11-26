@@ -184,7 +184,9 @@ camera and shake. They feed the rework tickets written from T-017:
   - *Agent:* Reproduced. Kenney's `roadRampLong` model is only a one-sided
     road deck. From the side or the high end it is almost invisible, and
     the space under it looks open. Its collision is a solid wedge (T-011),
-    so that "open" space is an invisible wall. Fix tracked in T-023: give
-    it a visible solid body that matches the collision.
+    so that "open" space is an invisible wall. Fixed in
+    [T-023](../tasks/T-023-kenney-ramp-visible-body.md): the ramp now has
+    a visible grey wedge body under the deck that matches its collision
+    (rule 3 in [track-geometry.md](../design/track-geometry.md)).
 - Drift slip is barely visible with F3 on (about 2-3.5 degrees in a held
   drift). The drift needs much more slip in the handling rework.

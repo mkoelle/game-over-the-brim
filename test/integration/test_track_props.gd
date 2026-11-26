@@ -64,3 +64,38 @@ func test_ramp_matches_old_csg_ramp_within_ten_percent() -> void:
 	var slope: float = (high - low) / 12.0
 	assert_float(slope).is_equal_approx(OLD_RAMP_SLOPE, OLD_RAMP_SLOPE * 0.1)
 	assert_float(high).is_equal_approx(OLD_RAMP_HEIGHT_AT_Z13, OLD_RAMP_HEIGHT_AT_Z13 * 0.1)
+
+
+## T-023: the Kenney ramp model is only a one-sided road deck, but its
+## collision is a solid wedge. A visible "Body" fills the wedge, so the car
+## never meets an invisible wall under the deck.
+func test_ramp_has_a_visible_body_covering_its_collision() -> void:
+	var ramp: StaticBody3D = _track.get_node("Ramp") as StaticBody3D
+	var body: MeshInstance3D = ramp.get_node("Body") as MeshInstance3D
+	assert_object(body).is_not_null()
+	assert_bool(body.visible).is_true()
+	var prism: PrismMesh = body.mesh as PrismMesh
+	assert_object(prism).is_not_null()
+	# A right-angle wedge: vertical face at the high end, like the collision.
+	assert_float(prism.left_to_right).is_equal(1.0)
+	var mesh_box: AABB = body.transform * prism.get_aabb()
+	var shape: ConvexPolygonShape3D = (
+		(ramp.get_node("CollisionShape3D") as CollisionShape3D).shape as ConvexPolygonShape3D
+	)
+	var shape_box: AABB = AABB(shape.points[0], Vector3.ZERO)
+	for p: Vector3 in shape.points:
+		shape_box = shape_box.expand(p)
+	# Same footprint, and the top stays just under the deck (within 0.2 m).
+	assert_vector(mesh_box.position * Vector3(1, 0, 1)).is_equal_approx(
+		shape_box.position * Vector3(1, 0, 1),
+		Vector3.ONE * 0.01,
+	)
+	assert_vector(mesh_box.size * Vector3(1, 0, 1)).is_equal_approx(
+		shape_box.size * Vector3(1, 0, 1),
+		Vector3.ONE * 0.01,
+	)
+	assert_float(mesh_box.end.y).is_less(shape_box.end.y)
+	assert_float(shape_box.end.y - mesh_box.end.y).is_less(0.2)
+	assert_float(mesh_box.position.y).is_less_equal(0.0)
+	# The high end (+Z) is the vertical face of both.
+	assert_float(mesh_box.end.z).is_equal_approx(shape_box.end.z, 0.01)
