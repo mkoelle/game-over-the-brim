@@ -46,8 +46,11 @@ static func velocity_arrow_length(speed: float, max_speed: float) -> float:
 func _process(_delta: float) -> void:
 	if target == null or not GameConfig.debug_mode:
 		return
-	var origin: Vector3 = target.global_position + Vector3.UP * DRAW_HEIGHT
-	var forward: Vector3 = -target.global_transform.basis.z
+	# Interpolated, so the arrows stay on the car as drawn between physics
+	# ticks (T-020).
+	var drawn: Transform3D = target.get_global_transform_interpolated()
+	var origin: Vector3 = drawn.origin + Vector3.UP * DRAW_HEIGHT
+	var forward: Vector3 = -drawn.basis.z
 	var flat_velocity: Vector3 = Vector3(target.velocity.x, 0.0, target.velocity.z)
 	var speed: float = flat_velocity.length()
 	var grounded: bool = target.is_on_floor()
