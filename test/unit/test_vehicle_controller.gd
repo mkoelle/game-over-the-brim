@@ -193,26 +193,25 @@ func test_impacted_reports_only_the_speed_into_the_wall() -> void:
 	assert_float(impacts[0]).is_equal_approx(10.0, 0.5)
 
 
-func test_impacted_fires_once_for_a_long_scrape() -> void:
+func test_shallow_scrape_fires_once_and_keeps_momentum() -> void:
 	var impacts: Array[float] = []
 	var runner := scene_runner(TOPHAT_CAR_SCENE)
 	var car := _impact_car(runner, impacts)
 	# A long wall along the car's right side, 1 m away, and a nose turned
-	# 5 degrees into it, so the car rides along it at full throttle.
+	# 5 degrees into it, at full throttle. Since T-029 the car turns along
+	# the wall and keeps going instead of grinding against it.
 	_add_wall(car, Vector3(2.0, 1.0, -90.0), Vector3(1, 3, 200))
 	car.rotation.y = deg_to_rad(-5.0)
 	(car.input_source as HeldInput).throttle = 1.0
 	car.velocity = -car.global_basis.z * car.stats.max_speed
 
-	var wall_frames: int = 0
-	for i: int in 180:
-		await get_tree().physics_frame
-		if car.is_on_wall():
-			wall_frames += 1
+	await _physics_frames(180)
 
-	# It really scraped: in contact for most of the 3 s.
-	assert_int(wall_frames).is_greater(120)
 	assert_int(impacts.size()).is_equal(1)
+	assert_float(car.speed).is_greater(car.stats.max_speed * 0.95)
+	# The nose ends parallel to the wall (it ran along -Z).
+	var heading_into_wall: float = rad_to_deg(asin((-car.global_basis.z).x))
+	assert_float(absf(heading_into_wall)).is_less(1.0)
 
 
 func test_impacted_fires_again_when_a_scrape_runs_into_another_wall() -> void:
@@ -237,15 +236,14 @@ func test_impacted_fires_again_for_a_new_hit() -> void:
 	var impacts: Array[float] = []
 	var runner := scene_runner(TOPHAT_CAR_SCENE)
 	var car := _impact_car(runner, impacts)
-	_add_wall(car, Vector3(0, 1.0, -4.0), Vector3(20, 3, 1))
-	var input := car.input_source as HeldInput
-
-	input.throttle = 1.0
+	_add_wall(car, Vector3(0, 1.0, -6.0), Vector3(20, 3, 1))
+	# Coast into the wall; the bounce (T-029) carries the car back off it.
+	car.velocity = Vector3(0, 0, -10.0)
 	await _physics_frames(60)
-	input.throttle = -1.0
-	await _physics_frames(20)
-	input.throttle = 1.0
-	await _physics_frames(120)
+	assert_int(impacts.size()).is_equal(1)
+	# A second, separate run at the wall is a new hit.
+	car.velocity = Vector3(0, 0, -10.0)
+	await _physics_frames(60)
 
 	assert_int(impacts.size()).is_equal(2)
 
@@ -449,3 +447,69 @@ func test_grip_circle_keeps_speed() -> void:
 	# T-027 lost about 2% per circle to re-projection; the model keeps it.
 	assert_float(car.speed).is_equal_approx(24.0, 0.05)
 	assert_float(absf(car.slide_angle_deg)).is_less(8.0)
+
+
+## T-029: wall contact response.
+func test_wall_bounce_needs_a_hard_hit() -> void:
+	var slid: Vector3 = Vector3(0, 0, -10.0)
+	var n: Vector3 = Vector3.RIGHT
+	assert_vector(VehicleController.wall_bounce(slid, 2.0, n, 0.4)).is_equal(slid)
+	assert_vector(VehicleController.wall_bounce(slid, 10.0, n, 0.4)).is_equal_approx(
+		Vector3(4.0, 0, -10.0),
+		Vector3.ONE * 0.001,
+	)
+	assert_float(VehicleController.wall_approach_deg(Vector3(-1, 0, 0), n)).is_equal_approx(
+		90.0,
+		0.01,
+	)
+	var thirty: Vector3 = Vector3(-sin(deg_to_rad(30.0)), 0, -cos(deg_to_rad(30.0)))
+	assert_float(VehicleController.wall_approach_deg(thirty, n)).is_equal_approx(30.0, 0.01)
+
+
+func test_head_on_hit_bounces_back() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	_add_wall(car, Vector3(0, 1.0, WALL_AHEAD_Z), Vector3(20, 3, 1))
+	car.velocity = Vector3(0, 0, -car.stats.max_speed)
+	await _physics_frames(50)
+	assert_int(impacts.size()).is_equal(1)
+	# Moving backward, away from the wall, at restitution x impact speed.
+	assert_float(car.speed).is_equal_approx(-car.stats.max_speed * car.stats.wall_restitution, 0.3)
+
+
+func test_thirty_degree_glancing_hit_keeps_most_speed() -> void:
+	var impacts: Array[float] = []
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car := _impact_car(runner, impacts)
+	# Wall on the right (x = 10), car heading 30 degrees into it, coasting.
+	_add_wall(car, Vector3(10.5, 1.0, -100.0), Vector3(1, 3, 300))
+	car.global_position = Vector3(10.0 - 1.2 - 3.0, car.global_position.y, 0.0)
+	car.rotation.y = deg_to_rad(-30.0)
+	car.velocity = -car.global_basis.z * 24.0
+	await _physics_frames(90)
+	assert_int(impacts.size()).is_equal(1)
+	assert_float(car.speed).is_greater(24.0 * 0.85)
+	var heading_into_wall: float = rad_to_deg(asin((-car.global_basis.z).x))
+	assert_float(absf(heading_into_wall)).is_less(2.0)
+
+
+func test_hard_wall_hit_ends_a_drift() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: DriftInput = _drift_car(runner, 20.0)
+	# Close enough to hit inside the first quarter of the drift circle.
+	_add_wall(car, Vector3(0, 1.0, -9.0), Vector3(80, 3, 1))
+	var ended: Array[int] = [0]
+	car.drift_ended.connect(
+		func() -> void:
+			ended[0] += 1,
+	)
+	await await_physics_ticks(3)
+	input.steer = 1.0
+	input.drift = true
+	await await_physics_ticks(6)
+	assert_bool(car.is_drifting).is_true()
+	await await_physics_ticks(40)
+	# The drift button is still held, but the hit ended the drift.
+	assert_int(ended[0]).is_greater_equal(1)

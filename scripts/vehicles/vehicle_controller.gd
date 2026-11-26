@@ -42,7 +42,24 @@ const WALL_NORMAL_MAX_Y: float = 0.7
 ## A wall contact that starts within this many seconds of the last one is
 ## the same hit, so a scrape that flickers on and off the wall emits
 ## `impacted` once.
-const WALL_REARM_TIME: float = 0.1
+const WALL_REARM_TIME: float = 0.3
+
+## Wall response (T-029). Below this into-wall speed, in m/s, a wall only
+## slides the car. At or above it, the car also bounces back by
+## `stats.wall_restitution`. 3 m/s matches the camera shake threshold (T-008).
+const WALL_BOUNCE_MIN_SPEED: float = 3.0
+
+## A hit whose approach is steeper than this, in degrees from the wall
+## surface, is head-on: the car bounces straight back and keeps its heading.
+## Shallower hits turn the body along the wall.
+const WALL_HEAD_ON_DEG: float = 60.0
+
+## After a glancing hit, the body keeps turning along the wall for this long,
+## in seconds, so it does not stay pointed into it and grind (T-029).
+const WALL_ALIGN_HOLD: float = 0.25
+
+## A hit at least this hard, in m/s into the wall, ends a drift.
+const WALL_DRIFT_CANCEL_SPEED: float = 6.0
 
 ## Smallest steer input that starts a drift (T-028).
 const DRIFT_ENTRY_STEER: float = 0.3
@@ -103,6 +120,8 @@ var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 
 var _time_since_wall_contact: float = INF
 var _contact_peak_speed: float = 0.0
 var _drift_air_time: float = 0.0
+var _wall_align_heading: Vector3 = Vector3.ZERO
+var _wall_align_left: float = 0.0
 
 
 func _physics_process(delta: float) -> void:
@@ -162,6 +181,7 @@ func _physics_process(delta: float) -> void:
 		)
 		yaw_rate = -steer * stats.steering_rate * fade * signf(speed)
 	rotate_y(yaw_rate * control_factor * delta)
+	_apply_wall_align(delta)
 	body_forward = -global_transform.basis.z
 
 	# --- Grip (T-028): on the ground the travel direction turns toward the
@@ -191,6 +211,7 @@ func _physics_process(delta: float) -> void:
 	var pre_slide_velocity: Vector3 = velocity
 	move_and_slide()
 	_detect_wall_impact(pre_slide_velocity, delta)
+	_respond_to_wall(pre_slide_velocity, delta)
 
 
 ## Signed speed from a flat velocity: its length, negative when it points
@@ -304,6 +325,76 @@ func _ramped_steer(raw: float, delta: float) -> float:
 		stats.steer_reverse_time,
 	)
 	return steer_applied
+
+
+## The flat velocity after a wall contact (T-029). `slid` is what
+## move_and_slide() left, which already lost its into-wall part. A hit of at
+## least WALL_BOUNCE_MIN_SPEED adds `restitution` of the into-wall speed back
+## out along the wall normal. Pure, so it is testable.
+static func wall_bounce(
+	slid: Vector3,
+	into_speed: float,
+	normal: Vector3,
+	restitution: float,
+) -> Vector3:
+	if into_speed < WALL_BOUNCE_MIN_SPEED:
+		return slid
+	return slid + normal * (into_speed * restitution)
+
+
+## Approach angle of `pre` against a wall with `normal`, in degrees from the
+## wall surface: 0 is grazing, 90 is head-on.
+static func wall_approach_deg(pre: Vector3, normal: Vector3) -> float:
+	var speed_value: float = pre.length()
+	if speed_value < 0.01:
+		return 0.0
+	return rad_to_deg(asin(clampf(-pre.dot(normal) / speed_value, -1.0, 1.0)))
+
+
+## Wall response (T-029): bounce on a hard hit, turn the body along the wall on
+## a glancing one, and end a drift on a hard one. The next tick reads the
+## resulting velocity back as speed and travel direction (T-028), so speed
+## along the wall is kept instead of grinding away.
+func _respond_to_wall(pre_slide_velocity: Vector3, delta: float) -> void:
+	if not is_on_wall():
+		return
+	var normal: Vector3 = get_wall_normal()
+	if absf(normal.y) >= WALL_NORMAL_MAX_Y:
+		return
+	normal = Vector3(normal.x, 0.0, normal.z).normalized()
+	var pre_flat: Vector3 = Vector3(pre_slide_velocity.x, 0.0, pre_slide_velocity.z)
+	var into: float = -pre_flat.dot(normal)
+	if into <= 0.0:
+		return
+	var flat: Vector3 = wall_bounce(
+		Vector3(velocity.x, 0.0, velocity.z),
+		into,
+		normal,
+		stats.wall_restitution,
+	)
+	velocity.x = flat.x
+	velocity.z = flat.z
+	if into >= WALL_DRIFT_CANCEL_SPEED and is_drifting:
+		_end_drift()
+	if wall_approach_deg(pre_flat, normal) >= WALL_HEAD_ON_DEG:
+		return
+	# Glancing: turn the nose along the wall, now and for WALL_ALIGN_HOLD.
+	var slid: Vector3 = Vector3(velocity.x, 0.0, velocity.z) - normal * flat.dot(normal)
+	var forward: Vector3 = -global_transform.basis.z
+	if slid.length() < 0.5 or slid.dot(forward) <= 0.0:
+		return
+	_wall_align_heading = slid.normalized()
+	_wall_align_left = WALL_ALIGN_HOLD
+	_apply_wall_align(delta)
+
+
+func _apply_wall_align(delta: float) -> void:
+	if _wall_align_left <= 0.0:
+		return
+	_wall_align_left -= delta
+	var forward: Vector3 = -global_transform.basis.z
+	var angle: float = forward.signed_angle_to(_wall_align_heading, Vector3.UP)
+	rotate_y(angle * (1.0 - exp(-delta / stats.wall_align_time)))
 
 
 ## Emits `impacted` on the first frame of a wall contact, or for a much

@@ -62,6 +62,14 @@ extends Resource
 ## Largest angle, in degrees, between the body and the travel direction.
 @export var max_slide_angle_deg: float = 35.0
 
+## Share of the into-wall speed the car bounces back with on a hard hit
+## (T-029). 0 is a dead stop, 1 a perfect bounce. The target is 0.3-0.5.
+@export_range(0.0, 1.0) var wall_restitution: float = 0.4
+
+## Time constant, in seconds, for the body to turn along a wall after a
+## glancing hit, so the car slides off instead of grinding (T-029).
+@export var wall_align_time: float = 0.1
+
 ## Vehicle mass in kilograms — feeds collision response (heavier vehicles
 ## resist spin-outs and punch through lighter ones on impact).
 @export var mass: float = 1000.0
