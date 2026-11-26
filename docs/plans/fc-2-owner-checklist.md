@@ -118,6 +118,18 @@ the next round fixes or tunes it.
       look too sideways.
 - [ ] Entering and leaving a drift never snaps the camera.
 
+## 8b. Tuning circuit ([T-035](../tasks/T-035-tuning-circuit.md))
+
+A second, larger map. Press **F4** in game or run `task run:circuit`. The
+layouts are in [test-tracks.md](../design/test-tracks.md).
+
+- [ ] F4 switches maps, and the car starts behind the start line.
+- [ ] The 14 m road feels right for drifting and (later) four cars.
+- [ ] The R10 hairpin needs a brake or a drift, and drifting it is fun.
+- [ ] The R35 sweeper holds a drift long enough for tier 3.
+- [ ] The kicker launches cleanly, and the trick window works there too.
+- [ ] Pick the next layout to build (B to E in `test-tracks.md`).
+
 ## 9. The gate
 
 - [ ] One car on one track is fun (Guardrail 3). If not, say what is

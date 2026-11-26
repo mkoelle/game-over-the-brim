@@ -28,6 +28,10 @@ Opus checker).
 ---
 
 ## Recent Progress
+- A second, larger test map (2026-11-26, T-035): the 571 m Tuning Circuit,
+  generated from a corner list, with a hairpin, chicane, kicker jump and
+  sweeper. F4 or `task run:circuit` selects it. Five layout options are
+  in `docs/design/test-tracks.md`.
 - Handling rework done (2026-11-25), PRs #32 to #39, self-implemented per
   ADR-012:
   - a flat yaw-rate steering curve and a steer ramp

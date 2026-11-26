@@ -29,6 +29,9 @@ extends Node
 ## GameCamera/SpeedFx (T-034) widens the FOV with speed and boost, and pulls
 ## the camera back on a boost. In split screen each camera needs its own.
 ##
+## The map comes from GameConfig (T-035): the sandbox by default, and F4 or
+## `--track=circuit` for the tuning circuit.
+##
 ## An OutOfBoundsReset puts the car back at its spawn pose if it ever falls
 ## out of the level (T-024), and the follow camera teleports with it.
 
@@ -40,7 +43,10 @@ extends Node
 
 
 func _ready() -> void:
+	var moved: bool = _use_selected_track()
 	_follow_cam.follow_target = _car
+	if moved:
+		_teleport_camera_next_frame()
 	_car.impacted.connect(_on_car_impacted)
 	_debug_overlay.target = _car
 	_speed_fx.target = _car
@@ -59,6 +65,35 @@ func _ready() -> void:
 		"[color=green][OverTheBrim][/color] Test track loaded, car spawned, CarFollowCam following."
 	)
 	EventBus.race_started.emit()
+
+
+## Swaps the sandbox for the map GameConfig selects (T-035), and starts the car
+## at that map's "Spawn" marker. Returns true if it swapped. The sandbox stays
+## the default, so tests and `task run` are unchanged.
+func _use_selected_track() -> bool:
+	var path: String = GameConfig.track_path()
+	var current: Node = get_node_or_null("TestTrack")
+	if current == null or current.scene_file_path == path:
+		return false
+	var track: Node3D = (load(path) as PackedScene).instantiate()
+	remove_child(current)
+	current.free()
+	add_child(track)
+	move_child(track, 0)
+	var spawn: Marker3D = track.get_node_or_null("Spawn") as Marker3D
+	if spawn != null:
+		_car.global_transform = spawn.global_transform
+		_car.velocity = Vector3.ZERO
+		_car.reset_physics_interpolation()
+	return true
+
+
+## Starts the camera behind the car at its new spawn, not flying in from the
+## sandbox spawn. It waits one frame, because Phantom Camera builds its
+## third-person rig during its first frame.
+func _teleport_camera_next_frame() -> void:
+	await get_tree().process_frame
+	_follow_cam.teleport_position()
 
 
 func _on_car_reset(_car_that_reset: VehicleController) -> void:
