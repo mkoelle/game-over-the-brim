@@ -263,3 +263,70 @@ func test_impacted_does_not_fire_on_floor_landings() -> void:
 
 	assert_bool(car.is_on_floor()).is_true()
 	assert_int(impacts.size()).is_equal(0)
+
+
+## T-027: steering curve and input ramp.
+class SteerInput:
+	extends InputSource
+
+	var steer: float = 0.0
+
+
+	func get_input() -> Dictionary[String, Variant]:
+		return { "throttle": 0.0, "steer": steer, "drift": false }
+
+
+func test_steer_fade_is_zero_at_standstill_and_full_when_moving() -> void:
+	assert_float(VehicleController.steer_speed_fade(0.0, 1.0, 7.0)).is_equal(0.0)
+	assert_float(VehicleController.steer_speed_fade(1.0, 1.0, 7.0)).is_equal(0.0)
+	assert_float(VehicleController.steer_speed_fade(4.0, 1.0, 7.0)).is_between(0.2, 0.8)
+	assert_float(VehicleController.steer_speed_fade(7.0, 1.0, 7.0)).is_equal(1.0)
+	assert_float(VehicleController.steer_speed_fade(24.0, 1.0, 7.0)).is_equal(1.0)
+
+
+func test_steer_ramp_reaches_full_lock_in_about_ramp_time() -> void:
+	var steer: float = 0.0
+	var ticks: int = 0
+	while steer < 1.0 and ticks < 100:
+		steer = VehicleController.ramp_steer(steer, 1.0, 1.0 / 60.0, 0.17, 0.28)
+		ticks += 1
+	# 0.17 s at 60 Hz is 10.2 ticks, so full lock lands on tick 11.
+	assert_int(ticks).is_equal(11)
+
+
+func test_steer_ramp_is_slower_across_centre() -> void:
+	var dt: float = 1.0 / 60.0
+	var from_centre: float = VehicleController.ramp_steer(0.0, 1.0, dt, 0.17, 0.28)
+	var across: float = VehicleController.ramp_steer(-1.0, 1.0, dt, 0.17, 0.28)
+	assert_float(from_centre).is_equal_approx(dt / 0.17, 0.0001)
+	assert_float(across - (-1.0)).is_equal_approx(dt / 0.28, 0.0001)
+	assert_float(across - (-1.0)).is_less(from_centre)
+
+
+func test_full_lock_turn_radius_grows_with_speed() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	_add_floor_under(car)
+	var input := SteerInput.new()
+	car.input_source = input
+	await runner.simulate_frames(5)
+	var radii: Array[float] = []
+	for speed: float in [10.0, 24.0]:
+		car.rotation = Vector3.ZERO
+		car.velocity = Vector3(0.0, 0.0, -speed)
+		car.steer_applied = 1.0
+		input.steer = 1.0
+		await await_physics_ticks(5)
+		var yaw0: float = car.rotation.y
+		await await_physics_ticks(30)
+		var rate: float = absf(angle_difference(yaw0, car.rotation.y)) / 0.5
+		radii.append(speed / rate)
+		# Flat yaw rate once moving (handling-reference.md section 1).
+		assert_float(rate).is_between(1.1, 1.6)
+	assert_float(radii[0]).is_between(6.0, 9.5)
+	assert_float(radii[1]).is_between(15.0, 20.0)
+
+
+func await_physics_ticks(ticks: int) -> void:
+	for i: int in ticks:
+		await get_tree().physics_frame

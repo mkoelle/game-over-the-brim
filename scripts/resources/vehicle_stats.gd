@@ -21,8 +21,26 @@ extends Resource
 ## Forward speed lost per second under full brake, in meters/second^2.
 @export var braking_force: float = 25.0
 
-## Turn rate at full steering input, in radians/second.
-@export var steering_rate: float = 2.5
+## Yaw rate at full steering input once the car is moving, in
+## radians/second. It stays flat with speed, so the turn radius grows with
+## speed, as in the genre (T-027, handling-reference.md section 1): 1.4 rad/s
+## gives about 7 m at 10 m/s and 17 m at 24 m/s.
+@export var steering_rate: float = 1.4
+
+## Below this speed, in m/s, the car does not rotate at all.
+@export var steer_min_speed: float = 1.0
+
+## Steering fades in from `steer_min_speed` and reaches full strength at this
+## speed, in m/s.
+@export var steer_full_speed: float = 7.0
+
+## Seconds for the steer input to ramp from centre to full lock. A keyboard
+## then feels like a soft analog stick.
+@export var steer_ramp_time: float = 0.17
+
+## Seconds per full unit of steer when the input crosses centre (left to
+## right). This is slower than ramping up from centre.
+@export var steer_reverse_time: float = 0.28
 
 ## Fraction of lateral grip retained while drifting, 0..1 — 1.0 means no
 ## slide at all, lower values mean more slide/slip through the drift.

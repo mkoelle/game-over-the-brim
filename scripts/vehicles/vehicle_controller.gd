@@ -53,6 +53,10 @@ var input_source: InputSource = InputSource.new()
 ## DebugOverlay) — not read back by this script itself.
 var last_input: Dictionary[String, Variant] = { }
 
+## The steer value actually applied this tick, after the input ramp
+## (T-027). -1 is full left, +1 full right. Public for debug readouts.
+var steer_applied: float = 0.0
+
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 var _time_since_wall_contact: float = INF
 var _contact_peak_speed: float = 0.0
@@ -62,7 +66,7 @@ func _physics_process(delta: float) -> void:
 	var input: Dictionary[String, Variant] = input_source.get_input()
 	last_input = input
 	var throttle: float = float(input.get("throttle", 0.0))
-	var steer: float = float(input.get("steer", 0.0))
+	var steer: float = _ramped_steer(float(input.get("steer", 0.0)), delta)
 	var drift: bool = bool(input.get("drift", false))
 
 	var forward: Vector3 = -transform.basis.z
@@ -104,17 +108,22 @@ func _physics_process(delta: float) -> void:
 	velocity.x = flat_velocity.x
 	velocity.z = flat_velocity.z
 
-	# --- Steering: yaw rate scales with steer input, how fast we're going
-	# (arcade-style — no spinning in place at a standstill), and
+	# --- Steering (T-027): a flat yaw rate once moving, so the turn radius
+	# grows with speed (handling-reference.md section 1). It fades in from
+	# steer_min_speed, so the car never spins on the spot, and is scaled by
 	# control_factor (reduced but not zero in the air). Scaled by
 	# signf(current_speed) so steer_right always curves the actual path
 	# right on screen, forward or reverse — real cars invert this in
 	# reverse (turn the wheel right, the nose swings right but the car
 	# actually travels left), which reads as broken controls in a casual
 	# party game. "Fun > Realism" (docs/design/game-pillars.md) wins here. ---
-	var speed_factor: float = clampf(absf(current_speed) / stats.max_speed, 0.0, 1.0)
+	var fade: float = steer_speed_fade(
+		absf(current_speed),
+		stats.steer_min_speed,
+		stats.steer_full_speed,
+	)
 	var yaw: float = (
-		-steer * stats.steering_rate * speed_factor * delta * signf(current_speed) * control_factor
+		-steer * stats.steering_rate * fade * delta * signf(current_speed) * control_factor
 	)
 	rotate_y(yaw)
 
@@ -128,6 +137,43 @@ func _physics_process(delta: float) -> void:
 	var pre_slide_velocity: Vector3 = velocity
 	move_and_slide()
 	_detect_wall_impact(pre_slide_velocity, delta)
+
+
+## Steering strength from 0 to 1 by speed: 0 at or below `min_speed`, 1 at or
+## above `full_speed`, smooth in between (T-027).
+static func steer_speed_fade(speed: float, min_speed: float, full_speed: float) -> float:
+	if full_speed <= min_speed:
+		return 1.0 if speed > min_speed else 0.0
+	return smoothstep(min_speed, full_speed, speed)
+
+
+## Moves `current` toward `target` at a fixed rate, so full lock takes
+## `ramp_time` seconds from centre. When the input crosses centre (the signs
+## differ), it moves at the slower `reverse_time` rate per unit instead.
+## Pure and tick-based, so it is deterministic (T-027).
+static func ramp_steer(
+	current: float,
+	target: float,
+	delta: float,
+	ramp_time: float,
+	reverse_time: float,
+) -> float:
+	var crossing: bool = current * target < 0.0
+	var time: float = reverse_time if crossing else ramp_time
+	if time <= 0.0:
+		return target
+	return move_toward(current, target, delta / time)
+
+
+func _ramped_steer(raw: float, delta: float) -> float:
+	steer_applied = ramp_steer(
+		steer_applied,
+		clampf(raw, -1.0, 1.0),
+		delta,
+		stats.steer_ramp_time,
+		stats.steer_reverse_time,
+	)
+	return steer_applied
 
 
 ## Emits `impacted` on the first frame of a wall contact, or for a much
