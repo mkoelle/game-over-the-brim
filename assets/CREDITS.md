@@ -32,8 +32,9 @@ in each `.gltf.import`) is a project setting, not an edit of the model.
 | --- | --- | --- | --- | --- | --- |
 | `addons/gdUnit4/` (v6.2.3 since T-009, includes its bundled `.png` icons and logos) | <https://github.com/godot-gdunit-labs/gdUnit4> | Mike Schulze | MIT | 2026-09-09 | no |
 | `addons/phantom_camera/` (v0.12, T-004; includes its bundled `.svg`/`.png` icons, fonts and example textures) | <https://github.com/ramokz/phantom-camera> | Marcus Skov | MIT | 2026-11-25 | no |
+| `addons/debug_draw_3d/` (v1.7.3, T-006; native GDExtension binaries for Windows, Linux, macOS, Android, iOS and Web, plus `native_api/` headers; dev-only, see ADR-016) | <https://github.com/DmitriySalnikov/godot_debug_draw_3d> | DmitriySalnikov | MIT | 2026-11-25 | no |
 
-The license text is in `addons/gdUnit4/LICENSE` (and `addons/phantom_camera/LICENSE` for Phantom Camera, copyright 2022 Marcus Skov, same MIT terms). It requires the copyright
+The license text is in `addons/gdUnit4/LICENSE` (and `addons/phantom_camera/LICENSE` for Phantom Camera, copyright 2022 Marcus Skov, same MIT terms; `addons/debug_draw_3d/LICENSE` for Debug Draw 3D, copyright 2026 DmitriySalnikov, MIT). It requires the copyright
 notice to ship "in all copies or substantial portions". The addon is not
 excluded from exports today (`exclude_filter` is empty), so the credits
 screen must show this notice. See the open items below.
