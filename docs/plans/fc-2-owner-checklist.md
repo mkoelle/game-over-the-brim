@@ -30,9 +30,18 @@ the next round fixes or tunes it.
 - [ ] Stopped against a wall, a little reverse frees the car (no
       rotation below 1 m/s).
 
-## 2. Drift slide (T-028)
+## 2. Drift slide ([T-028](../tasks/T-028-grip-and-drift-slide.md))
 
-_Added when T-028 merges._
+- [ ] With F3 on, a held drift through the barrier corners reads about
+      20-35 degrees of slide and stays controllable. Steering in
+      tightens the line, steering out widens it, and neither ends the
+      drift.
+- [ ] Drifting does not cost speed. Say if it feels like a free lunch.
+- [ ] A slow hairpin can still be drifted (minimum 11 m/s).
+- [ ] A normal full-lock turn feels planted, not icy (about 4 degrees of
+      slip).
+- [ ] A drift over a bump or a ramp lip does not cancel unexpectedly.
+- [ ] The overlay's `Drift:` line shows the side and the slide.
 
 ## 3. Walls (T-029)
 

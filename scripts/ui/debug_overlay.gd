@@ -25,15 +25,24 @@ func _process(_delta: float) -> void:
 	var throttle: float = float(target.last_input.get("throttle", 0.0))
 	var steer: float = float(target.last_input.get("steer", 0.0))
 	var drift: bool = bool(target.last_input.get("drift", false))
+	var drift_state: String = "no"
+	if target.is_drifting:
+		drift_state = "%s, slide %+.0f deg" % [
+			"R" if target.drift_direction > 0 else "L",
+			target.slide_angle_deg,
+		]
+	elif drift:
+		drift_state = "held"
 
 	_label.text = (
-		"Speed: %.1f / %.1f m/s\nThrottle: %+.2f\nSteer: %+.2f\nDrift: %s\nFPS: %d"
+		"Speed: %.1f / %.1f m/s\nThrottle: %+.2f\nSteer: %+.2f (applied %+.2f)\nDrift: %s\nFPS: %d"
 		% [
 			speed,
 			target.stats.max_speed,
 			throttle,
 			steer,
-			"YES" if drift else "no",
+			target.steer_applied,
+			drift_state,
 			Engine.get_frames_per_second(),
 		]
 	)
