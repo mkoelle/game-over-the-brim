@@ -13,6 +13,14 @@ holds the evidence and the full steps.
 Tick a box when it is confirmed. If a check fails, note it in the
 ticket's Assumptions section and open a follow-up ticket.
 
+**Status (2026-11-25): closed.** The owner answered the feel items over
+three rounds of comments, and every fix is merged (T-020 to T-026). The
+items marked `[-]` were not answered and are **deferred** (owner, "anything
+unanswered for now is deferred"). They carry over into the
+[FC-2 owner checklist](fc-2-owner-checklist.md), section "Deferred from
+FC-1". The handling rework continues in the
+[handling rework plan](handling-rework-plan.md).
+
 ## 0. Setup
 
 - [x] Pull `main`, run `mise install && task import`, then `task run`.
@@ -28,7 +36,7 @@ now be seen and described?
 
 Physics ([T-001](../tasks/T-001-pin-3d-physics-engine.md), ADR-021):
 
-- [ ] Jolt feels right on wall slides and on the Ramp2 landing. If not,
+- [-] Jolt feels right on wall slides and on the Ramp2 landing. If not,
       set `physics/3d/physics_engine` back to `GodotPhysics3D` and compare.
 
 Camera ([T-005](../tasks/T-005-replace-chase-camera-with-phantom-camera.md)):
@@ -87,7 +95,7 @@ Track ([T-011](../tasks/T-011-kenney-greybox-kit.md),
           [T-024](../tasks/T-024-level-bounds.md): the boundary walls are
           now 12 m (0 of 40 escape), and a car that falls below the level
           is reset to spawn.
-- [ ] Clipping a pylon's top edge feels fair (box collider).
+- [-] Clipping a pylon's top edge feels fair (box collider).
 - [x] Sliding along inner walls at an angle has no seam bumps.
       - slow ,boring, would like car to bounce off or keep momentum some
         - *Agent:* Recorded as rework ticket 8, "Wall contact response",
@@ -111,34 +119,34 @@ Handling targets ([T-017](../tasks/T-017-handling-genre-research.md)):
 Gamepads, 2 or more ([T-003](../tasks/T-003-port-input-source-to-device-action-map.md),
 [T-002](../tasks/T-002-device-action-map.md)):
 
-- [ ] Isolation: follow the 6 steps in T-003's Assumptions, using the
+- [-] Isolation: follow the 6 steps in T-003's Assumptions, using the
       temporary `_car.input_source = InputSource.new(1)` line. Only the
       chosen pad drives. The other pad and the keyboard stay at
       `Throttle: +0.00`, `Steer: +0.00`.
-- [ ] Hotplug: unplug the active pad mid-run. The car coasts and no errors
+- [-] Hotplug: unplug the active pad mid-run. The car coasts and no errors
       appear. Replug it, and it drives again.
-- [ ] Stick drift: leave each pad alone for 10 s. The overlay stays at
+- [-] Stick drift: leave each pad alone for 10 s. The overlay stays at
       zero with the 0.08 deadzone.
 
 Exports ([T-006](../tasks/T-006-vendor-debug-draw-3d.md)):
 
-- [ ] Windows or Linux: run `task export:windows` or `task export:linux`,
+- [-] Windows or Linux: run `task export:windows` or `task export:linux`,
       copy `build/<platform>/` to the machine, and run it with
       `--verbose`. The log has no `GDExtension` error and no
       `Can't open dynamic library` line.
-- [ ] Android: run `task export:android`, then `adb install -r
+- [-] Android: run `task export:android`, then `adb install -r
       build/android/OverTheBrim.apk`, launch it, and check
       `adb logcat` for the same errors.
-- [ ] macOS: unzip `build/macos/OverTheBrim.zip` and open it from Finder.
+- [-] macOS: unzip `build/macos/OverTheBrim.zip` and open it from Finder.
       A quarantine prompt is expected.
 
 ## 3. Editor and tooling
 
-- [ ] Editor: Project Settings > Plugins shows Phantom Camera, GdUnit4
+- [-] Editor: Project Settings > Plugins shows Phantom Camera, GdUnit4
       and godot-ai enabled. The Phantom Camera bottom panel loads. The
       Output panel has no errors. Debug Draw 3D is a GDExtension, so it has
       no plugin entry ([T-004](../tasks/T-004-vendor-phantom-camera.md)).
-- [ ] godot-ai MCP ([T-019](../tasks/T-019-vendor-godot-ai.md)): restart
+- [-] godot-ai MCP ([T-019](../tasks/T-019-vendor-godot-ai.md)): restart
       Claude Code in the repo, approve the project `godot-ai` server, and
       call `scene_get_hierarchy`. Do not press the plugin's Configure
       button. Do not run this project and another godot-ai project in the
@@ -148,7 +156,7 @@ Exports ([T-006](../tasks/T-006-vendor-debug-draw-3d.md)):
 
 ## 4. Decisions only the owner can make
 
-- [ ] Steam: decide whether to pay the $100 Steam Direct fee, then set
+- [-] Steam: decide whether to pay the $100 Steam Direct fee, then set
       ADR-020 to Accepted or Rejected
       ([T-016](../tasks/T-016-evaluate-steam-remote-play-together.md)).
       The ADR-020 hands-on test needs an app ID.
@@ -160,13 +168,13 @@ Exports ([T-006](../tasks/T-006-vendor-debug-draw-3d.md)):
           `contact-sheet.png` shows each one at 256, 48, 32 and 16 px.
           Pick one, or two to combine. `icon.svg` changes only after
           that.
-- [ ] Phantom Camera's bundled Nunito fonts have no license file in the
+- [-] Phantom Camera's bundled Nunito fonts have no license file in the
       addon. Upstream says OFL-1.1. Confirm this, or exclude the fonts from
       exports ([T-004](../tasks/T-004-vendor-phantom-camera.md)).
-- [ ] Dev addons in exports: today `exclude_filter` is empty, so GdUnit4,
+- [-] Dev addons in exports: today `exclude_filter` is empty, so GdUnit4,
       godot-ai and the inert Debug Draw 3D release library ship. Decide
       whether to exclude them before the first public build.
-- [ ] Debug Draw 3D is 41 MB, most of it for platforms we do not export.
+- [-] Debug Draw 3D is 41 MB, most of it for platforms we do not export.
       Keep it, or trim it in a later ticket (ADR-015 has a 50 MB LFS
       threshold).
 
