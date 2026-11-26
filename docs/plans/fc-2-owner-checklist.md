@@ -89,9 +89,15 @@ the next round fixes or tunes it.
       then magenta. The car still reads as red.
 - [ ] A boost glows brighter in the tier's colour.
 
-## 7. Tricks (T-033)
+## 7. Tricks ([T-033](../tasks/T-033-trick-boost.md))
 
-_Added when T-033 merges._
+- [ ] Tap the drift button just as you leave a ramp. The car does a barrel
+      roll and boosts on landing (+6.7 m/s for 0.9 s, white glow).
+- [ ] The timing window (0.15 s, plus a 0.2 s early buffer) feels fair,
+      not random.
+- [ ] You never trick by accident when trying to drift right after a
+      landing.
+- [ ] A trick landing feels worth it next to a tier-2 drift boost.
 
 ## 8. Camera (T-034)
 

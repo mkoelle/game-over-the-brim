@@ -692,3 +692,82 @@ func test_too_slow_cancels_the_charge_with_no_boost() -> void:
 	await await_physics_ticks(60)
 	assert_bool(car.is_drifting).is_false()
 	assert_array(boosts).is_empty()
+
+
+## T-033: trick boost off ramps.
+class TrickInput:
+	extends InputSource
+
+	var throttle: float = 1.0
+	var drift: bool = false
+
+
+	func get_input() -> Dictionary[String, Variant]:
+		return { "throttle": throttle, "steer": 0.0, "drift": drift }
+
+
+func test_trick_window() -> void:
+	# In the window, with a press just now.
+	assert_bool(VehicleController.trick_window_open(0.1, 0.0)).is_true()
+	# Buffered: pressed 0.15 s before takeoff, checked 0.05 s after it.
+	assert_bool(VehicleController.trick_window_open(0.05, 0.2)).is_true()
+	# Too early a press, too soon after takeoff, too late.
+	assert_bool(VehicleController.trick_window_open(0.1, 0.5)).is_false()
+	assert_bool(VehicleController.trick_window_open(0.02, 0.0)).is_false()
+	assert_bool(VehicleController.trick_window_open(0.3, 0.0)).is_false()
+
+
+## Drives the car over the Kenney ramp and taps the trick button `tap_ticks`
+## after takeoff (negative: never). Returns [tricks, trick boosts, peak speed].
+func _ramp_jump(start_speed: float, tap_ticks: int) -> Array[float]:
+	var runner := scene_runner("res://scenes/main.tscn")
+	var car: VehicleController = runner.scene().get_node("TophatCar")
+	var input := TrickInput.new()
+	car.input_source = input
+	await runner.simulate_frames(2)
+	var tricks: Array[int] = [0]
+	var boosts: Array[int] = [0]
+	car.trick_performed.connect(
+		func() -> void:
+			tricks[0] += 1,
+	)
+	car.boost_started.connect(
+		func(t: int) -> void:
+			if t == 0:
+				boosts[0] += 1,
+	)
+	car.global_position = Vector3(-27.69, 0.6, -30.0)
+	car.rotation = Vector3(0, PI, 0)
+	car.velocity = Vector3(0, 0, start_speed)
+	car.reset_physics_interpolation()
+	input.throttle = 1.0 if start_speed > 15.0 else 0.0
+	var takeoff: int = -1
+	var peak: float = 0.0
+	for i: int in 200:
+		await get_tree().physics_frame
+		if takeoff < 0 and not car.is_on_floor() and car.velocity.y > 1.0:
+			takeoff = i
+		if tap_ticks >= 0 and takeoff >= 0:
+			input.drift = i >= takeoff + tap_ticks and i < takeoff + tap_ticks + 3
+		peak = maxf(peak, car.speed)
+	return [float(tricks[0]), float(boosts[0]), peak]
+
+
+func test_trick_after_takeoff_boosts_on_landing() -> void:
+	var result: Array[float] = await _ramp_jump(24.0, 5)
+	assert_float(result[0]).is_equal(1.0)
+	assert_float(result[1]).is_equal(1.0)
+	# Peak speed is the trick boost's: 24 + 6.7 m/s.
+	assert_float(result[2]).is_greater(29.0)
+
+
+func test_no_tap_no_trick() -> void:
+	var result: Array[float] = await _ramp_jump(24.0, -1)
+	assert_float(result[0]).is_equal(0.0)
+	assert_float(result[1]).is_equal(0.0)
+
+
+func test_too_slow_for_a_trick() -> void:
+	# 10 m/s is under half of top speed (12 m/s).
+	var result: Array[float] = await _ramp_jump(10.0, 5)
+	assert_float(result[0]).is_equal(0.0)

@@ -88,3 +88,10 @@ func test_drift_tier_shows_its_colour_and_sparks() -> void:
 	assert_bool(body.tint().is_equal_approx(VehicleVisualBody.TIER_COLORS[0])).is_true()
 	assert_bool(body.sparks_emitting()).is_true()
 	assert_float(max_hop).is_equal_approx(VehicleVisualBody.HOP_HEIGHT, 0.02)
+
+
+func test_trick_spin_is_one_full_turn() -> void:
+	var spin_time: float = VehicleVisualBody.TRICK_SPIN_TIME
+	assert_float(VehicleVisualBody.trick_spin(spin_time)).is_equal(0.0)
+	assert_float(VehicleVisualBody.trick_spin(spin_time * 0.5)).is_equal_approx(PI, 0.001)
+	assert_float(VehicleVisualBody.trick_spin(0.0)).is_equal(0.0)
