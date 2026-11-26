@@ -71,10 +71,20 @@ func test_centerline_is_a_clean_closed_loop() -> void:
 
 func test_jump_walls_are_taller_than_the_jump() -> void:
 	var track: Node = auto_free((load(CIRCUIT) as PackedScene).instantiate())
+	var barrier_top: float = 1.2
+	var barrier_inner: float = 8.8
 	for node_name: String in ["JumpWallWest", "JumpWallEast"]:
 		var wall: CSGBox3D = track.get_node(node_name)
+		var top: float = wall.position.y + wall.size.y * 0.5
+		var bottom: float = wall.position.y - wall.size.y * 0.5
 		# Track-geometry rule 4: apex + half the car + 2 m.
-		assert_float(wall.size.y).is_greater_equal(KICKER_APEX + 0.5 + 2.0)
+		assert_float(top).is_greater_equal(KICKER_APEX + 0.5 + 2.0)
+		# It sits on the barrier with no gap, and none of its faces coincide
+		# with the barrier's, so nothing z-fights (T-036).
+		assert_float(bottom).is_less(barrier_top)
+		assert_float(bottom).is_greater(barrier_top - 0.05)
+		var inner: float = absf(wall.position.x - 70.0) - wall.size.x * 0.5
+		assert_float(inner - barrier_inner).is_greater_equal(0.01)
 
 
 func test_main_swaps_to_the_circuit_and_spawns_on_the_road() -> void:

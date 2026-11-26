@@ -52,7 +52,7 @@ with curbs and 1.2 m barriers.
 | 192 m start straight | top speed, speed FOV, boost FOV, boost pull-back |
 | R10 U-hairpin | braking, low-speed steer fade, a tight drift (it is under the 17 m full-lock radius, so it is never flat-out) |
 | R30 chicane | steer ramp, quick direction change, glancing walls |
-| back straight + 15 degree kicker (8 m wide, so you can go round it) | ramp launch, hang time, trick window, landing |
+| back straight + 15 degree kicker (8 m wide, so you can go round it) | ramp launch, hang time, trick window, landing. The 6.5 m jump walls sit on top of the barriers, set back 5 cm so they do not z-fight (T-036) |
 | R35 180-degree sweeper | a long drift to tier 3, the drift camera |
 
 **Pros:** it is a real lap, so it is ready for laps, checkpoints and 4

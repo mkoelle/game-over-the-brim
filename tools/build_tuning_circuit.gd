@@ -54,6 +54,8 @@ const KICKER_HEIGHT: float = 2.0
 const KICKER_DEG: float = 15.0
 const KICKER_WIDTH: float = 8.0
 const JUMP_WALL_HEIGHT: float = 6.5
+const JUMP_WALL_SETBACK: float = 0.05
+const JUMP_WALL_OVERLAP: float = 0.01
 const JUMP_WALL_FROM_Z: float = 12.0
 const JUMP_WALL_TO_Z: float = 78.0
 
@@ -336,16 +338,24 @@ func _add_kicker() -> void:
 	_add(wedge)
 
 
+## The jump walls sit on top of the barriers, set back JUMP_WALL_SETBACK on
+## both faces. Built as full-height boxes in the same place as the barriers,
+## they shared the barrier faces exactly and z-fought (FC-2: "clip over the
+## barriers and cause visual noise", T-036). Now no faces coincide: the wall
+## starts 1 cm inside the barrier top, so there is no gap, and its faces are
+## 5 cm out from the barrier's.
 func _add_jump_walls() -> void:
 	var wall: StandardMaterial3D = _mat(Color(0.85, 0.4, 0.15))
 	var length: float = JUMP_WALL_TO_Z - JUMP_WALL_FROM_Z
 	var z: float = (JUMP_WALL_FROM_Z + JUMP_WALL_TO_Z) * 0.5
-	var x_off: float = BARRIER_INNER + BARRIER_THICKNESS * 0.5
+	var bottom: float = BARRIER_HEIGHT - JUMP_WALL_OVERLAP
+	var height: float = JUMP_WALL_HEIGHT - bottom
+	var x_off: float = BARRIER_INNER + JUMP_WALL_SETBACK + BARRIER_THICKNESS * 0.5
 	for side: float in [-1.0, 1.0]:
 		_box(
 			"JumpWall" + ("West" if side < 0.0 else "East"),
-			Vector3(70.0 + side * x_off, JUMP_WALL_HEIGHT * 0.5, z),
-			Vector3(BARRIER_THICKNESS, JUMP_WALL_HEIGHT, length),
+			Vector3(70.0 + side * x_off, bottom + height * 0.5, z),
+			Vector3(BARRIER_THICKNESS, height, length),
 			wall,
 			true,
 		)

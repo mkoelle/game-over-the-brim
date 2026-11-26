@@ -5,6 +5,20 @@ extends GdUnitTestSuite
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 
 
+## The start-of-race fly-in (T-036) would move the camera for the first 2 s.
+## These tests check the chase camera itself, so they turn it off.
+var _saved_intro: bool = true
+
+
+func before_test() -> void:
+	_saved_intro = GameConfig.play_intro
+	GameConfig.play_intro = false
+
+
+func after_test() -> void:
+	GameConfig.play_intro = _saved_intro
+
+
 func _ticks(count: int) -> void:
 	for i: int in count:
 		await get_tree().physics_frame

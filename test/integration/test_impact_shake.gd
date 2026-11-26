@@ -10,6 +10,20 @@ const MAIN_SCENE := "res://scenes/main.tscn"
 const NEAR_EAST_WALL := Vector3(47.5, 0.5, 0.0)
 
 
+## The start-of-race fly-in (T-036) would move the camera for the first 2 s.
+## These tests check the chase camera itself, so they turn it off.
+var _saved_intro: bool = true
+
+
+func before_test() -> void:
+	_saved_intro = GameConfig.play_intro
+	GameConfig.play_intro = false
+
+
+func after_test() -> void:
+	GameConfig.play_intro = _saved_intro
+
+
 func _follow_cam(main: Node) -> PhantomCamera3D:
 	return main.find_child("CarFollowCam", true, false) as PhantomCamera3D
 

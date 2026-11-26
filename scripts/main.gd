@@ -35,11 +35,21 @@ extends Node
 ## An OutOfBoundsReset puts the car back at its spawn pose if it ever falls
 ## out of the level (T-024), and the follow camera teleports with it.
 
+## Intro vantage, relative to the car at spawn, in metres: behind, above and to
+## the right. About 22 degrees down onto the car from 25 m away.
+const INTRO_BACK: float = 22.0
+const INTRO_UP: float = 10.0
+const INTRO_SIDE: float = 7.0
+
+## Seconds the intro holds its still shot before flying to the chase camera.
+const INTRO_HOLD: float = 0.4
+
 @onready var _car: VehicleController = $TophatCar
 @onready var _follow_cam: PhantomCamera3D = $CarFollowCam
 @onready var _impact_shake: ImpactShakeDriver = $ImpactShake/ImpactShakeDriver
 @onready var _debug_overlay: DebugOverlay = $DebugOverlay
 @onready var _speed_fx: ChaseCamSpeedFx = $GameCamera/SpeedFx
+@onready var _intro_cam: PhantomCamera3D = $IntroCam
 
 
 func _ready() -> void:
@@ -47,6 +57,7 @@ func _ready() -> void:
 	_follow_cam.follow_target = _car
 	if moved:
 		_teleport_camera_next_frame()
+	_play_intro()
 	_car.impacted.connect(_on_car_impacted)
 	_debug_overlay.target = _car
 	_speed_fx.target = _car
@@ -86,6 +97,30 @@ func _use_selected_track() -> bool:
 		_car.velocity = Vector3.ZERO
 		_car.reset_physics_interpolation()
 	return true
+
+
+## Start-of-race camera (T-036). IntroCam holds a still shot above and behind
+## the car, then hands over to CarFollowCam. Phantom Camera flies between them
+## with CarFollowCam's tween (1.8 s, cubic ease in-out). Before this the camera
+## flew in from the world origin, which worked on the small sandbox but swept
+## 70 m on the circuit. GameConfig.play_intro turns it off (tests use that).
+func _play_intro() -> void:
+	if not GameConfig.play_intro:
+		_intro_cam.priority = 0
+		return
+	_intro_cam.global_transform = intro_vantage(_car.global_transform)
+	await get_tree().create_timer(INTRO_HOLD).timeout
+	_intro_cam.priority = 0
+
+
+## Intro vantage pose for a car at `car`: behind it, above it, and a little to
+## its right, looking at the car. Pure, so it is tested.
+static func intro_vantage(car: Transform3D) -> Transform3D:
+	var at: Vector3 = car.origin + Vector3.UP * 1.0
+	var from: Vector3 = (
+		car.origin + car.basis.z * INTRO_BACK + car.basis.x * INTRO_SIDE + Vector3.UP * INTRO_UP
+	)
+	return Transform3D(Basis.looking_at(at - from, Vector3.UP), from)
 
 
 ## Starts the camera behind the car at its new spawn, not flying in from the
