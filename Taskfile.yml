@@ -56,6 +56,18 @@ tasks:
     cmds:
       - godot --path . --scene res://scenes/main.tscn
 
+  run:circuit:
+    desc: Launch the game on the tuning circuit (T-035). F4 cycles maps in game.
+    cmds:
+      - godot --path . --scene res://scenes/main.tscn -- --track=circuit
+
+  track:circuit:
+    desc: >-
+      Regenerate scenes/arenas/tuning_circuit.tscn from the corner list in
+      tools/build_tuning_circuit.gd. This overwrites editor edits to that scene.
+    cmds:
+      - godot --headless --path . -s res://tools/build_tuning_circuit.gd
+
   import:
     desc: Headless editor pass to import all project assets.
     cmds:

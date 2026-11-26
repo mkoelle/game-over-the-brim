@@ -49,6 +49,7 @@ script = ExtResource("11_speedfx")
 [node name="CarFollowCam" type="Node3D" parent="." unique_id=1997785916]
 script = ExtResource("5_85g3d")
 priority = 10
+tween_on_load = false
 follow_mode = 6
 tween_resource = SubResource("Resource_eb6dy")
 follow_offset = Vector3(0, 1, 0)

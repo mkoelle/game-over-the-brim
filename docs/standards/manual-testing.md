@@ -73,6 +73,12 @@ aren't "bugs," they're calibration. Impact shake is tuned on the
 `ImpactShake` node in `main.tscn` (its noise resource) and its
 `ImpactShakeDriver` child.
 
+## Maps
+
+Press **F4** during play to cycle the test maps (T-035): the sandbox, then
+the tuning circuit. Or start on the circuit with `task run:circuit`. The
+layouts and how to edit them are in `docs/design/test-tracks.md`.
+
 ## Debug mode
 
 Press **F3** during play to toggle `GameConfig.debug_mode` (off by
