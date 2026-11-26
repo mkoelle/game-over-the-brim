@@ -62,6 +62,22 @@ extends Resource
 ## Largest angle, in degrees, between the body and the travel direction.
 @export var max_slide_angle_deg: float = 35.0
 
+## Seconds of in-turn drifting to reach each boost tier (T-031). Three tiers
+## (owner decision, FC-1). Tier 1 is quick so a casual player gets a payout
+## on a normal corner (handling-reference.md sections 2 and 6).
+@export var drift_tier_times: PackedFloat32Array = PackedFloat32Array([0.85, 1.9, 3.0])
+
+## Boost length, in seconds, paid out for tiers 1, 2 and 3 (section 2:
+## 0.5-0.8, 1.2-1.7 and 2.0-2.6 s).
+@export var boost_times: PackedFloat32Array = PackedFloat32Array([0.7, 1.45, 2.3])
+
+## Extra top speed while boosting, in m/s. 4.8 is +20% of 24 (section 2:
+## +15-25%).
+@export var boost_speed: float = 4.8
+
+## Acceleration, in m/s^2, toward the boosted top speed while boosting.
+@export var boost_acceleration: float = 25.0
+
 ## Share of the into-wall speed the car bounces back with on a hard hit
 ## (T-029). 0 is a dead stop, 1 a perfect bounce. The target is 0.3-0.5.
 @export_range(0.0, 1.0) var wall_restitution: float = 0.4

@@ -13,6 +13,7 @@ extends CharacterBody3D
 ##   grip, and a locked-direction drift whose slide angle is the gap between
 ##   the body heading and the travel direction
 ## - T-029: wall contact response (keep momentum, bounce on hard hits)
+## - T-031: drift charge in three tiers, paid out as a boost on release
 ## - T-030: ramps launch the car with the slope's upward speed; no throttle
 ##   and a small yaw share in the air; scaled-up air gravity
 ##
@@ -35,6 +36,15 @@ signal drift_started(direction: int)
 
 ## Emitted when a drift ends, for any reason.
 signal drift_ended
+
+## Emitted when the drift charge reaches a new boost tier (1, 2 or 3, T-031).
+signal drift_tier_reached(tier: int)
+
+## Emitted when a boost starts: a drift released at `tier` (T-031).
+signal boost_started(tier: int)
+
+## Emitted when a boost runs out.
+signal boost_ended
 
 ## A contact whose normal is within about 45 degrees of straight up or
 ## down (|normal.y| at or above this) is a floor or a ceiling, not a wall.
@@ -66,6 +76,19 @@ const WALL_DRIFT_CANCEL_SPEED: float = 6.0
 ## Length, in metres, of the downward ray from the car's centre that reads
 ## the surface normal under it (T-030). The car's half height is 0.5 m.
 const GROUND_RAY_LENGTH: float = 1.2
+
+## Drift charge per physics tick (T-031): full rate when steering into the
+## drift, about 40% otherwise (MKW 5 vs 2 per frame [S]). Integers, so the
+## charge is deterministic.
+const DRIFT_CHARGE_IN: int = 5
+const DRIFT_CHARGE_OUT: int = 2
+
+## Relative steer above which the car counts as steering into the drift.
+const DRIFT_IN_TURN_STEER: float = 0.1
+
+## Above the top speed (after a boost), speed falls back at this rate, in
+## m/s^2, instead of snapping down.
+const OVERSPEED_DECAY: float = 8.0
 
 ## Smallest steer input that starts a drift (T-028).
 const DRIFT_ENTRY_STEER: float = 0.3
@@ -118,6 +141,15 @@ var drift_direction: int = 0
 ## around +Y. It is positive when the car travels to the left of its nose.
 var slide_angle_deg: float = 0.0
 
+## Boost tier the current drift has charged to: 0 (none) to 3 (T-031).
+var drift_tier: int = 0
+
+## Tier of the running boost, 0 when not boosting.
+var boost_tier: int = 0
+
+## Seconds left on the running boost.
+var boost_time_left: float = 0.0
+
 ## The steer value actually applied this tick, after the input ramp
 ## (T-027). -1 is full left, +1 full right. Public for debug readouts.
 var steer_applied: float = 0.0
@@ -126,6 +158,7 @@ var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 
 var _time_since_wall_contact: float = INF
 var _contact_peak_speed: float = 0.0
 var _drift_air_time: float = 0.0
+var _drift_charge: int = 0
 var _was_grounded: bool = false
 var _ground_ray: RayCast3D
 var _ground_normal: Vector3 = Vector3.UP
@@ -169,14 +202,24 @@ func _physics_process(delta: float) -> void:
 	speed = signed_speed(flat, body_forward, speed)
 	var travel: Vector3 = travel_direction(flat, body_forward, speed)
 
-	# --- Acceleration / braking ---
+	# --- Acceleration / braking, and the drift boost (T-031). A boost raises
+	# the top speed by boost_speed and pushes toward it. Above the top speed
+	# the car eases back at OVERSPEED_DECAY instead of snapping down. ---
+	var before: float = speed
 	if throttle >= 0.0:
 		speed += throttle * stats.acceleration * throttle_factor * delta
 	else:
 		speed += throttle * stats.braking_force * throttle_factor * delta
-	speed = clampf(speed, -stats.max_speed, stats.max_speed)
+	var top: float = stats.max_speed
+	if boost_time_left > 0.0:
+		top += stats.boost_speed
+		if speed < top:
+			speed = minf(speed + stats.boost_acceleration * throttle_factor * delta, top)
+	var limit: float = maxf(top, move_toward(before, top, OVERSPEED_DECAY * delta))
+	speed = clampf(speed, -stats.max_speed, limit)
+	_tick_boost(delta)
 
-	_update_drift(drift_held, raw_steer, grounded, delta)
+	_update_drift(drift_held, raw_steer, steer, grounded, delta)
 
 	# --- Steering (T-027): a flat yaw rate once moving, so the turn radius
 	# grows with speed (handling-reference.md section 1). It fades in from
@@ -306,6 +349,21 @@ static func drift_steer_share(relative_steer: float) -> float:
 	return lerpf(DRIFT_STEER_MIN, DRIFT_STEER_MAX, (clampf(relative_steer, -1.0, 1.0) + 1.0) * 0.5)
 
 
+## Boost tier, 0-3, for a drift charge (T-031). `tier_times` are the seconds
+## of in-turn drifting per tier; at DRIFT_CHARGE_IN per tick that is
+## `round(seconds x ticks_per_second) x DRIFT_CHARGE_IN` charge per tier.
+static func drift_tier_for(
+	charge: int,
+	tier_times: PackedFloat32Array,
+	ticks_per_second: int,
+) -> int:
+	var tier: int = 0
+	for i: int in tier_times.size():
+		if charge >= roundi(tier_times[i] * ticks_per_second) * DRIFT_CHARGE_IN:
+			tier = i + 1
+	return tier
+
+
 ## Whether a drift may start this tick (T-028): button held, steer past the
 ## entry threshold, fast enough, on the ground, and moving forward.
 static func can_start_drift(
@@ -344,26 +402,72 @@ static func ramp_steer(
 	return move_toward(current, target, delta / time)
 
 
-func _update_drift(held: bool, raw_steer: float, grounded: bool, delta: float) -> void:
+func _update_drift(
+	held: bool,
+	raw_steer: float,
+	steer: float,
+	grounded: bool,
+	delta: float,
+) -> void:
 	if is_drifting:
 		_drift_air_time = 0.0 if grounded else _drift_air_time + delta
-		if (
-			not held or speed < stats.drift_min_speed * DRIFT_EXIT_SPEED_RATIO
+		if not held:
+			# Releasing pays out the tier reached (T-031).
+			_end_drift(true)
+		elif (
+			speed < stats.drift_min_speed * DRIFT_EXIT_SPEED_RATIO
 			or _drift_air_time > DRIFT_AIR_GRACE
 		):
-			_end_drift()
+			_end_drift(false)
+		elif grounded:
+			_charge_drift(steer)
 		return
 	if can_start_drift(held, raw_steer, speed, grounded, stats.drift_min_speed):
 		is_drifting = true
 		drift_direction = 1 if raw_steer > 0.0 else -1
 		_drift_air_time = 0.0
+		_drift_charge = 0
+		drift_tier = 0
 		drift_started.emit(drift_direction)
 
 
-func _end_drift() -> void:
+func _charge_drift(steer: float) -> void:
+	var into_turn: bool = steer * float(drift_direction) > DRIFT_IN_TURN_STEER
+	_drift_charge += DRIFT_CHARGE_IN if into_turn else DRIFT_CHARGE_OUT
+	var tier: int = drift_tier_for(_drift_charge, stats.drift_tier_times, _ticks_per_second())
+	if tier > drift_tier:
+		drift_tier = tier
+		drift_tier_reached.emit(tier)
+
+
+## Ends the drift. With `pay_out`, the tier reached becomes a boost (T-031).
+## Without it (too slow, too long in the air, a hard wall hit) the charge is
+## lost.
+func _end_drift(pay_out: bool) -> void:
+	var tier: int = drift_tier
 	is_drifting = false
 	drift_direction = 0
+	drift_tier = 0
+	_drift_charge = 0
 	drift_ended.emit()
+	if pay_out and tier > 0:
+		boost_tier = tier
+		boost_time_left = stats.boost_times[tier - 1]
+		boost_started.emit(tier)
+
+
+func _tick_boost(delta: float) -> void:
+	if boost_time_left <= 0.0:
+		return
+	boost_time_left -= delta
+	if boost_time_left <= 0.0:
+		boost_time_left = 0.0
+		boost_tier = 0
+		boost_ended.emit()
+
+
+func _ticks_per_second() -> int:
+	return Engine.physics_ticks_per_second
 
 
 func _ramped_steer(raw: float, delta: float) -> float:
@@ -425,7 +529,7 @@ func _respond_to_wall(pre_slide_velocity: Vector3, delta: float) -> void:
 	velocity.x = flat.x
 	velocity.z = flat.z
 	if into >= WALL_DRIFT_CANCEL_SPEED and is_drifting:
-		_end_drift()
+		_end_drift(false)
 	if wall_approach_deg(pre_flat, normal) >= WALL_HEAD_ON_DEG:
 		return
 	# Glancing: turn the nose along the wall, now and for WALL_ALIGN_HOLD.

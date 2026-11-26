@@ -27,12 +27,15 @@ func _process(_delta: float) -> void:
 	var drift: bool = bool(target.last_input.get("drift", false))
 	var drift_state: String = "no"
 	if target.is_drifting:
-		drift_state = "%s, slide %+.0f deg" % [
+		drift_state = "%s, slide %+.0f deg, tier %d" % [
 			"R" if target.drift_direction > 0 else "L",
 			target.slide_angle_deg,
+			target.drift_tier,
 		]
 	elif drift:
 		drift_state = "held"
+	if target.boost_time_left > 0.0:
+		drift_state += "  BOOST %d (%.1f s)" % [target.boost_tier, target.boost_time_left]
 
 	_label.text = (
 		"Speed: %.1f / %.1f m/s\nThrottle: %+.2f\nSteer: %+.2f (applied %+.2f)\nDrift: %s\nFPS: %d"

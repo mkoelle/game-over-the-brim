@@ -66,9 +66,17 @@ the next round fixes or tunes it.
 - [ ] A clean landing keeps your speed. Jumping is not a speed boost.
 - [ ] Driving into the foot of a ramp never pops the car into the air.
 
-## 5. Drift boost tiers (T-031)
+## 5. Drift boost tiers ([T-031](../tasks/T-031-drift-charge-tiers-boost.md))
 
-_Added when T-031 merges._
+- [ ] Tier 1 lands on a normal corner, about 0.85 s of drifting into the
+      turn. Tier 2 comes at 1.9 s and tier 3 at 3.0 s.
+- [ ] Releasing pays a boost you can feel: +4.8 m/s for 0.7, 1.45 or
+      2.3 s. Tier 3 feels worth the risk.
+- [ ] Steering out of a drift charges more slowly (40%). It feels like a
+      fair trade.
+- [ ] Braking out, or hitting a wall hard, loses the charge. That feels
+      fair.
+- [ ] After a boost, the speed eases back down and does not snap.
 
 ## 6. Visual body (T-032)
 
