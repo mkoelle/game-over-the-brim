@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- 02 Full Throttle: the topper leans into speed, with motion lines. -->
+  <circle cx="64" cy="64" r="62" fill="#1f6f78"/>
+  <g stroke="#f6efe2" stroke-width="5" stroke-linecap="round" opacity="0.85">
+    <line x1="10" y1="52" x2="30" y2="52"/>
+    <line x1="6" y1="66" x2="30" y2="66"/>
+    <line x1="12" y1="80" x2="28" y2="80"/>
+  </g>
+  <ellipse cx="70" cy="106" rx="38" ry="6" fill="#000" opacity="0.3"/>
+  <g transform="rotate(-12 68 70)">
+    <path d="M49 84 L46 30 Q46 22 54 22 L84 22 Q92 22 92 30 L89 84 Z" fill="#c8323c"/>
+    <rect x="47" y="66" width="44" height="11" fill="#1b1622"/>
+    <rect x="47" y="66" width="11" height="5.5" fill="#f6efe2"/>
+    <rect x="69" y="66" width="11" height="5.5" fill="#f6efe2"/>
+    <rect x="58" y="71.5" width="11" height="5.5" fill="#f6efe2"/>
+    <rect x="80" y="71.5" width="11" height="5.5" fill="#f6efe2"/>
+    <circle cx="66" cy="46" r="7.5" fill="#f6efe2"/>
+    <circle cx="84" cy="46" r="7.5" fill="#f6efe2"/>
+    <circle cx="69.5" cy="46" r="3.5" fill="#1b1622"/>
+    <circle cx="87.5" cy="46" r="3.5" fill="#1b1622"/>
+    <path d="M58 37 L72 39" stroke="#1b1622" stroke-width="3" stroke-linecap="round"/>
+    <path d="M78 39 L92 37" stroke="#1b1622" stroke-width="3" stroke-linecap="round"/>
+    <rect x="28" y="80" width="84" height="11" rx="5.5" fill="#8e1f2a"/>
+  </g>
+  <circle cx="46" cy="100" r="12" fill="#1b1622"/>
+  <circle cx="94" cy="92" r="12" fill="#1b1622"/>
+  <circle cx="46" cy="100" r="4.5" fill="#f2b632"/>
+  <circle cx="94" cy="92" r="4.5" fill="#f2b632"/>
+</svg>
