@@ -3,7 +3,7 @@
 **Assignee:** Claude (Opus, ADR-022 FC-1 feedback)
 **Date:** 2026-11-25
 **Priority:** P3
-**Status:** Done
+**Status:** Done (owner kept concepts 2 and 4 and adopted 2; see T-026)
 **Estimate:** 2h
 **Phase:** 1 — FC-1 feedback ([checklist](../plans/fc-1-owner-checklist.md) §4)
 
