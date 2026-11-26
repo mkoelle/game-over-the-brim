@@ -14,6 +14,8 @@ extends CharacterBody3D
 ##   the body heading and the travel direction
 ## - T-029: wall contact response (keep momentum, bounce on hard hits)
 ## - T-031: drift charge in three tiers, paid out as a boost on release
+## - T-032: the mesh lives under a VehicleVisualBody child, which rolls, tilts,
+##   hops and shows the tier; this script never touches it
 ## - T-030: ramps launch the car with the slope's upward speed; no throttle
 ##   and a small yaw share in the air; scaled-up air gravity
 ##
@@ -149,6 +151,11 @@ var boost_tier: int = 0
 
 ## Seconds left on the running boost.
 var boost_time_left: float = 0.0
+
+## Normal of the last surface the car drove on (T-030), for the visual body.
+var ground_normal: Vector3:
+	get:
+		return _ground_normal
 
 ## The steer value actually applied this tick, after the input ramp
 ## (T-027). -1 is full left, +1 full right. Public for debug readouts.
