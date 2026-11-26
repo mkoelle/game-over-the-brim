@@ -330,3 +330,122 @@ func test_full_lock_turn_radius_grows_with_speed() -> void:
 func await_physics_ticks(ticks: int) -> void:
 	for i: int in ticks:
 		await get_tree().physics_frame
+
+
+## T-028: speed and travel-direction model, grip and drift.
+class DriftInput:
+	extends InputSource
+
+	var steer: float = 0.0
+	var drift: bool = false
+
+
+	func get_input() -> Dictionary[String, Variant]:
+		return { "throttle": 0.0, "steer": steer, "drift": drift }
+
+
+func _drift_car(runner: GdUnitSceneRunner, start_speed: float) -> DriftInput:
+	var car: VehicleController = runner.scene()
+	_add_floor_under(car)
+	var input := DriftInput.new()
+	car.input_source = input
+	car.rotation = Vector3.ZERO
+	car.velocity = Vector3(0.0, 0.0, -start_speed)
+	return input
+
+
+func test_signed_speed_and_travel_direction() -> void:
+	var fwd: Vector3 = Vector3.FORWARD
+	assert_float(VehicleController.signed_speed(fwd * 10.0, fwd, 0.0)).is_equal_approx(10.0, 0.001)
+	assert_float(VehicleController.signed_speed(-fwd * 4.0, fwd, 0.0)).is_equal_approx(-4.0, 0.001)
+	# Sideways keeps the previous sign.
+	assert_float(VehicleController.signed_speed(Vector3.RIGHT * 5.0, fwd, -2.0)).is_less(0.0)
+	var back: Vector3 = VehicleController.travel_direction(-fwd * 4.0, fwd, -4.0)
+	assert_vector(back).is_equal_approx(fwd, Vector3.ONE * 0.001)
+
+
+func test_clamp_slide_and_turn_toward() -> void:
+	var body: Vector3 = Vector3.FORWARD
+	var wide: Vector3 = body.rotated(Vector3.UP, deg_to_rad(60.0))
+	var clamped: Vector3 = VehicleController.clamp_slide(wide, body, deg_to_rad(35.0))
+	assert_float(rad_to_deg(body.angle_to(clamped))).is_equal_approx(35.0, 0.01)
+	var half: Vector3 = VehicleController.turn_toward(wide, body, 0.5)
+	assert_float(rad_to_deg(body.angle_to(half))).is_equal_approx(30.0, 0.01)
+
+
+func test_drift_steer_share_maps_to_twenty_to_eighty_percent() -> void:
+	assert_float(VehicleController.drift_steer_share(-1.0)).is_equal_approx(0.2, 0.0001)
+	assert_float(VehicleController.drift_steer_share(0.0)).is_equal_approx(0.5, 0.0001)
+	assert_float(VehicleController.drift_steer_share(1.0)).is_equal_approx(0.8, 0.0001)
+
+
+func test_drift_needs_button_steer_speed_and_ground() -> void:
+	assert_bool(VehicleController.can_start_drift(true, 1.0, 20.0, true, 11.0)).is_true()
+	assert_bool(VehicleController.can_start_drift(false, 1.0, 20.0, true, 11.0)).is_false()
+	assert_bool(VehicleController.can_start_drift(true, 0.1, 20.0, true, 11.0)).is_false()
+	assert_bool(VehicleController.can_start_drift(true, 1.0, 9.0, true, 11.0)).is_false()
+	assert_bool(VehicleController.can_start_drift(true, 1.0, 20.0, false, 11.0)).is_false()
+	assert_bool(VehicleController.can_start_drift(true, 1.0, -20.0, true, 11.0)).is_false()
+
+
+func test_held_drift_slides_without_losing_speed() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: DriftInput = _drift_car(runner, 20.0)
+	await await_physics_ticks(3)
+	input.steer = 1.0
+	input.drift = true
+	await await_physics_ticks(120)
+	assert_bool(car.is_drifting).is_true()
+	assert_int(car.drift_direction).is_equal(1)
+	# In-turn drift reaches the slide cap (25-45 degree target, capped at 35).
+	assert_float(absf(car.slide_angle_deg)).is_between(25.0, 35.01)
+	assert_float(car.speed).is_equal_approx(20.0, 0.05)
+
+
+func test_drift_direction_stays_locked_and_release_ends_it() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: DriftInput = _drift_car(runner, 20.0)
+	await await_physics_ticks(3)
+	var ended: Array[int] = [0]
+	car.drift_ended.connect(
+		func() -> void:
+			ended[0] += 1,
+	)
+	input.steer = -1.0
+	input.drift = true
+	await await_physics_ticks(20)
+	assert_int(car.drift_direction).is_equal(-1)
+	input.steer = 1.0
+	await await_physics_ticks(40)
+	# Steering out widens the line but does not flip or end the drift.
+	assert_int(car.drift_direction).is_equal(-1)
+	assert_bool(car.is_drifting).is_true()
+	input.drift = false
+	await await_physics_ticks(2)
+	assert_bool(car.is_drifting).is_false()
+	assert_int(ended[0]).is_equal(1)
+
+
+func test_no_drift_below_minimum_speed() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: DriftInput = _drift_car(runner, 8.0)
+	await await_physics_ticks(3)
+	input.steer = 1.0
+	input.drift = true
+	await await_physics_ticks(30)
+	assert_bool(car.is_drifting).is_false()
+
+
+func test_grip_circle_keeps_speed() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: DriftInput = _drift_car(runner, 24.0)
+	await await_physics_ticks(3)
+	input.steer = 1.0
+	await await_physics_ticks(120)
+	# T-027 lost about 2% per circle to re-projection; the model keeps it.
+	assert_float(car.speed).is_equal_approx(24.0, 0.05)
+	assert_float(absf(car.slide_angle_deg)).is_less(8.0)

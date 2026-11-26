@@ -42,9 +42,25 @@ extends Resource
 ## right). This is slower than ramping up from centre.
 @export var steer_reverse_time: float = 0.28
 
-## Fraction of lateral grip retained while drifting, 0..1 — 1.0 means no
-## slide at all, lower values mean more slide/slip through the drift.
-@export_range(0.0, 1.0) var drift_grip: float = 0.6
+## Time constant, in seconds, for the travel direction to follow the body
+## heading while gripping (T-028). Small means planted. It is frame-rate
+## independent: `1 - exp(-delta / grip_time)` per tick.
+@export var grip_time: float = 0.06
+
+## The same time constant while drifting. Larger means a longer slide. The
+## slide angle settles near `yaw rate x drift_slide_time` (T-028).
+@export var drift_slide_time: float = 0.4
+
+## Slowest speed, in m/s, at which a drift can start. Below 80% of it a
+## drift ends (T-028).
+@export var drift_min_speed: float = 11.0
+
+## How much faster the body yaws in a drift than at normal full lock. Steer
+## input then picks 20-80% of that rate (T-028).
+@export var drift_turn_multiplier: float = 1.5
+
+## Largest angle, in degrees, between the body and the travel direction.
+@export var max_slide_angle_deg: float = 35.0
 
 ## Vehicle mass in kilograms — feeds collision response (heavier vehicles
 ## resist spin-outs and punch through lighter ones on impact).
