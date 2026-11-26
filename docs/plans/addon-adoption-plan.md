@@ -88,8 +88,11 @@ them touch `project.godot`):
    correct input and F3 vectors on. Checks: does the camera feel right,
    and can drift and air problems now be seen and described? Also confirm
    the pinned physics engine (ADR-021, Jolt) feels right on wall slides
-   and ramp landing; flip back to `GodotPhysics3D` if not.
-7. T-008 impact shake.
+   and ramp landing; flip back to `GodotPhysics3D` if not. All owner
+   checks from the Phase 1 and 2 tickets are collected in the
+   [FC-1 owner checklist](fc-1-owner-checklist.md).
+7. T-008 impact shake. *(Done before FC-1, on 2026-11-25, so FC-1 also
+   judges the shake.)*
 
 [T-017](../tasks/T-017-handling-genre-research.md) (handling genre
 research, no code) runs in parallel. The handling rework tickets are

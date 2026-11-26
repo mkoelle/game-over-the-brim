@@ -6,14 +6,15 @@
 ---
 
 ## Current Priorities
-1. **Phase 1 tooling**: physics pin, camera, input fix and debug vectors
-   ([addon adoption plan](docs/plans/addon-adoption-plan.md), in its
-   execution order), ending at feel checkpoint FC-1.
-2. **Handling genre research**: [T-017](docs/tasks/T-017-handling-genre-research.md),
-   in parallel. It gives target numbers for steering, drift, air and
-   camera.
-3. **Handling rework**: self-implemented (ADR-012). Tickets are written
-   from T-017 after FC-1. This is the path to passing the 1-Car Fun gate.
+1. **FC-1 owner drive**: Phase 1 tooling is merged. The owner works
+   through the [FC-1 owner checklist](docs/plans/fc-1-owner-checklist.md):
+   the feel drive, gamepad and export hardware checks, and the open
+   decisions.
+2. **Handling rework**: self-implemented (ADR-012). Tickets are written
+   from [T-017](docs/tasks/T-017-handling-genre-research.md)'s targets and
+   the FC-1 results. This is the path to passing the 1-Car Fun gate.
+3. **Blocked until later:** T-018 (Godot 4.8 is not stable yet) and
+   T-012 to T-015 (they wait for the 1-Car Fun gate).
 
 Process: [ADR-022](docs/adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md)
 (lean trunk, one tracker in `docs/tasks`, feel gates, Sonnet builder with
@@ -29,6 +30,24 @@ Opus checker).
 ---
 
 ## Recent Progress
+- Phase 1 and Phase 2 of the addon adoption plan (2026-11-25), PRs #8 to
+  #21, each auto-merged after the checker re-ran `task ci`:
+  - Jolt physics pinned (ADR-021). GdUnit4 bumped to 6.2.3.
+  - Per-device input: `DeviceActionMap` plus the `InputSource` port
+    (ADR-014). This fixes joypad 0 leaking into the keyboard player.
+  - Phantom Camera chase rig, with tuned framing, collision and yaw, plus
+    impact shake on wall hits.
+  - Debug Draw 3D vendored (all ADR-015 checks recorded). F3 now also
+    draws in-world handling vectors.
+  - The godot-ai editor MCP is vendored and adopted after the T-005 spike
+    (ADR-022 §6a).
+  - `assets/CREDITS.md`, and Kenney greybox props on the test track.
+  - Research only: handling genre targets (T-017) and Steam Remote Play
+    Together (T-016; ADR-020 is still Proposed, pending the owner's
+    decision on the Steam fee).
+  - The agents recorded every owner-input point as a researched
+    assumption in its ticket. These are collected in the FC-1 owner
+    checklist.
 - Tooling audit (2026-11-24), all PRs auto-merged:
   - #5 committed `.import` files (they had been gitignored, which broke
     UIDs) and fixed export output folders.
