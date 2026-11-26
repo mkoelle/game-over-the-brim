@@ -69,11 +69,12 @@ collision_mask = 0
 size = Vector3(1, 3, 98)
 material = SubResource("Material_Boundary")
 
-[node name="Ramp2" type="CSGBox3D" parent="." unique_id=491477970]
-transform = Transform3D(1, 0, 0, 0, 0.86602557, 0.5000002, 0, -0.5000002, 0.86602557, -27.688313, 3.567, 8.730326)
+[node name="Ramp2" type="CSGPolygon3D" parent="." unique_id=491477970]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -31.688313, 0, 1.5521212)
 use_collision = true
 collision_mask = 0
-size = Vector3(8, 1, 16)
+polygon = PackedVector2Array(0, 0, 13.856409, 8, 13.856409, 0)
+depth = 8.0
 material = SubResource("Material_Ramp")
 
 [node name="Props" type="Node3D" parent="."]
