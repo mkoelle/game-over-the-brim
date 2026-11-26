@@ -43,9 +43,17 @@ the next round fixes or tunes it.
 - [ ] A drift over a bump or a ramp lip does not cancel unexpectedly.
 - [ ] The overlay's `Drift:` line shows the side and the slide.
 
-## 3. Walls (T-029)
+## 3. Walls ([T-029](../tasks/T-029-wall-contact-response.md))
 
-_Added when T-029 merges._
+- [ ] Glancing a wall keeps momentum. The car slides off and carries on,
+      and does not grind to a stop (your FC-1 comment).
+- [ ] A head-on hit at full speed bounces the car back. It feels fun, not
+      punishing (`wall_restitution` 0.4).
+- [ ] Holding throttle into a wall gives a few shrinking bounces, not
+      jitter.
+- [ ] A glancing hit does not feel like the game is steering for you
+      (`wall_align_time` 0.1 s).
+- [ ] Each crash still shakes the camera once.
 
 ## 4. Ramps, air, landing (T-030)
 

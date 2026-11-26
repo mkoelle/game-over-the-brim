@@ -17,5 +17,7 @@ drift_slide_time = 0.4
 drift_min_speed = 11.0
 drift_turn_multiplier = 1.5
 max_slide_angle_deg = 35.0
+wall_restitution = 0.4
+wall_align_time = 0.1
 mass = 900.0
 air_control = 0.35
