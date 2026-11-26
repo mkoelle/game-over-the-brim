@@ -77,6 +77,7 @@ Process, tracking and model tiering: [ADR-022](../adr/ADR-022-dev-workflow-lean-
 | [T-019](../tasks/T-019-vendor-godot-ai.md) | Vendor godot-ai 4.4.2 (project scope, telemetry off) | P1 | 2h | — | [022](../adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md) |
 | [T-018](../tasks/T-018-upgrade-godot-4-8.md) | Upgrade to Godot 4.8 stable | P2 | 3h | 4.8 stable + addon support | [007](../adr/ADR-007-build-test-and-release-pipeline.md) |
 | [T-020](../tasks/T-020-enable-physics-interpolation.md) | Enable physics interpolation (FC-1: car vibration at 120 Hz) | P1 | 1h | T-005 | [013](../adr/ADR-013-camera-addon-phantom-camera.md) |
+| [T-021](../tasks/T-021-solid-ramp2-camera-pop.md) | Solid Ramp2 wedge (FC-1: camera jumps through the ramp) | P1 | 2h | T-020 | [013](../adr/ADR-013-camera-addon-phantom-camera.md) |
 
 **Execution order** (ADR-022; tickets run one at a time, because most of
 them touch `project.godot`):

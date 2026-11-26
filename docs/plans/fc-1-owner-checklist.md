@@ -39,7 +39,11 @@ Camera ([T-005](../tasks/T-005-replace-chase-camera-with-phantom-camera.md)):
         - *Agent:* Reproduced. Reversing under Ramp2's high end wedges the
           car in the gap under the slab. The camera's collision start point
           ends up inside the slab, so the camera pops to the top side.
-          Fix tracked in T-021.
+          Fixed in [T-021](../tasks/T-021-solid-ramp2-camera-pop.md).
+          Ramp2 is now a solid wedge with the same top surface, so there
+          is no gap. The rule is in
+          [track-geometry.md](../design/track-geometry.md). Re-check by
+          backing into Ramp2 from both ends.
 - [x] Framing: the car is not too small or too high in frame. If it is,
       try `spring_length` 4.0–5.0 or `follow_offset.y` 0.8–1.4.
 - [ ] Full-throttle straight: the car keeps a steady size.
