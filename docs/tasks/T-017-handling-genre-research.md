@@ -97,6 +97,8 @@ None. Can run in parallel with Phase 1 tooling.
   **Evidence:** Wii-era frame data and SuperTuxKart both use two tiers.
   Splitscreen readability favours fewer tiers.
   **Owner check:** Say if you want a third tier in the rework.
+  *Owner (FC-1, 2026-11-25): three tiers. Recorded in
+  `handling-reference.md` section 2 and rework ticket 3.*
 - **Assumption:** The starting camera values (4.5 to 6 m back, 2.2 to
   2.5 m up, FOV 75 plus 8 on boost) are good enough for T-005 to start.
   Most are our estimates, anchored on SuperTuxKart's camera code.
