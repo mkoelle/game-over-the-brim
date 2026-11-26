@@ -43,12 +43,12 @@ roughness = 0.9
 albedo_color = Color(0.95, 0.95, 0.95, 1)
 roughness = 0.9
 
-[node name="TuningCircuit" type="Node3D" unique_id=105872415]
+[node name="TuningCircuit" type="Node3D" unique_id=1260783909]
 
-[node name="Centerline" type="Path3D" parent="." unique_id=1005030339]
+[node name="Centerline" type="Path3D" parent="." unique_id=930180103]
 curve = SubResource("Curve3D_xlfth")
 
-[node name="Road" type="CSGPolygon3D" parent="." unique_id=274657090]
+[node name="Road" type="CSGPolygon3D" parent="." unique_id=1706903296]
 use_collision = true
 collision_mask = 0
 polygon = PackedVector2Array(-7, -0.3, 7, -0.3, 7, 0.02, -7, 0.02)
@@ -65,7 +65,7 @@ path_u_distance = 1.0
 path_joined = true
 material = SubResource("StandardMaterial3D_o5ixc")
 
-[node name="CurbLeft" type="CSGPolygon3D" parent="." unique_id=415027526]
+[node name="CurbLeft" type="CSGPolygon3D" parent="." unique_id=382926316]
 use_collision = true
 collision_mask = 0
 polygon = PackedVector2Array(-7.8, -0.3, -7, -0.3, -7, 0.04, -7.8, 0.04)
@@ -82,7 +82,7 @@ path_u_distance = 1.0
 path_joined = true
 material = SubResource("StandardMaterial3D_esufn")
 
-[node name="CurbRight" type="CSGPolygon3D" parent="." unique_id=717154362]
+[node name="CurbRight" type="CSGPolygon3D" parent="." unique_id=57504063]
 use_collision = true
 collision_mask = 0
 polygon = PackedVector2Array(7, -0.3, 7.8, -0.3, 7.8, 0.04, 7, 0.04)
@@ -99,7 +99,7 @@ path_u_distance = 1.0
 path_joined = true
 material = SubResource("StandardMaterial3D_esufn")
 
-[node name="BarrierLeft" type="CSGPolygon3D" parent="." unique_id=1258063743]
+[node name="BarrierLeft" type="CSGPolygon3D" parent="." unique_id=663870552]
 use_collision = true
 collision_mask = 0
 polygon = PackedVector2Array(-9.3, -0.3, -8.8, -0.3, -8.8, 1.2, -9.3, 1.2)
@@ -116,7 +116,7 @@ path_u_distance = 1.0
 path_joined = true
 material = SubResource("StandardMaterial3D_yfjne")
 
-[node name="BarrierRight" type="CSGPolygon3D" parent="." unique_id=1749111921]
+[node name="BarrierRight" type="CSGPolygon3D" parent="." unique_id=1688902050]
 use_collision = true
 collision_mask = 0
 polygon = PackedVector2Array(8.8, -0.3, 9.3, -0.3, 9.3, 1.2, 8.8, 1.2)
@@ -133,50 +133,50 @@ path_u_distance = 1.0
 path_joined = true
 material = SubResource("StandardMaterial3D_yfjne")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=332629514]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1392257042]
 transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 20, 0)
 shadow_enabled = true
 directional_shadow_max_distance = 200.0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=314880233]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=917500067]
 environment = SubResource("Environment_fuxtm")
 
-[node name="Ground" type="CSGBox3D" parent="." unique_id=1878278925]
+[node name="Ground" type="CSGBox3D" parent="." unique_id=165234136]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, -0.5, 12.5)
 use_collision = true
 collision_mask = 0
 size = Vector3(320, 1, 420)
 material = SubResource("StandardMaterial3D_6ax4r")
 
-[node name="PerimeterNorth" type="CSGBox3D" parent="." unique_id=242191302]
+[node name="PerimeterNorth" type="CSGBox3D" parent="." unique_id=81279159]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 6, -197.5)
 use_collision = true
 collision_mask = 0
 size = Vector3(320, 12, 1)
 material = SubResource("StandardMaterial3D_qkeuc")
 
-[node name="PerimeterSouth" type="CSGBox3D" parent="." unique_id=1572757829]
+[node name="PerimeterSouth" type="CSGBox3D" parent="." unique_id=1183963189]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35, 6, 222.5)
 use_collision = true
 collision_mask = 0
 size = Vector3(320, 12, 1)
 material = SubResource("StandardMaterial3D_qkeuc")
 
-[node name="PerimeterWest" type="CSGBox3D" parent="." unique_id=1777460206]
+[node name="PerimeterWest" type="CSGBox3D" parent="." unique_id=766323637]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125, 6, 12.5)
 use_collision = true
 collision_mask = 0
 size = Vector3(1, 12, 420)
 material = SubResource("StandardMaterial3D_qkeuc")
 
-[node name="PerimeterEast" type="CSGBox3D" parent="." unique_id=1598899720]
+[node name="PerimeterEast" type="CSGBox3D" parent="." unique_id=1100742772]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 195, 6, 12.5)
 use_collision = true
 collision_mask = 0
 size = Vector3(1, 12, 420)
 material = SubResource("StandardMaterial3D_qkeuc")
 
-[node name="Kicker" type="CSGPolygon3D" parent="." unique_id=2057402896]
+[node name="Kicker" type="CSGPolygon3D" parent="." unique_id=2059499326]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 66, 0.02, 20)
 use_collision = true
 collision_mask = 0
@@ -184,25 +184,25 @@ polygon = PackedVector2Array(0, 0, 7.464102, 2, 7.464102, 0)
 depth = 8.0
 material = SubResource("StandardMaterial3D_oroj8")
 
-[node name="JumpWallWest" type="CSGBox3D" parent="." unique_id=529431040]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60.95, 3.25, 45)
+[node name="JumpWallWest" type="CSGBox3D" parent="." unique_id=69974137]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60.9, 3.845, 45)
 use_collision = true
 collision_mask = 0
-size = Vector3(0.5, 6.5, 66)
+size = Vector3(0.5, 5.31, 66)
 material = SubResource("StandardMaterial3D_0ed4e")
 
-[node name="JumpWallEast" type="CSGBox3D" parent="." unique_id=1846197106]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.05, 3.25, 45)
+[node name="JumpWallEast" type="CSGBox3D" parent="." unique_id=1532332062]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.1, 3.845, 45)
 use_collision = true
 collision_mask = 0
-size = Vector3(0.5, 6.5, 66)
+size = Vector3(0.5, 5.31, 66)
 material = SubResource("StandardMaterial3D_0ed4e")
 
-[node name="StartLine" type="CSGBox3D" parent="." unique_id=586252249]
+[node name="StartLine" type="CSGBox3D" parent="." unique_id=1532142889]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 60)
 collision_mask = 0
 size = Vector3(14, 0.01, 1)
 material = SubResource("StandardMaterial3D_8nxkq")
 
-[node name="Spawn" type="Marker3D" parent="." unique_id=417614029]
+[node name="Spawn" type="Marker3D" parent="." unique_id=1303214889]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 70)

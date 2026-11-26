@@ -15,6 +15,11 @@
 
 [sub_resource type="Resource" id="Resource_eb6dy"]
 script = ExtResource("6_choun")
+duration = 1.8
+transition = 7
+
+[sub_resource type="Resource" id="Resource_intro"]
+script = ExtResource("6_choun")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_tipki"]
 radius = 0.25
@@ -61,6 +66,12 @@ spring_length = 4.657
 shape = SubResource("SphereShape3D_tipki")
 margin = 0.2
 noise_emitter_layer = 1
+
+[node name="IntroCam" type="Node3D" parent="."]
+script = ExtResource("5_85g3d")
+priority = 20
+tween_on_load = false
+tween_resource = SubResource("Resource_intro")
 
 [node name="YawDriver" type="Node" parent="CarFollowCam" unique_id=79572450]
 script = ExtResource("7_ya4ey")

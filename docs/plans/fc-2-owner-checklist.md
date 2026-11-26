@@ -129,6 +129,11 @@ layouts are in [test-tracks.md](../design/test-tracks.md).
 - [ ] The R35 sweeper holds a drift long enough for tier 3.
 - [ ] The kicker launches cleanly, and the trick window works there too.
 - [ ] Pick the next layout to build (B to E in `test-tracks.md`).
+- [ ] Each map (and each F4) opens on a still shot above and behind the
+      car, then flies smoothly into the chase camera
+      ([T-036](../tasks/T-036-intro-camera-and-jump-walls.md)).
+- [ ] The jump walls no longer flicker against the barriers. Say if they
+      still feel heavy (the option is a see-through catch fence).
 
 ## 9. The gate
 

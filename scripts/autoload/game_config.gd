@@ -20,6 +20,10 @@ const TRACK_NAMES: Array[String] = ["sandbox", "circuit"]
 ## The map main.tscn loads. Set by `--track=` at start, cycled with F4.
 var track_index: int = 0
 
+## Play the start-of-race camera fly-in (T-036). Tests that check the chase
+## camera from the first frames turn it off.
+var play_intro: bool = true
+
 
 func _ready() -> void:
 	for arg: String in OS.get_cmdline_user_args():
