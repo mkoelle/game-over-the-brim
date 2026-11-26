@@ -55,9 +55,16 @@ the next round fixes or tunes it.
       (`wall_align_time` 0.1 s).
 - [ ] Each crash still shakes the camera once.
 
-## 4. Ramps, air, landing (T-030)
+## 4. Ramps, air, landing ([T-030](../tasks/T-030-ramp-launch-air-landing.md))
 
-_Added when T-030 merges._
+- [ ] Both ramps launch the car now. About 1.2 s of air feels snappy, not
+      floaty (`air_gravity_scale` 1.6).
+- [ ] Ramp2 is now a 20-degree, 2.5 m kicker (it was 30 degrees and 8 m).
+      Is it big enough?
+- [ ] In the air the nose turns a little (25%), but the line holds.
+      Landings feel controllable.
+- [ ] A clean landing keeps your speed. Jumping is not a speed boost.
+- [ ] Driving into the foot of a ramp never pops the car into the air.
 
 ## 5. Drift boost tiers (T-031)
 
