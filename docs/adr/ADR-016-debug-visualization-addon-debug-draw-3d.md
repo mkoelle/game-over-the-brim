@@ -160,3 +160,13 @@ no extension errors).
 **Pending owner:** the Windows or Linux launch on a second machine, and
 the Android install on a device. See the assumptions in
 [T-006](../tasks/T-006-vendor-debug-draw-3d.md).
+
+#### Physics interpolation (T-022, 2026-11-25)
+
+`draw_text` uses pooled `Label3D` nodes under the addon's
+`_DD3D_WorldWatcher` node. With project physics interpolation on (T-020),
+they inherited it and blended from stale positions: 300 px RMS shake and
+pops in turns. `VehicleDebugDraw` turns interpolation off for nodes whose
+name contains `_DD3D_`. The addon's arrows render through
+`RenderingServer` and were not affected. **On any Debug Draw 3D update,
+re-check the node name and re-run the T-022 probe.**

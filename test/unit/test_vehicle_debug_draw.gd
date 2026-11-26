@@ -72,3 +72,46 @@ func test_scenes_do_not_reference_the_debug_draw_script() -> void:
 		var text: String = FileAccess.get_file_as_string(path)
 		assert_bool(text.is_empty()).is_false()
 		assert_bool(text.contains("vehicle_debug_draw")).is_false()
+
+
+## T-022: Debug Draw 3D's pooled Label3D nodes live under a root node whose
+## name contains "_DD3D_" (for example `@_DD3D_WorldWatcher@9` in v1.7.3).
+## They are moved every frame, so physics interpolation must be off for them.
+func test_is_dd3d_node_matches_the_addon_world_node_only() -> void:
+	var watcher: Node = auto_free(Node.new())
+	watcher.name = "_DD3D_WorldWatcher"
+	var other: Node = auto_free(Node.new())
+	other.name = "DebugOverlay"
+	assert_bool(VehicleDebugDraw.is_dd3d_node(watcher)).is_true()
+	assert_bool(VehicleDebugDraw.is_dd3d_node(other)).is_false()
+
+
+func test_dd3d_labels_present_at_ready_are_not_interpolated() -> void:
+	var watcher: Node = Node.new()
+	watcher.name = "_DD3D_WorldWatcher_Test"
+	var label: Label3D = Label3D.new()
+	watcher.add_child(label)
+	get_tree().root.add_child(watcher)
+	var node: VehicleDebugDraw = VehicleDebugDraw.new()
+	add_child(node)
+	assert_int(watcher.physics_interpolation_mode).is_equal(Node.PHYSICS_INTERPOLATION_MODE_OFF)
+	assert_bool(label.is_physics_interpolated()).is_false()
+	node.free()
+	watcher.free()
+
+
+func test_dd3d_node_added_later_is_not_interpolated() -> void:
+	var node: VehicleDebugDraw = VehicleDebugDraw.new()
+	add_child(node)
+	var watcher: Node = Node.new()
+	watcher.name = "_DD3D_WorldWatcher_Late"
+	var label: Label3D = Label3D.new()
+	watcher.add_child(label)
+	get_tree().root.add_child(watcher)
+	assert_bool(label.is_physics_interpolated()).is_false()
+	var unrelated: Node3D = Node3D.new()
+	get_tree().root.add_child(unrelated)
+	assert_bool(unrelated.is_physics_interpolated()).is_true()
+	unrelated.free()
+	node.free()
+	watcher.free()
