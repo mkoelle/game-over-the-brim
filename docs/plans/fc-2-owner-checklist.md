@@ -18,9 +18,17 @@ the next round fixes or tunes it.
 - [ ] Pull `main`, run `mise install && task import`, then `task run`.
       F3 shows the overlay and the in-world vectors.
 
-## 1. Steering (T-027)
+## 1. Steering ([T-027](../tasks/T-027-steering-curve-and-smoothing.md))
 
-_Added when T-027 merges._
+- [ ] Top speed feels planted, not twitchy, with a turn radius of about
+      17 m. The tuning knob is `steering_rate` (1.4) in
+      `resources/vehicles/stovepipe_speedster.tres`.
+- [ ] Hairpins at low speed feel agile (about 5-7 m radius).
+- [ ] Tapping left and right moves the nose smoothly, not in snaps
+      (`steer_ramp_time` 0.17 s).
+- [ ] A gamepad stick still feels direct with the ramp on.
+- [ ] Stopped against a wall, a little reverse frees the car (no
+      rotation below 1 m/s).
 
 ## 2. Drift slide (T-028)
 

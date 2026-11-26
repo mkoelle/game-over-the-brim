@@ -41,7 +41,7 @@ and T-028 introduce the model. Later tickets build on it.
 
 | Ticket | Title | §7 item | Depends on | Status |
 |---|---|---|---|---|
-| [T-027](../tasks/T-027-steering-curve-and-smoothing.md) | Steering curve, standstill fade, steer ramp | 1 | — | Todo |
+| [T-027](../tasks/T-027-steering-curve-and-smoothing.md) | Steering curve, standstill fade, steer ramp | 1 | — | Done |
 | [T-028](../tasks/T-028-grip-and-drift-slide.md) | Speed and heading model, grip and drift slide | 2 | T-027 | Todo |
 | [T-029](../tasks/T-029-wall-contact-response.md) | Wall contact response (owner request) | 8 | T-028 | Todo |
 | [T-030](../tasks/T-030-ramp-launch-air-landing.md) | Ramp launch, air control, landing | 4 | T-028 | Todo |
