@@ -42,31 +42,31 @@ material = SubResource("Material_Ground")
 [node name="Walls" type="Node3D" parent="." unique_id=2078436293]
 
 [node name="BoundaryNorth" type="CSGBox3D" parent="Walls" unique_id=1761033134]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 49.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 49.5)
 use_collision = true
 collision_mask = 0
-size = Vector3(100, 3, 1)
+size = Vector3(100, 12, 1)
 material = SubResource("Material_Boundary")
 
 [node name="BoundarySouth" type="CSGBox3D" parent="Walls" unique_id=1454271827]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -49.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -49.5)
 use_collision = true
 collision_mask = 0
-size = Vector3(100, 3, 1)
+size = Vector3(100, 12, 1)
 material = SubResource("Material_Boundary")
 
 [node name="BoundaryEast" type="CSGBox3D" parent="Walls" unique_id=544108576]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.5, 6, 0)
 use_collision = true
 collision_mask = 0
-size = Vector3(1, 3, 98)
+size = Vector3(1, 12, 98)
 material = SubResource("Material_Boundary")
 
 [node name="BoundaryWest" type="CSGBox3D" parent="Walls" unique_id=1152544844]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -49.5, 6, 0)
 use_collision = true
 collision_mask = 0
-size = Vector3(1, 3, 98)
+size = Vector3(1, 12, 98)
 material = SubResource("Material_Boundary")
 
 [node name="Ramp2" type="CSGPolygon3D" parent="." unique_id=491477970]

@@ -25,6 +25,9 @@ extends Node
 ## attaches a VehicleDebugDraw node at runtime (T-007, ADR-016). It is loaded
 ## with `load()` and set through `set()`, so no scene and no release build
 ## references the script statically.
+##
+## An OutOfBoundsReset puts the car back at its spawn pose if it ever falls
+## out of the level (T-024), and the follow camera teleports with it.
 
 @onready var _car: VehicleController = $TophatCar
 @onready var _follow_cam: PhantomCamera3D = $CarFollowCam
@@ -36,6 +39,11 @@ func _ready() -> void:
 	_follow_cam.follow_target = _car
 	_car.impacted.connect(_on_car_impacted)
 	_debug_overlay.target = _car
+	var bounds_reset := OutOfBoundsReset.new()
+	bounds_reset.name = "OutOfBoundsReset"
+	bounds_reset.target = _car
+	bounds_reset.car_reset.connect(_on_car_reset)
+	add_child(bounds_reset)
 	if OS.is_debug_build() and ClassDB.class_exists(&"DebugDraw3D"):
 		var script: GDScript = load("res://scripts/vehicles/vehicle_debug_draw.gd")
 		var debug_draw: Node = script.new()
@@ -45,6 +53,10 @@ func _ready() -> void:
 		"[color=green][OverTheBrim][/color] Test track loaded, car spawned, CarFollowCam following."
 	)
 	EventBus.race_started.emit()
+
+
+func _on_car_reset(_car_that_reset: VehicleController) -> void:
+	_follow_cam.teleport_position()
 
 
 func _on_car_impacted(impact_speed: float) -> void:

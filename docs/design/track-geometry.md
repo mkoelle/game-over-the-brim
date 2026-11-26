@@ -43,7 +43,20 @@ invisible wall (FC-1, T-023). The wrapper scene now adds a visible
 `Body` (a `PrismMesh` wedge) just under the deck. Check every new
 imported prop from the side, from behind and from below.
 
-## 4. Collision shapes
+## 4. Bounds are taller than any jump
+
+The outer walls must be taller than the highest point a car can reach
+off any ramp, plus 2 m. On the test track the highest car origin
+measured is 8.64 m off Ramp2. With half the car (0.5 m) and the margin,
+the walls are now 12 m (T-024). At 3 m, a right turn off Ramp2 cleared
+the west wall in 13 of 40 scripted runs.
+
+When the handling rework makes ramps launch upward, re-measure the apex
+and raise the walls, or add a see-through fence above them. As a safety
+net, `OutOfBoundsReset` puts a car that falls below y = -20 back at its
+spawn pose.
+
+## 5. Collision shapes
 
 Use box or convex collision on layer 1 with mask 0, at uniform scale.
 Do not use trimesh collision for props (T-011, tested in
