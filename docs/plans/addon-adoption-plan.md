@@ -80,6 +80,7 @@ Process, tracking and model tiering: [ADR-022](../adr/ADR-022-dev-workflow-lean-
 | [T-021](../tasks/T-021-solid-ramp2-camera-pop.md) | Solid Ramp2 wedge (FC-1: camera jumps through the ramp) | P1 | 2h | T-020 | [013](../adr/ADR-013-camera-addon-phantom-camera.md) |
 | [T-022](../tasks/T-022-debug-text-interpolation.md) | F3 debug text shakes and pops in turns (FC-1) | P2 | 1h | T-020 | [016](../adr/ADR-016-debug-visualization-addon-debug-draw-3d.md) |
 | [T-023](../tasks/T-023-kenney-ramp-visible-body.md) | Visible solid body for the Kenney ramp (FC-1: invisible wall) | P2 | 1h | T-011 | [019](../adr/ADR-019-third-party-asset-sourcing-and-licensing.md) |
+| [T-024](../tasks/T-024-level-bounds.md) | Keep the car inside the test track (FC-1: escape off Ramp2) | P1 | 2h | T-021 | — |
 
 **Execution order** (ADR-022; tickets run one at a time, because most of
 them touch `project.godot`):
