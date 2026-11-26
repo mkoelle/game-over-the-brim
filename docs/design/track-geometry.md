@@ -33,7 +33,17 @@ Do not build them as a tilted slab with an open underside. The high end
 of a jump is then a vertical face, which the car and the camera treat as
 a wall.
 
-## 3. Collision shapes
+## 3. What you see is what you hit
+
+Every collision volume a car can touch must be visible. Kenney's
+`roadRampLong` model is only a one-sided road deck: from the side or
+the high end it is almost invisible, and the space under it looks open.
+Its collider is a solid wedge (rule 2), so the "open" space was an
+invisible wall (FC-1, T-023). The wrapper scene now adds a visible
+`Body` (a `PrismMesh` wedge) just under the deck. Check every new
+imported prop from the side, from behind and from below.
+
+## 4. Collision shapes
 
 Use box or convex collision on layer 1 with mask 0, at uniform scale.
 Do not use trimesh collision for props (T-011, tested in

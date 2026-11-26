@@ -5,6 +5,15 @@
 [sub_resource type="ConvexPolygonShape3D" id="Shape_1"]
 points = PackedVector3Array(-4, 0, -8, 4, 0, -8, -4, 0, 8, 4, 0, 8, -4, 4.16, 8, 4, 4.16, 8)
 
+[sub_resource type="StandardMaterial3D" id="Material_Body"]
+albedo_color = Color(0.55, 0.56, 0.6, 1)
+roughness = 0.9
+
+[sub_resource type="PrismMesh" id="Mesh_Body"]
+material = SubResource("Material_Body")
+left_to_right = 1.0
+size = Vector3(16, 4, 8)
+
 [node name="RoadRampLong" type="StaticBody3D"]
 collision_layer = 1
 collision_mask = 0
@@ -14,3 +23,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38.90872, 0, -0.300624)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("Shape_1")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 1.97, 0)
+mesh = SubResource("Mesh_Body")
