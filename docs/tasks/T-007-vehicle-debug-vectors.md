@@ -113,9 +113,14 @@ Run F5 and press F3:
   floor-normal arrow pointing straight up, and white text "slip +1.4 deg /
   grounded" above the car. The same run with F3 off shows no arrows or text.
 - Scripted probe, drift held at 12 m/s with steer left: slip -2.4 to -3.5
-  degrees (non-zero, and it grows with speed). Straight driving: 0.0.
+  degrees (non-zero, and it grows while the drift is held). Straight
+  driving: 0.0.
 - Scripted probe on a synthetic 15 degree slope: `get_floor_normal()` tilts
   15.0 degrees from up, which is what the yellow arrow follows.
+- Checker probe on the in-scene `Ramp2`, from its low end at full throttle
+  (start x=-27.69, z=-5, heading +Z): the car climbs to y=8.5 and leaves
+  the top at 24 m/s. `get_floor_normal()` tilts 30.0 degrees on the ramp.
+  A second run from z=-45 jumps the Kenney `Ramp` and lands on `Ramp2`.
 
 ### Assumptions (owner to validate)
 
@@ -132,15 +137,15 @@ Run F5 and press F3:
   in a drift (velocity lags to the right of the nose).
   **Owner check:** hold a drift in a corner and confirm the sign reads
   sensibly to you.
-- **Assumption:** the in-scene `Ramp2` could not be driven by a script, so
-  ramp tilt was verified on a synthetic 15 degree slope instead. A probe
-  that drove at `Ramp2` from the +Z side stopped dead at z=6.3 with speed 0.
-  **Evidence:** probe output; the floor normal read 15.0 degrees on the
-  synthetic slope. The `Ramp2` stop is not caused by this ticket (the
-  component only reads state).
-  **Owner check:** drive the ramp by hand with F3 on and confirm the yellow
-  arrow tilts. If the car is stopped by `Ramp2`, that is a track or
-  controller issue to raise separately.
+- **Assumption:** the yellow arrow is readable when it tilts on a ramp.
+  The tilt itself is measured: 30.0 degrees on `Ramp2` and 15.0 degrees on
+  a synthetic slope (see Verification results). The builder's first probe
+  "stopped dead" at `Ramp2` because it drove into the ramp's 8 m high end
+  from the +Z side. Its "fell out of the world" run started inside the
+  Kenney `Ramp` collider. Neither is a track bug.
+  **Evidence:** checker probe output above.
+  **Owner check:** drive up `Ramp2` by hand with F3 on and confirm the
+  yellow arrow visibly tilts forward.
 - **Assumption:** a held drift through a real corner, and the F3 toggle by
   key press, behave as the scripted probes show.
   **Owner check:** the hand run listed under Verification above.
