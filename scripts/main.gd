@@ -20,6 +20,11 @@ extends Node
 ## matches CarFollowCam's. In split screen each player needs their own
 ## emitter, layer and connection, so one car's hit never shakes another
 ## player's view.
+##
+## In debug builds only, when the Debug Draw 3D class exists, `_ready()`
+## attaches a VehicleDebugDraw node at runtime (T-007, ADR-016). It is loaded
+## with `load()` and set through `set()`, so no scene and no release build
+## references the script statically.
 
 @onready var _car: VehicleController = $TophatCar
 @onready var _follow_cam: PhantomCamera3D = $CarFollowCam
@@ -31,6 +36,11 @@ func _ready() -> void:
 	_follow_cam.follow_target = _car
 	_car.impacted.connect(_on_car_impacted)
 	_debug_overlay.target = _car
+	if OS.is_debug_build() and ClassDB.class_exists(&"DebugDraw3D"):
+		var script: GDScript = load("res://scripts/vehicles/vehicle_debug_draw.gd")
+		var debug_draw: Node = script.new()
+		debug_draw.set(&"target", _car)
+		add_child(debug_draw)
 	print_rich(
 		"[color=green][OverTheBrim][/color] Test track loaded, car spawned, CarFollowCam following."
 	)
