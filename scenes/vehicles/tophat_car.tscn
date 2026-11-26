@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/vehicles/vehicle_controller.gd" id="1_script"]
 [ext_resource type="Resource" path="res://resources/vehicles/stovepipe_speedster.tres" id="2_stats"]
+[ext_resource type="Script" path="res://scripts/vehicles/vehicle_visual_body.gd" id="3_visual"]
 
 [sub_resource type="BoxShape3D" id="Shape_Body"]
 size = Vector3(1, 1, 2)
@@ -23,6 +24,9 @@ stats = ExtResource("2_stats")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("Shape_Body")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="VisualBody" type="Node3D" parent="."]
+script = ExtResource("3_visual")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VisualBody"]
 mesh = SubResource("Mesh_Body")
 material_override = SubResource("Material_Body")

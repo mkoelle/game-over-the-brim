@@ -78,9 +78,16 @@ the next round fixes or tunes it.
       fair.
 - [ ] After a boost, the speed eases back down and does not snap.
 
-## 6. Visual body (T-032)
+## 6. Visual body ([T-032](../tasks/T-032-visual-body-ground-alignment.md))
 
-_Added when T-032 merges._
+- [ ] The car leans into corners (up to 10 degrees), and the lean looks
+      right.
+- [ ] On the ramps the body tilts to the slope. In the air the nose
+      follows the arc.
+- [ ] Starting a drift gives a small hop. It feels alive, not silly.
+- [ ] Each tier is obvious from the sparks and the glow: cyan, then amber,
+      then magenta. The car still reads as red.
+- [ ] A boost glows brighter in the tier's colour.
 
 ## 7. Tricks (T-033)
 
