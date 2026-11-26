@@ -591,3 +591,104 @@ func test_kenney_ramp_launches_and_landing_keeps_speed() -> void:
 	# Hang time close to the 0.6-1.2 s target (measured 1.20 s).
 	assert_float(air_ticks / 60.0).is_between(0.9, 1.4)
 	assert_float(landed_speed).is_greater(23.5)
+
+
+## T-031: drift charge tiers and boost.
+class BoostInput:
+	extends InputSource
+
+	var throttle: float = 1.0
+	var steer: float = 0.0
+	var drift: bool = false
+
+
+	func get_input() -> Dictionary[String, Variant]:
+		return { "throttle": throttle, "steer": steer, "drift": drift }
+
+
+func _boost_car(runner: GdUnitSceneRunner) -> BoostInput:
+	var car: VehicleController = runner.scene()
+	_add_floor_under(car)
+	var input := BoostInput.new()
+	car.input_source = input
+	car.rotation = Vector3.ZERO
+	car.velocity = Vector3(0, 0, -22.0)
+	return input
+
+
+func test_drift_tier_thresholds() -> void:
+	var times := PackedFloat32Array([0.85, 1.9, 3.0])
+	# 0.85 s at 60 Hz is 51 ticks of in-turn charge (5 per tick).
+	assert_int(VehicleController.drift_tier_for(254, times, 60)).is_equal(0)
+	assert_int(VehicleController.drift_tier_for(255, times, 60)).is_equal(1)
+	assert_int(VehicleController.drift_tier_for(570, times, 60)).is_equal(2)
+	assert_int(VehicleController.drift_tier_for(900, times, 60)).is_equal(3)
+
+
+func test_released_drift_pays_out_a_boost_above_top_speed() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	var tiers: Array[int] = []
+	var boosts: Array[int] = []
+	car.drift_tier_reached.connect(
+		func(t: int) -> void:
+			tiers.append(t),
+	)
+	car.boost_started.connect(
+		func(t: int) -> void:
+			boosts.append(t),
+	)
+	await await_physics_ticks(3)
+	input.steer = 1.0
+	input.drift = true
+	# Just past tier 2 (1.9 s), then release.
+	await await_physics_ticks(120)
+	assert_array(tiers).contains_exactly([1, 2])
+	input.drift = false
+	input.steer = 0.0
+	await await_physics_ticks(30)
+	assert_array(boosts).contains_exactly([2])
+	assert_float(car.speed).is_greater(car.stats.max_speed + 2.0)
+	assert_float(car.boost_time_left).is_greater(0.0)
+	# After the boost, speed eases back to the normal top speed.
+	await await_physics_ticks(150)
+	assert_float(car.boost_time_left).is_equal(0.0)
+	assert_float(car.speed).is_less_equal(car.stats.max_speed + 0.01)
+
+
+func test_steering_out_charges_slower() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	await await_physics_ticks(3)
+	input.steer = 1.0
+	input.drift = true
+	await await_physics_ticks(2)
+	input.steer = -1.0
+	# 1.0 s steering out reaches only about 40% of the tier 1 charge.
+	await await_physics_ticks(60)
+	assert_bool(car.is_drifting).is_true()
+	assert_int(car.drift_tier).is_equal(0)
+
+
+func test_too_slow_cancels_the_charge_with_no_boost() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	var boosts: Array[int] = []
+	car.boost_started.connect(
+		func(t: int) -> void:
+			boosts.append(t),
+	)
+	await await_physics_ticks(3)
+	input.steer = 1.0
+	input.drift = true
+	await await_physics_ticks(60)
+	assert_int(car.drift_tier).is_equal(1)
+	# Brake hard while still holding drift: below 80% of the minimum speed the
+	# drift ends with no payout.
+	input.throttle = -1.0
+	await await_physics_ticks(60)
+	assert_bool(car.is_drifting).is_false()
+	assert_array(boosts).is_empty()

@@ -45,7 +45,7 @@ and T-028 introduce the model. Later tickets build on it.
 | [T-028](../tasks/T-028-grip-and-drift-slide.md) | Speed and heading model, grip and drift slide | 2 | T-027 | Done |
 | [T-029](../tasks/T-029-wall-contact-response.md) | Wall contact response (owner request) | 8 | T-028 | Done |
 | [T-030](../tasks/T-030-ramp-launch-air-landing.md) | Ramp launch, air control, landing | 4 | T-028 | Done |
-| [T-031](../tasks/T-031-drift-charge-tiers-boost.md) | Drift charge, three tiers, boost | 3 | T-028 | Todo |
+| [T-031](../tasks/T-031-drift-charge-tiers-boost.md) | Drift charge, three tiers, boost | 3 | T-028 | Done |
 | [T-032](../tasks/T-032-visual-body-ground-alignment.md) | Visual body: roll, ground alignment, drift hop, tier cues | 5 | T-028, T-030, T-031 | Todo |
 | [T-033](../tasks/T-033-trick-boost.md) | Trick boost off ramps | 6 | T-030, T-031 | Todo |
 | [T-034](../tasks/T-034-chase-camera-tuning-pass.md) | Chase camera tuning pass: boost FOV, drift heading, speed FOV | 7 | T-031 | Todo |
