@@ -6,15 +6,14 @@
 ---
 
 ## Current Priorities
-1. **FC-1 owner drive**: Phase 1 tooling is merged. The owner works
-   through the [FC-1 owner checklist](docs/plans/fc-1-owner-checklist.md):
-   the feel drive, gamepad and export hardware checks, and the open
-   decisions.
-2. **Handling rework**: self-implemented (ADR-012). Tickets are written
-   from [T-017](docs/tasks/T-017-handling-genre-research.md)'s targets and
-   the FC-1 results. This is the path to passing the 1-Car Fun gate.
+1. **Handling rework**: [handling rework plan](docs/plans/handling-rework-plan.md),
+   tickets T-027 to T-034. These are self-implemented (ADR-012), with
+   targets from [handling-reference.md](docs/design/handling-reference.md).
+2. **FC-2 (the "1-Car Fun" gate)**: the owner works through the
+   [FC-2 owner checklist](docs/plans/fc-2-owner-checklist.md) after
+   T-034. Items not answered at FC-1 are deferred into it.
 3. **Blocked until later:** T-018 (Godot 4.8 is not stable yet) and
-   T-012 to T-015 (they wait for the 1-Car Fun gate).
+   T-012 to T-015 (they wait for the gate).
 
 Process: [ADR-022](docs/adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md)
 (lean trunk, one tracker in `docs/tasks`, feel gates, Sonnet builder with
@@ -30,6 +29,16 @@ Opus checker).
 ---
 
 ## Recent Progress
+- FC-1 closed (2026-11-25) after three rounds of owner comments. All the
+  fixes are merged (#23 to #30):
+  - physics interpolation for 120 Hz displays
+  - a solid Ramp2 and a visible Kenney ramp body
+  - steady F3 text
+  - 12 m bounds and an out-of-bounds reset
+  - the "Full Throttle" app icon, plus `task icons`
+  The handling findings and owner decisions are recorded in
+  `handling-reference.md`: three drift tiers, and walls should keep
+  momentum.
 - Phase 1 and Phase 2 of the addon adoption plan (2026-11-25), PRs #8 to
   #21, each auto-merged after the checker re-ran `task ci`:
   - Jolt physics pinned (ADR-021). GdUnit4 bumped to 6.2.3.
