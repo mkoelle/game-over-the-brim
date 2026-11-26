@@ -20,4 +20,5 @@ max_slide_angle_deg = 35.0
 wall_restitution = 0.4
 wall_align_time = 0.1
 mass = 900.0
-air_control = 0.35
+air_steer_share = 0.25
+air_gravity_scale = 1.6

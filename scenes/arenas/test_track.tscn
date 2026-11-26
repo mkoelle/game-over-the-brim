@@ -73,7 +73,7 @@ material = SubResource("Material_Boundary")
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -31.688313, 0, 1.5521212)
 use_collision = true
 collision_mask = 0
-polygon = PackedVector2Array(0, 0, 13.856409, 8, 13.856409, 0)
+polygon = PackedVector2Array(0, 0, 6.868694, 2.5, 6.868694, 0)
 depth = 8.0
 material = SubResource("Material_Ramp")
 

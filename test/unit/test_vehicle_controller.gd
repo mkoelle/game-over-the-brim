@@ -513,3 +513,81 @@ func test_hard_wall_hit_ends_a_drift() -> void:
 	await await_physics_ticks(40)
 	# The drift button is still held, but the hit ended the drift.
 	assert_int(ended[0]).is_greater_equal(1)
+
+
+## T-030: ramp launch, air control and landing.
+class ThrottleSteerInput:
+	extends InputSource
+
+	var throttle: float = 0.0
+	var steer: float = 0.0
+
+
+	func get_input() -> Dictionary[String, Variant]:
+		return { "throttle": throttle, "steer": steer, "drift": false }
+
+
+func test_launch_vertical_speed_is_the_slope_climb_rate() -> void:
+	var travel: Vector3 = Vector3.BACK # +Z
+	var up_slope: Vector3 = Vector3(0, cos(deg_to_rad(15.0)), -sin(deg_to_rad(15.0)))
+	assert_float(VehicleController.launch_vertical_speed(travel, Vector3.UP, 24.0)).is_equal(0.0)
+	assert_float(VehicleController.launch_vertical_speed(travel, up_slope, 24.0)).is_equal_approx(
+		24.0 * sin(deg_to_rad(15.0)),
+		0.01,
+	)
+	# Downhill, or reversing up a slope, gives no launch.
+	assert_float(VehicleController.launch_vertical_speed(-travel, up_slope, 24.0)).is_equal(0.0)
+	assert_float(VehicleController.launch_vertical_speed(travel, up_slope, -24.0)).is_equal(0.0)
+
+
+func test_no_throttle_and_reduced_yaw_in_the_air() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input := ThrottleSteerInput.new()
+	car.input_source = input
+	await runner.simulate_frames(2)
+	# No floor: the car is airborne the whole time.
+	car.rotation = Vector3.ZERO
+	car.velocity = Vector3(0, 0, -10.0)
+	input.throttle = 1.0
+	input.steer = 1.0
+	car.steer_applied = 1.0
+	await await_physics_ticks(2)
+	var yaw0: float = car.rotation.y
+	await await_physics_ticks(30)
+	var flat: float = Vector2(car.velocity.x, car.velocity.z).length()
+	assert_float(flat).is_equal_approx(10.0, 0.01)
+	var air_rate: float = absf(angle_difference(yaw0, car.rotation.y)) / 0.5
+	var ground_rate: float = car.stats.steering_rate
+	assert_float(air_rate / ground_rate).is_equal_approx(car.stats.air_steer_share, 0.02)
+
+
+func test_kenney_ramp_launches_and_landing_keeps_speed() -> void:
+	var runner := scene_runner("res://scenes/main.tscn")
+	var car: VehicleController = runner.scene().get_node("TophatCar")
+	var input := ThrottleSteerInput.new()
+	car.input_source = input
+	await runner.simulate_frames(2)
+	car.global_position = Vector3(-27.69, 0.6, -45.0)
+	car.rotation = Vector3(0, PI, 0)
+	car.velocity = Vector3.ZERO
+	car.reset_physics_interpolation()
+	input.throttle = 1.0
+	var apex: float = 0.0
+	var air_ticks: int = 0
+	var landed_speed: float = -1.0
+	var was_air: bool = false
+	for i: int in 260:
+		await get_tree().physics_frame
+		var air: bool = not car.is_on_floor() and car.global_position.y > 1.0
+		if air:
+			air_ticks += 1
+			apex = maxf(apex, car.global_position.y)
+		elif was_air and landed_speed < 0.0:
+			landed_speed = Vector2(car.velocity.x, car.velocity.z).length()
+		was_air = air
+	# Takeoff at 4.66 m: the launch adds height (no launch tops out at 4.66).
+	assert_float(apex).is_greater(5.3)
+	# Hang time close to the 0.6-1.2 s target (measured 1.20 s).
+	assert_float(air_ticks / 60.0).is_between(0.9, 1.4)
+	assert_float(landed_speed).is_greater(23.5)

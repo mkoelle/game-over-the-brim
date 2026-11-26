@@ -74,12 +74,12 @@ extends Resource
 ## resist spin-outs and punch through lighter ones on impact).
 @export var mass: float = 1000.0
 
-## Fraction of ground throttle/brake/steering effectiveness retained while
-## airborne (0..1) — kart racers consistently give the player some control
-## and continued boosting mid-jump rather than a pure unpowered ballistic
-## fall (Super Mario Kart's handling is fully ground-equivalent in the
-## air; Crash Team Racing's air-brake lets you turn *tighter* than on the
-## ground). This isn't full ground grip: velocity blends toward the
-## target instead of snapping to it, so momentum from the launch is still
-## dominant.
-@export_range(0.0, 1.0) var air_control: float = 0.35
+## Share of the ground yaw rate available in the air (T-030). The genre keeps
+## air control small: steering adds a few degrees of yaw, and the launch keeps
+## its line (handling-reference.md section 3: 15-30%). There is no throttle in
+## the air.
+@export_range(0.0, 1.0) var air_steer_share: float = 0.25
+
+## Gravity multiplier while airborne (T-030). Arcade jumps fall faster than
+## real ones, so hang time stays short (section 3: 1.3-1.8).
+@export var air_gravity_scale: float = 1.6

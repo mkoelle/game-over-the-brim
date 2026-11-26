@@ -1,7 +1,9 @@
 extends GdUnitTestSuite
 
-## T-021: Ramp2 is a solid wedge. Its top surface matches the old tilted
-## slab (30 degrees, 8 m high), and nothing can drive under its high end.
+## T-021: Ramp2 is a solid wedge, and nothing can drive under its high end.
+## T-030 reshaped it from 30 degrees / 8 m to a 20-degree, 2.5 m kicker, so
+## that with ramp launches the hang time is about 1.2 s and the landing stays
+## inside the walls.
 ## Under the old slab the car wedged in the gap, the camera's collision
 ## start point ended up inside the slab, and the camera popped through it.
 
@@ -9,8 +11,9 @@ const TRACK: String = "res://scenes/arenas/test_track.tscn"
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const RAMP_X: float = -27.688313
 const LOW_Z: float = 1.5521212 # where the top surface meets the floor
-const HIGH_Z: float = 15.408530 # the top edge and the vertical back face
-const RAMP_DEG: float = 30.0
+const HIGH_Z: float = 8.420815 # the top edge and the vertical back face
+const RAMP_DEG: float = 20.0
+const RAMP_HEIGHT: float = 2.5
 
 var _track: Node3D
 
@@ -28,12 +31,12 @@ func _add_track() -> PhysicsDirectSpaceState3D:
 	return _track.get_world_3d().direct_space_state
 
 
-func test_top_surface_is_thirty_degrees_and_eight_metres_high() -> void:
+func test_top_surface_is_twenty_degrees_and_two_and_a_half_metres_high() -> void:
 	var space: PhysicsDirectSpaceState3D = await _add_track()
 	var mid_z: float = (LOW_Z + HIGH_Z) * 0.5
 	var hit: Dictionary = _ray(space, Vector3(RAMP_X, 20.0, mid_z), Vector3(RAMP_X, -1.0, mid_z))
 	assert_bool(hit.is_empty()).is_false()
-	assert_float(float(hit.position.y)).is_equal_approx(4.0, 0.05)
+	assert_float(float(hit.position.y)).is_equal_approx(RAMP_HEIGHT * 0.5, 0.05)
 	var normal: Vector3 = hit.normal
 	assert_float(rad_to_deg(normal.angle_to(Vector3.UP))).is_equal_approx(RAMP_DEG, 0.1)
 	var top: Dictionary = _ray(
@@ -41,14 +44,14 @@ func test_top_surface_is_thirty_degrees_and_eight_metres_high() -> void:
 		Vector3(RAMP_X, 20.0, HIGH_Z - 0.05),
 		Vector3(RAMP_X, -1.0, HIGH_Z - 0.05),
 	)
-	assert_float(float(top.position.y)).is_equal_approx(8.0, 0.05)
+	assert_float(float(top.position.y)).is_equal_approx(RAMP_HEIGHT, 0.05)
 
 
 func test_no_gap_under_the_high_end() -> void:
 	var space: PhysicsDirectSpaceState3D = await _add_track()
 	# A car-height ray from behind the ramp must stop at the back face, not
 	# travel under the ramp. The old slab let it reach z of about 4.
-	for height: float in [0.5, 1.0, 1.5, 2.5]:
+	for height: float in [0.5, 1.0, 1.5, 2.2]:
 		var hit: Dictionary = _ray(
 			space,
 			Vector3(RAMP_X, height, 30.0),

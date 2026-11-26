@@ -3,7 +3,7 @@
 **Assignee:** Claude (Opus, ADR-022 camera-feel work)
 **Date:** 2026-11-25
 **Priority:** P1
-**Status:** Done
+**Status:** Done (Ramp2 later reshaped to 20 degrees / 2.5 m in T-030)
 **Estimate:** 2h
 **Phase:** 1 — Feel-test support ([plan](../plans/addon-adoption-plan.md)), FC-1 feedback
 **ADR:** [ADR-013](../adr/ADR-013-camera-addon-phantom-camera.md)

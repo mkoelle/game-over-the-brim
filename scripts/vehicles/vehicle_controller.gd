@@ -12,7 +12,9 @@ extends CharacterBody3D
 ## - T-028: a speed and travel-direction model with frame-rate independent
 ##   grip, and a locked-direction drift whose slide angle is the gap between
 ##   the body heading and the travel direction
-## Control is reduced (not zero) while airborne.
+## - T-029: wall contact response (keep momentum, bounce on hard hits)
+## - T-030: ramps launch the car with the slope's upward speed; no throttle
+##   and a small yaw share in the air; scaled-up air gravity
 ##
 ## It emits no EventBus signals. Its one signal, `impacted`, is local to
 ## this vehicle (see below).
@@ -60,6 +62,10 @@ const WALL_ALIGN_HOLD: float = 0.25
 
 ## A hit at least this hard, in m/s into the wall, ends a drift.
 const WALL_DRIFT_CANCEL_SPEED: float = 6.0
+
+## Length, in metres, of the downward ray from the car's centre that reads
+## the surface normal under it (T-030). The car's half height is 0.5 m.
+const GROUND_RAY_LENGTH: float = 1.2
 
 ## Smallest steer input that starts a drift (T-028).
 const DRIFT_ENTRY_STEER: float = 0.3
@@ -120,8 +126,23 @@ var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 
 var _time_since_wall_contact: float = INF
 var _contact_peak_speed: float = 0.0
 var _drift_air_time: float = 0.0
+var _was_grounded: bool = false
+var _ground_ray: RayCast3D
+var _ground_normal: Vector3 = Vector3.UP
 var _wall_align_heading: Vector3 = Vector3.ZERO
 var _wall_align_left: float = 0.0
+
+
+func _ready() -> void:
+	# The contact normal at a ramp's foot is a blend of floor and slope (44
+	# degrees measured on a 15-degree ramp), which would launch the car off
+	# the base. A ray from the centre reads the real face under the car.
+	_ground_ray = RayCast3D.new()
+	_ground_ray.target_position = Vector3.DOWN * GROUND_RAY_LENGTH
+	_ground_ray.collision_mask = collision_mask
+	_ground_ray.enabled = false
+	_ground_ray.add_exception(self)
+	add_child(_ground_ray)
 
 
 func _physics_process(delta: float) -> void:
@@ -133,9 +154,10 @@ func _physics_process(delta: float) -> void:
 	var drift_held: bool = bool(input.get("drift", false))
 	var grounded: bool = is_on_floor()
 
-	# --- Control effectiveness: full on the ground, partial while airborne
-	# (stats.air_control), so a launch's momentum still dominates. ---
-	var control_factor: float = 1.0 if grounded else stats.air_control
+	# --- Air (T-030): no throttle in the air, and only a share of the yaw,
+	# so a launch keeps its line (handling-reference.md section 3). ---
+	var throttle_factor: float = 1.0 if grounded else 0.0
+	var yaw_factor: float = 1.0 if grounded else stats.air_steer_share
 
 	# --- Speed and travel direction (T-028). The velocity itself holds both:
 	# its length is the speed and its direction is where the car is going.
@@ -149,9 +171,9 @@ func _physics_process(delta: float) -> void:
 
 	# --- Acceleration / braking ---
 	if throttle >= 0.0:
-		speed += throttle * stats.acceleration * control_factor * delta
+		speed += throttle * stats.acceleration * throttle_factor * delta
 	else:
-		speed += throttle * stats.braking_force * control_factor * delta
+		speed += throttle * stats.braking_force * throttle_factor * delta
 	speed = clampf(speed, -stats.max_speed, stats.max_speed)
 
 	_update_drift(drift_held, raw_steer, grounded, delta)
@@ -159,7 +181,7 @@ func _physics_process(delta: float) -> void:
 	# --- Steering (T-027): a flat yaw rate once moving, so the turn radius
 	# grows with speed (handling-reference.md section 1). It fades in from
 	# steer_min_speed, so the car never spins on the spot, and is scaled by
-	# control_factor (reduced but not zero in the air). Scaled by
+	# yaw_factor (a small share in the air, T-030). Scaled by
 	# signf(speed) so steer_right always curves the actual path right on
 	# screen, forward or reverse — real cars invert this in reverse, which
 	# reads as broken controls in a casual party game. "Fun > Realism"
@@ -180,7 +202,7 @@ func _physics_process(delta: float) -> void:
 			stats.steer_full_speed,
 		)
 		yaw_rate = -steer * stats.steering_rate * fade * signf(speed)
-	rotate_y(yaw_rate * control_factor * delta)
+	rotate_y(yaw_rate * yaw_factor * delta)
 	_apply_wall_align(delta)
 	body_forward = -global_transform.basis.z
 
@@ -197,21 +219,31 @@ func _physics_process(delta: float) -> void:
 		if absf(speed) > MIN_SLIDE_SPEED
 		else 0.0
 	)
+	# --- Velocity (T-030). On the ground it stays flat and move_and_slide()
+	# carries it up slopes, which keeps floor contact. The slope under the car
+	# is remembered, and on the tick the car leaves the ground going uphill it
+	# gets the slope's upward speed: that is the ramp launch. The flat speed is
+	# kept, so a takeoff costs nothing. In the air gravity is scaled up. ---
 	var new_flat: Vector3 = travel * speed
 	velocity.x = new_flat.x
 	velocity.z = new_flat.z
-
-	# --- Gravity ---
 	if grounded:
 		velocity.y = 0.0
+		# Past a ramp's top edge the centre ray misses while the rear still
+		# touches; keep the slope seen last, so the launch uses it.
+		_ground_normal = _surface_normal(_ground_normal)
 	else:
-		velocity.y -= _gravity * delta
+		if _was_grounded:
+			velocity.y = maxf(velocity.y, launch_vertical_speed(travel, _ground_normal, speed))
+		velocity.y -= _gravity * stats.air_gravity_scale * delta
+	_was_grounded = grounded
 
 	# The slide removes the into-wall part of velocity, so read it before.
 	var pre_slide_velocity: Vector3 = velocity
 	move_and_slide()
 	_detect_wall_impact(pre_slide_velocity, delta)
 	_respond_to_wall(pre_slide_velocity, delta)
+	_keep_floor_motion(pre_slide_velocity)
 
 
 ## Signed speed from a flat velocity: its length, negative when it points
@@ -240,6 +272,24 @@ static func travel_direction(flat: Vector3, body_forward: Vector3, signed: float
 ## between them.
 static func turn_toward(from: Vector3, to: Vector3, t: float) -> Vector3:
 	return from.rotated(Vector3.UP, from.signed_angle_to(to, Vector3.UP) * clampf(t, 0.0, 1.0))
+
+
+## Upward speed, in m/s, a car leaving a surface with `normal` gets when it
+## travels along flat unit `travel` at signed `speed_value` (T-030). It is
+## `speed x sin(slope)` going uphill, and 0 going downhill or on flat ground.
+static func launch_vertical_speed(travel: Vector3, normal: Vector3, speed_value: float) -> float:
+	var climb: float = along_surface(travel, normal).y * speed_value
+	return maxf(climb, 0.0)
+
+
+## Unit direction along the floor surface under a flat unit `travel` (T-030):
+## `travel` with its part along `normal` removed. On flat ground it is
+## `travel`. Going uphill it tilts up, so it carries the climb.
+static func along_surface(travel: Vector3, normal: Vector3) -> Vector3:
+	if normal.length() < 0.5:
+		return travel
+	var on_plane: Vector3 = travel - normal * travel.dot(normal)
+	return on_plane.normalized() if on_plane.length() > 0.001 else travel
 
 
 ## Keeps `travel` within `max_angle` radians of `body` around +Y.
@@ -386,6 +436,36 @@ func _respond_to_wall(pre_slide_velocity: Vector3, delta: float) -> void:
 	_wall_align_heading = slid.normalized()
 	_wall_align_left = WALL_ALIGN_HOLD
 	_apply_wall_align(delta)
+
+
+## Floors and ramp lips (T-030). move_and_slide() slides the velocity along
+## whatever it touched, and at a ramp's foot the edge between floor and slope
+## can kick the car upward (measured: 13.5 m/s up at 21 m/s, a launch off the
+## base). The lip's edge normal is steep enough to count as a wall, so the
+## rule off the floor is: never more upward speed than was commanded, so only a
+## real ramp top launches the car. A true wall (T-029) keeps its slid flat
+## part; anything else keeps the commanded flat part.
+func _keep_floor_motion(commanded: Vector3) -> void:
+	if is_on_floor():
+		return
+	velocity.y = minf(velocity.y, commanded.y)
+	if is_on_wall() and absf(get_wall_normal().y) < WALL_NORMAL_MAX_Y:
+		var n: Vector3 = get_wall_normal()
+		if absf(n.y) < 0.3:
+			return
+	velocity.x = commanded.x
+	velocity.z = commanded.z
+
+
+## Normal of the surface under the car's centre (T-030), from the ground ray,
+## or `fallback` if the ray misses.
+func _surface_normal(fallback: Vector3) -> Vector3:
+	if _ground_ray == null:
+		return fallback
+	_ground_ray.force_raycast_update()
+	if _ground_ray.is_colliding():
+		return _ground_ray.get_collision_normal()
+	return fallback
 
 
 func _apply_wall_align(delta: float) -> void:

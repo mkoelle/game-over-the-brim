@@ -47,14 +47,16 @@ imported prop from the side, from behind and from below.
 
 The outer walls must be taller than the highest point a car can reach
 off any ramp, plus 2 m. On the test track the highest car origin
-measured is 8.64 m off Ramp2. With half the car (0.5 m) and the margin,
-the walls are now 12 m (T-024). At 3 m, a right turn off Ramp2 cleared
-the west wall in 13 of 40 scripted runs.
+measured is 5.77 m, off the Kenney ramp, now that ramps launch (T-030).
+It was 8.64 m off the old 8 m Ramp2 (T-024). The walls are 12 m. At 3 m,
+a right turn off the old Ramp2 cleared the west wall in 13 of 40
+scripted runs.
 
-When the handling rework makes ramps launch upward, re-measure the apex
-and raise the walls, or add a see-through fence above them. As a safety
-net, `OutOfBoundsReset` puts a car that falls below y = -20 back at its
-spawn pose.
+Size ramps for the hang time, not the drama. At 24 m/s and 1.6 g air
+gravity, a 15-22 degree ramp gives 1.0-1.3 s of air (T-030). The old
+30-degree 8 m Ramp2 launched to 13 m. After any ramp or launch change,
+re-measure the apex. As a safety net, `OutOfBoundsReset` puts a car that
+falls below y = -20 back at its spawn pose.
 
 ## 5. Collision shapes
 
