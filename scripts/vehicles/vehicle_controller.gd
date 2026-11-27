@@ -14,6 +14,7 @@ extends CharacterBody3D
 ##   the body heading and the travel direction
 ## - T-029: wall contact response (keep momentum, bounce on hard hits)
 ## - T-031: drift charge in three tiers, paid out as a boost on release
+## - T-038: drifts linked left-right within 0.75 s lengthen each payout
 ## - T-033: a trick (the drift button just after a ramp launch) boosts on
 ##   landing
 ## - T-032: the mesh lives under a VehicleVisualBody child, which rolls, tilts,
@@ -50,6 +51,10 @@ signal boost_started(tier: int)
 
 ## Emitted when a trick fires in the air (T-033). The boost follows on landing.
 signal trick_performed
+
+## Emitted when a new drift links onto the last one (T-038). `count` is the
+## links in the chain so far, 1 to CHAIN_MAX.
+signal drift_chained(count: int)
 
 ## Emitted when a boost runs out.
 signal boost_ended
@@ -114,6 +119,17 @@ const TRICK_MIN_LAUNCH_SPEED: float = 1.0
 ## After a trick fires, its landing boost waits at least this long.
 const TRICK_COOLDOWN: float = 0.08
 
+## Drift chain (T-038, owner choice at FC-2). A drift that starts within
+## CHAIN_WINDOW seconds of a paid-out release, turning the other way, links
+## onto it. Each link adds CHAIN_BONUS to the next payout's length, up to
+## CHAIN_MAX links. The bonus is on the payout, not on the charge rate, so
+## every drift still needs the full tier-1 time (0.85 s, about 80 degrees of
+## turning) and weaving on a straight ("snaking", which Mario Kart Wii
+## removed) cannot farm it.
+const CHAIN_WINDOW: float = 0.75
+const CHAIN_BONUS: float = 0.25
+const CHAIN_MAX: int = 3
+
 ## Smallest steer input that starts a drift (T-028).
 const DRIFT_ENTRY_STEER: float = 0.3
 
@@ -165,6 +181,9 @@ var drift_direction: int = 0
 ## around +Y. It is positive when the car travels to the left of its nose.
 var slide_angle_deg: float = 0.0
 
+## Links in the current drift chain, 0 to CHAIN_MAX (T-038).
+var chain_count: int = 0
+
 ## True after a trick fired in the air, until the landing pays it (T-033).
 var has_trick: bool = false
 
@@ -191,6 +210,8 @@ var _time_since_wall_contact: float = INF
 var _contact_peak_speed: float = 0.0
 var _drift_air_time: float = 0.0
 var _drift_charge: int = 0
+var _since_payout: float = INF
+var _last_payout_direction: int = 0
 var _boost_extra: float = 0.0
 var _drift_was_held: bool = false
 var _since_press: float = INF
@@ -502,9 +523,13 @@ func _update_drift(
 		elif grounded:
 			_charge_drift(steer)
 		return
+	_since_payout += delta
+	if chain_count > 0 and _since_payout > CHAIN_WINDOW:
+		chain_count = 0
 	if can_start_drift(held, raw_steer, speed, grounded, stats.drift_min_speed):
 		is_drifting = true
 		drift_direction = 1 if raw_steer > 0.0 else -1
+		_link_chain()
 		_drift_air_time = 0.0
 		_drift_charge = 0
 		drift_tier = 0
@@ -525,13 +550,41 @@ func _charge_drift(steer: float) -> void:
 ## lost.
 func _end_drift(pay_out: bool) -> void:
 	var tier: int = drift_tier
+	var direction: int = drift_direction
 	is_drifting = false
 	drift_direction = 0
 	drift_tier = 0
 	_drift_charge = 0
 	drift_ended.emit()
 	if pay_out and tier > 0:
-		_start_boost(tier, stats.boost_speed, stats.boost_times[tier - 1])
+		var length: float = stats.boost_times[tier - 1] * chain_payout_scale(chain_count)
+		_start_boost(tier, stats.boost_speed, length)
+		_since_payout = 0.0
+		_last_payout_direction = direction
+	else:
+		# A cancelled or unpaid drift breaks the chain.
+		chain_count = 0
+		_since_payout = INF
+
+
+## Links this drift onto the last payout, or starts a new chain (T-038).
+func _link_chain() -> void:
+	if chain_links(_since_payout, _last_payout_direction, drift_direction):
+		chain_count = mini(chain_count + 1, CHAIN_MAX)
+		drift_chained.emit(chain_count)
+	else:
+		chain_count = 0
+
+
+## Whether a drift turning `direction` links onto a payout `since` seconds
+## ago that turned `last_direction` (T-038): inside the window, other way.
+static func chain_links(since: float, last_direction: int, direction: int) -> bool:
+	return since <= CHAIN_WINDOW and last_direction != 0 and direction == -last_direction
+
+
+## Payout length multiplier for a chain of `count` links (T-038).
+static func chain_payout_scale(count: int) -> float:
+	return 1.0 + CHAIN_BONUS * clampi(count, 0, CHAIN_MAX)
 
 
 func _start_boost(tier: int, extra_speed: float, seconds: float) -> void:

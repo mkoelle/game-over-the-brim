@@ -802,3 +802,60 @@ func test_ramp_crest_has_no_level_hitch() -> void:
 	# 8 before or after takeoff stops rising.
 	for i: int in range(takeoff - 8, takeoff + 8):
 		assert_float(rates[i]).is_greater(3.0)
+
+
+## T-038: drift chain.
+func test_chain_link_rules_and_payout_scale() -> void:
+	assert_bool(VehicleController.chain_links(0.3, 1, -1)).is_true()
+	assert_bool(VehicleController.chain_links(0.3, 1, 1)).is_false()
+	assert_bool(VehicleController.chain_links(1.0, 1, -1)).is_false()
+	assert_bool(VehicleController.chain_links(0.3, 0, -1)).is_false()
+	assert_float(VehicleController.chain_payout_scale(0)).is_equal(1.0)
+	assert_float(VehicleController.chain_payout_scale(2)).is_equal(1.5)
+	assert_float(VehicleController.chain_payout_scale(9)).is_equal(1.75)
+
+
+## Holds a drift `dir` for `hold` ticks, then releases for `gap` ticks.
+func _drift_once(input: BoostInput, dir: float, hold: int, gap: int) -> void:
+	input.steer = dir
+	input.drift = true
+	await await_physics_ticks(hold)
+	input.drift = false
+	input.steer = 0.0
+	await await_physics_ticks(gap)
+
+
+func test_linked_drift_pays_a_longer_boost() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	var lengths: Array[float] = []
+	car.boost_started.connect(
+		func(_t: int) -> void:
+			lengths.append(car.boost_time_left),
+	)
+	await await_physics_ticks(3)
+	await _drift_once(input, 1.0, 57, 12)
+	await _drift_once(input, -1.0, 57, 12)
+	assert_int(lengths.size()).is_equal(2)
+	assert_float(lengths[0]).is_equal_approx(0.7, 0.02)
+	# One link: the tier-1 payout is 25% longer.
+	assert_float(lengths[1]).is_equal_approx(0.7 * 1.25, 0.02)
+	assert_int(car.chain_count).is_equal(1)
+
+
+func test_short_weaving_drifts_earn_no_chain() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	var chains: Array[int] = [0]
+	car.drift_chained.connect(
+		func(_c: int) -> void:
+			chains[0] += 1,
+	)
+	await await_physics_ticks(3)
+	# Snaking: 0.5 s drifts never reach tier 1, so nothing pays or links.
+	for i: int in 4:
+		await _drift_once(input, 1.0 if i % 2 == 0 else -1.0, 30, 6)
+	assert_int(chains[0]).is_equal(0)
+	assert_int(car.chain_count).is_equal(0)

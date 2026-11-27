@@ -34,6 +34,8 @@ func _process(_delta: float) -> void:
 		]
 	elif drift:
 		drift_state = "held"
+	if target.chain_count > 0:
+		drift_state += "  CHAIN x%d" % target.chain_count
 	if target.boost_time_left > 0.0:
 		drift_state += "  BOOST %d (%.1f s)" % [target.boost_tier, target.boost_time_left]
 
