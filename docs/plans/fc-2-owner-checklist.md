@@ -23,56 +23,64 @@ the next round fixes or tunes it.
 
 ## 0. Setup
 
-- [ ] Pull `main`, run `mise install && task import`, then `task run`.
+- [x] Pull `main`, run `mise install && task import`, then `task run`.
       F3 shows the overlay and the in-world vectors.
 
 ## 1. Steering ([T-027](../tasks/T-027-steering-curve-and-smoothing.md))
 
-- [ ] Top speed feels planted, not twitchy, with a turn radius of about
+- [x] Top speed feels planted, not twitchy, with a turn radius of about
       17 m. The tuning knob is `steering_rate` (1.4) in
       `resources/vehicles/stovepipe_speedster.tres`.
-- [ ] Hairpins at low speed feel agile (about 5-7 m radius).
-- [ ] Tapping left and right moves the nose smoothly, not in snaps
+- [x] Hairpins at low speed feel agile (about 5-7 m radius).
+- [x] Tapping left and right moves the nose smoothly, not in snaps
       (`steer_ramp_time` 0.17 s).
 - [ ] A gamepad stick still feels direct with the ramp on.
-- [ ] Stopped against a wall, a little reverse frees the car (no
+- [x] Stopped against a wall, a little reverse frees the car (no
       rotation below 1 m/s).
 
 ## 2. Drift slide ([T-028](../tasks/T-028-grip-and-drift-slide.md))
 
-- [ ] With F3 on, a held drift through the barrier corners reads about
+- [x] With F3 on, a held drift through the barrier corners reads about
       20-35 degrees of slide and stays controllable. Steering in
       tightens the line, steering out widens it, and neither ends the
       drift.
-- [ ] Drifting does not cost speed. Say if it feels like a free lunch.
-- [ ] A slow hairpin can still be drifted (minimum 11 m/s).
-- [ ] A normal full-lock turn feels planted, not icy (about 4 degrees of
+- [x] Drifting does not cost speed. Say if it feels like a free lunch.
+- [x] A slow hairpin can still be drifted (minimum 11 m/s).
+- [x] A normal full-lock turn feels planted, not icy (about 4 degrees of
       slip).
 - [ ] A drift over a bump or a ramp lip does not cancel unexpectedly.
 - [ ] The overlay's `Drift:` line shows the side and the slide.
 
 ## 3. Walls ([T-029](../tasks/T-029-wall-contact-response.md))
 
-- [ ] Glancing a wall keeps momentum. The car slides off and carries on,
+- [x] Glancing a wall keeps momentum. The car slides off and carries on,
       and does not grind to a stop (your FC-1 comment).
-- [ ] A head-on hit at full speed bounces the car back. It feels fun, not
+- [x] A head-on hit at full speed bounces the car back. It feels fun, not
       punishing (`wall_restitution` 0.4).
-- [ ] Holding throttle into a wall gives a few shrinking bounces, not
+- [x] Holding throttle into a wall gives a few shrinking bounces, not
       jitter.
-- [ ] A glancing hit does not feel like the game is steering for you
+- [x] A glancing hit does not feel like the game is steering for you
       (`wall_align_time` 0.1 s).
-- [ ] Each crash still shakes the camera once.
+- [x] Each crash still shakes the camera once.
 
 ## 4. Ramps, air, landing ([T-030](../tasks/T-030-ramp-launch-air-landing.md))
 
-- [ ] Both ramps launch the car now. About 1.2 s of air feels snappy, not
+- [x] Both ramps launch the car now. About 1.2 s of air feels snappy, not
       floaty (`air_gravity_scale` 1.6).
+      - adds a bounce at top, this may be ok, still debating
+      - the bounce feels like it occurs after leaving the ramp instead of while on the ramp
+        - *Agent:* Measured and fixed in
+          [T-037](../tasks/T-037-ramp-crest-hitch.md). At the top edge the
+          car held level for about 80 ms, with its rear on the edge, and
+          was then launched: a hitch and a second pop. Now the climb
+          carries straight off the edge (6.2 m/s up, then gravity only).
+          Jump again: any bounce left is the launch itself.
 - [ ] Ramp2 is now a 20-degree, 2.5 m kicker (it was 30 degrees and 8 m).
       Is it big enough?
 - [ ] In the air the nose turns a little (25%), but the line holds.
       Landings feel controllable.
-- [ ] A clean landing keeps your speed. Jumping is not a speed boost.
-- [ ] Driving into the foot of a ramp never pops the car into the air.
+- [x] A clean landing keeps your speed. Jumping is not a speed boost.
+- [x] Driving into the foot of a ramp never pops the car into the air.
 
 ## 5. Drift boost tiers ([T-031](../tasks/T-031-drift-charge-tiers-boost.md))
 
@@ -88,24 +96,24 @@ the next round fixes or tunes it.
 
 ## 6. Visual body ([T-032](../tasks/T-032-visual-body-ground-alignment.md))
 
-- [ ] The car leans into corners (up to 10 degrees), and the lean looks
+- [x] The car leans into corners (up to 10 degrees), and the lean looks
       right.
-- [ ] On the ramps the body tilts to the slope. In the air the nose
+- [x] On the ramps the body tilts to the slope. In the air the nose
       follows the arc.
-- [ ] Starting a drift gives a small hop. It feels alive, not silly.
-- [ ] Each tier is obvious from the sparks and the glow: cyan, then amber,
+- [x] Starting a drift gives a small hop. It feels alive, not silly.
+- [x] Each tier is obvious from the sparks and the glow: cyan, then amber,
       then magenta. The car still reads as red.
-- [ ] A boost glows brighter in the tier's colour.
+- [x] A boost glows brighter in the tier's colour.
 
 ## 7. Tricks ([T-033](../tasks/T-033-trick-boost.md))
 
-- [ ] Tap the drift button just as you leave a ramp. The car does a barrel
+- [x] Tap the drift button just as you leave a ramp. The car does a barrel
       roll and boosts on landing (+6.7 m/s for 0.9 s, white glow).
 - [ ] The timing window (0.15 s, plus a 0.2 s early buffer) feels fair,
       not random.
 - [ ] You never trick by accident when trying to drift right after a
       landing.
-- [ ] A trick landing feels worth it next to a tier-2 drift boost.
+- [x] A trick landing feels worth it next to a tier-2 drift boost.
 
 ## 8. Camera ([T-034](../tasks/T-034-chase-camera-tuning-pass.md))
 
@@ -113,7 +121,7 @@ the next round fixes or tunes it.
       (+4 degrees).
 - [ ] A boost widens it more (+8 to +12 by tier) and pulls the camera back
       a little. It feels fast, not like a fish-eye.
-- [ ] In a drift the camera looks down the travel direction, so the road
+- [x] In a drift the camera looks down the travel direction, so the road
       stays in view and the car is angled across the screen. It does not
       look too sideways.
 - [ ] Entering and leaving a drift never snaps the camera.
@@ -123,22 +131,36 @@ the next round fixes or tunes it.
 A second, larger map. Press **F4** in game or run `task run:circuit`. The
 layouts are in [test-tracks.md](../design/test-tracks.md).
 
-- [ ] F4 switches maps, and the car starts behind the start line.
-- [ ] The 14 m road feels right for drifting and (later) four cars.
-- [ ] The R10 hairpin needs a brake or a drift, and drifting it is fun.
-- [ ] The R35 sweeper holds a drift long enough for tier 3.
-- [ ] The kicker launches cleanly, and the trick window works there too.
+- [x] F4 switches maps, and the car starts behind the start line.
+- [x] The 14 m road feels right for drifting and (later) four cars.
+- [x] The R10 hairpin needs a brake or a drift, and drifting it is fun.
+- [x] The R35 sweeper holds a drift long enough for tier 3.
+- [x] The kicker launches cleanly, and the trick window works there too.
 - [ ] Pick the next layout to build (B to E in `test-tracks.md`).
-- [ ] Each map (and each F4) opens on a still shot above and behind the
+- [x] Each map (and each F4) opens on a still shot above and behind the
       car, then flies smoothly into the chase camera
       ([T-036](../tasks/T-036-intro-camera-and-jump-walls.md)).
-- [ ] The jump walls no longer flicker against the barriers. Say if they
+- [x] The jump walls no longer flicker against the barriers. Say if they
       still feel heavy (the option is a see-through catch fence).
 
 ## 9. The gate
 
-- [ ] One car on one track is fun (Guardrail 3). If not, say what is
+- [x] One car on one track is fun (Guardrail 3). If not, say what is
       missing, and the next round becomes tickets.
+      - could chaining drifts be possible?
+      - could nuilding up a boost be done over time , and using space to boost when not turning and space to drift when turning work?
+      - time without boosting or drifitng would slowly drain boost guage?
+      - thougths and chalenges, counters and alternatives
+  - *Agent:* **Gate passed (2026-11-26).** Phases 3-4 of the addon plan
+    are unblocked (T-012 to T-015 are now Todo). The boost and drift
+    questions are answered in
+    [boost-meter-and-drift-chains.md](../design/boost-meter-and-drift-chains.md):
+    genre evidence (CTR reserves, Mario Kart DS snaking and its removal,
+    Burnout and Hot Wheels meters), plus options, challenges, counters
+    and a recommendation. In short: a hybrid "bank" gauge, a chain combo
+    with anti-snaking counters, and a cap with no drain. Pick a
+    direction to prototype.
+
 
 ## Deferred from FC-1
 

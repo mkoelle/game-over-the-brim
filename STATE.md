@@ -1,18 +1,30 @@
 # Development State
 
 ## Active Milestone
-**Phase A: Foundation — Iteration 01: Drivable Prototype — core loop done, tasks 1-9 complete, merged to `main` (#1). Hand feel-test done 2026-11-24: drivable, but steering response, drift, camera and ramps/air/landing all feel wrong. The current tuning is **not a usable reference baseline**. The "1-Car Fun" gate (Guardrail 3) is NOT passed. Handling needs a rework pass (self-implemented per ADR-012), not small tuning. Phase 1 of the [addon adoption plan](docs/plans/addon-adoption-plan.md) (physics pin, per-device input fix, Phantom Camera, debug vectors) supports the tuning pass. Phases 3-4 stay blocked until the gate passes.**
+**Phase A: Foundation — Iteration 01: Drivable Prototype.** The
+"1-Car Fun" gate (Guardrail 3) **passed at FC-2 on 2026-11-26**, after:
+- the FC-1 fixes (T-020 to T-026)
+- the handling rework (T-027 to T-034)
+- the Tuning Circuit (T-035 to T-037)
+
+Phases 3-4 of the [addon adoption plan](docs/plans/addon-adoption-plan.md)
+are unblocked. Next: decide the boost and drift depth (see the priorities
+below), then track and menu work.
 
 ---
 
 ## Current Priorities
-1. **FC-2 (the "1-Car Fun" gate)**: the handling rework is done (T-027
-   to T-034, [plan](docs/plans/handling-rework-plan.md)). The owner works
-   through the [FC-2 owner checklist](docs/plans/fc-2-owner-checklist.md).
-   Items not answered at FC-1 are deferred into it.
-2. **Next tuning round**: FC-2 comments become tickets, as at FC-1.
-3. **Blocked until later:** T-018 (Godot 4.8 is not stable yet) and
-   T-012 to T-015 (they wait for the gate).
+1. **"1-Car Fun" gate: passed** (FC-2, owner, 2026-11-26). The handling
+   rework (T-027 to T-034) and the Tuning Circuit (T-035 to T-037) are
+   merged.
+2. **Boost and drift depth**: the owner asked about chaining drifts, a
+   boost gauge and draining it. The options and a recommendation are in
+   [boost-meter-and-drift-chains.md](docs/design/boost-meter-and-drift-chains.md),
+   waiting for the owner to pick a direction to prototype.
+3. **Unblocked by the gate**: T-012 to T-015 (Road Generator spike,
+   RoadLane probe, ProtonScatter, menus template) in the
+   [addon adoption plan](docs/plans/addon-adoption-plan.md).
+4. **Still blocked:** T-018 (Godot 4.8 is not stable yet).
 
 Process: [ADR-022](docs/adr/ADR-022-dev-workflow-lean-trunk-and-model-tiering.md)
 (lean trunk, one tracker in `docs/tasks`, feel gates, Sonnet builder with
@@ -28,6 +40,11 @@ Opus checker).
 ---
 
 ## Recent Progress
+- **FC-2 passed** (2026-11-26): the owner judged "one car on one track is
+  fun". Follow-ups:
+  - T-036: the intro camera from a vantage point, and jump walls without
+    z-fighting
+  - T-037: smooth ramp takeoff with no crest hitch
 - A second, larger test map (2026-11-26, T-035): the 571 m Tuning Circuit,
   generated from a corner list, with a hairpin, chicane, kicker jump and
   sweeper. F4 or `task run:circuit` selects it. Five layout options are

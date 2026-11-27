@@ -3,7 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P3
-**Status:** Blocked (menus wait for the 1-Car Fun gate)
+**Status:** Todo (the 1-Car Fun gate passed at FC-2, 2026-11-26)
 **Estimate:** 4h
 **Phase:** 4 — Menus ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-018](../adr/ADR-018-menu-framework-maaack-menus-template.md)
