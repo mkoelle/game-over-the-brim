@@ -5,8 +5,9 @@ extends GdUnitTestSuite
 
 const CIRCUIT: String = "res://scenes/arenas/tuning_circuit.tscn"
 const MAIN_SCENE: String = "res://scenes/main.tscn"
-## Highest car origin off the kicker, measured by the T-035 autopilot probe.
-const KICKER_APEX: float = 3.70
+## Highest car origin off the kicker, measured by the autopilot probe: 3.81 m
+## since T-037 (3.70 m in T-035).
+const KICKER_APEX: float = 3.81
 
 var _saved_track: int = 0
 
