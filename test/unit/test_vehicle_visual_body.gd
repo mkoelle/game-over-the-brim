@@ -95,3 +95,14 @@ func test_trick_spin_is_one_full_turn() -> void:
 	assert_float(VehicleVisualBody.trick_spin(spin_time)).is_equal(0.0)
 	assert_float(VehicleVisualBody.trick_spin(spin_time * 0.5)).is_equal_approx(PI, 0.001)
 	assert_float(VehicleVisualBody.trick_spin(0.0)).is_equal(0.0)
+
+
+func test_gauge_pips_fill_by_segment() -> void:
+	assert_float(VehicleVisualBody.pip_fill(0, 1.5, 0.0)).is_equal(1.0)
+	assert_float(VehicleVisualBody.pip_fill(1, 1.5, 0.0)).is_equal(0.5)
+	assert_float(VehicleVisualBody.pip_fill(2, 1.5, 0.0)).is_equal(0.0)
+	assert_float(VehicleVisualBody.pip_fill(3, 3.0, 0.4)).is_equal(0.4)
+	var car: Node = auto_free((load(TOPHAT_CAR_SCENE) as PackedScene).instantiate())
+	add_child(car)
+	for i: int in 4:
+		assert_object(car.get_node_or_null("VisualBody/GaugePip%d" % i)).is_not_null()

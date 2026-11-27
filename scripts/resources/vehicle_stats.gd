@@ -85,6 +85,11 @@ extends Resource
 @export var trick_boost_speed: float = 6.7
 @export var trick_boost_time: float = 0.9
 
+## Boost gauge spend (T-039): extra top speed, in m/s, and length, in seconds,
+## for one gauge segment.
+@export var gauge_boost_speed: float = 4.8
+@export var gauge_boost_time: float = 1.0
+
 ## Share of the into-wall speed the car bounces back with on a hard hit
 ## (T-029). 0 is a dead stop, 1 a perfect bounce. The target is 0.3-0.5.
 @export_range(0.0, 1.0) var wall_restitution: float = 0.4

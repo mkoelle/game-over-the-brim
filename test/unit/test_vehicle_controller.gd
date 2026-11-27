@@ -859,3 +859,88 @@ func test_short_weaving_drifts_earn_no_chain() -> void:
 		await _drift_once(input, 1.0 if i % 2 == 0 else -1.0, 30, 6)
 	assert_int(chains[0]).is_equal(0)
 	assert_int(car.chain_count).is_equal(0)
+
+
+## T-039: boost gauge, contextual tap, overcharge drain.
+func test_bank_fills_base_then_overcharge_then_drops_the_rest() -> void:
+	var a: Vector2 = VehicleController.bank_into(0.0, 0.0, 2.0 / 3.0)
+	assert_vector(a).is_equal_approx(Vector2(2.0 / 3.0, 0.0), Vector2.ONE * 0.001)
+	var b: Vector2 = VehicleController.bank_into(2.5, 0.0, 1.0)
+	assert_vector(b).is_equal_approx(Vector2(3.0, 0.5), Vector2.ONE * 0.001)
+	var c: Vector2 = VehicleController.bank_into(3.0, 0.8, 1.0)
+	assert_vector(c).is_equal_approx(Vector2(3.0, 1.0), Vector2.ONE * 0.001)
+
+
+func test_boost_tap_rule() -> void:
+	assert_bool(VehicleController.is_boost_tap(0.1, false, false)).is_true()
+	assert_bool(VehicleController.is_boost_tap(0.3, false, false)).is_false()
+	assert_bool(VehicleController.is_boost_tap(0.1, true, false)).is_false()
+	assert_bool(VehicleController.is_boost_tap(0.1, false, true)).is_false()
+
+
+func _tap(input: BoostInput, ticks: int, steer: float) -> void:
+	input.steer = steer
+	input.drift = true
+	await await_physics_ticks(ticks)
+	input.drift = false
+	input.steer = 0.0
+	await await_physics_ticks(2)
+
+
+func test_tier_one_release_banks_a_third_segment() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	await await_physics_ticks(3)
+	await _drift_once(input, 1.0, 57, 4)
+	assert_float(car.boost_gauge).is_equal_approx(1.0 / 3.0, 0.001)
+
+
+func test_tap_spends_a_segment_and_boosts() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	var tiers: Array[int] = []
+	car.boost_started.connect(
+		func(t: int) -> void:
+			tiers.append(t),
+	)
+	await await_physics_ticks(3)
+	car.boost_gauge = 1.5
+	await _tap(input, 3, 0.0)
+	assert_array(tiers).contains_exactly([VehicleController.GAUGE_BOOST_TIER])
+	assert_float(car.boost_gauge).is_equal_approx(0.5, 0.001)
+	await await_physics_ticks(30)
+	assert_float(car.speed).is_greater(car.stats.max_speed + 2.0)
+
+
+func test_no_spend_when_short_held_or_steered() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	var input: BoostInput = _boost_car(runner)
+	await await_physics_ticks(3)
+	car.boost_gauge = 0.9
+	await _tap(input, 3, 0.0)
+	# Under one segment: nothing to spend.
+	assert_float(car.boost_gauge).is_equal_approx(0.9, 0.001)
+	car.boost_gauge = 2.0
+	# Held too long to be a tap.
+	await _tap(input, 15, 0.0)
+	assert_float(car.boost_gauge).is_equal_approx(2.0, 0.001)
+	# A tap while steering starts a drift instead.
+	await _tap(input, 3, 1.0)
+	assert_float(car.boost_gauge).is_equal_approx(2.0, 0.001)
+
+
+func test_overcharge_drains_and_the_base_does_not() -> void:
+	var runner := scene_runner(TOPHAT_CAR_SCENE)
+	var car: VehicleController = runner.scene()
+	_boost_car(runner)
+	(car.input_source as BoostInput).throttle = 0.0
+	await await_physics_ticks(3)
+	car.boost_gauge = 3.0
+	car.boost_overcharge = 0.6
+	# No bank this run, so the grace is long over: it drains at 0.25 per s.
+	await await_physics_ticks(60)
+	assert_float(car.boost_overcharge).is_equal_approx(0.35, 0.02)
+	assert_float(car.boost_gauge).is_equal(3.0)

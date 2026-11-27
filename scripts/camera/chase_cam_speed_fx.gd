@@ -18,8 +18,9 @@ extends Node
 @export var speed_fov: float = 4.0
 
 ## Extra FOV while boosting, in degrees, by boost tier: index 0 is a trick
-## boost (T-033), 1-3 the drift tiers (section 4: +8, up to +12).
-@export var boost_fov_by_tier: PackedFloat32Array = PackedFloat32Array([10.0, 8.0, 10.0, 12.0])
+## boost (T-033), 1-3 the drift tiers (section 4: +8, up to +12), and 4 a
+## gauge boost (T-039).
+@export var boost_fov_by_tier: PackedFloat32Array = PackedFloat32Array([10.0, 8.0, 10.0, 12.0, 9.0])
 
 ## FOV time constants, in seconds: widening (attack) and narrowing (decay).
 ## Section 4: 0.15 s in, 0.5 s out.
