@@ -771,3 +771,34 @@ func test_too_slow_for_a_trick() -> void:
 	# 10 m/s is under half of top speed (12 m/s).
 	var result: Array[float] = await _ramp_jump(10.0, 5)
 	assert_float(result[0]).is_equal(0.0)
+
+
+## T-037: the climb carries through a ramp's top edge. Before, the car moved
+## level along the edge for about 80 ms and was then launched: a hitch, and a
+## second pop after leaving the ramp (FC-2).
+func test_ramp_crest_has_no_level_hitch() -> void:
+	var runner := scene_runner("res://scenes/main.tscn")
+	var car: VehicleController = runner.scene().get_node("TophatCar")
+	var input := ThrottleSteerInput.new()
+	car.input_source = input
+	await runner.simulate_frames(2)
+	car.global_position = Vector3(-27.69, 0.6, -45.0)
+	car.rotation = Vector3(0, PI, 0)
+	car.velocity = Vector3.ZERO
+	car.reset_physics_interpolation()
+	input.throttle = 1.0
+	var rates: PackedFloat32Array = []
+	var takeoff: int = -1
+	var prev_y: float = car.global_position.y
+	for i: int in 220:
+		await get_tree().physics_frame
+		var y: float = car.global_position.y
+		rates.append((y - prev_y) * 60.0)
+		prev_y = y
+		if takeoff < 0 and not car.is_on_floor() and car.global_position.y > 4.0:
+			takeoff = i
+	assert_int(takeoff).is_greater(0)
+	# Climbing at about 6 m/s up, then a smooth gravity curve: no tick in the
+	# 8 before or after takeoff stops rising.
+	for i: int in range(takeoff - 8, takeoff + 8):
+		assert_float(rates[i]).is_greater(3.0)

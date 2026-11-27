@@ -200,11 +200,13 @@ var _trick_cooldown: float = 0.0
 var _was_grounded: bool = false
 var _ground_ray: RayCast3D
 var _ground_normal: Vector3 = Vector3.UP
+var _default_floor_snap: float = 0.1
 var _wall_align_heading: Vector3 = Vector3.ZERO
 var _wall_align_left: float = 0.0
 
 
 func _ready() -> void:
+	_default_floor_snap = floor_snap_length
 	# The contact normal at a ramp's foot is a blend of floor and slope (44
 	# degrees measured on a 15-degree ramp), which would launch the car off
 	# the base. A ray from the centre reads the real face under the car.
@@ -310,11 +312,24 @@ func _physics_process(delta: float) -> void:
 	var new_flat: Vector3 = travel * speed
 	velocity.x = new_flat.x
 	velocity.z = new_flat.z
-	if grounded:
-		velocity.y = 0.0
-		# Past a ramp's top edge the centre ray misses while the rear still
-		# touches; keep the slope seen last, so the launch uses it.
-		_ground_normal = _surface_normal(_ground_normal)
+	var ray_hit: bool = _update_ground_ray()
+	# Crest (T-037): past a ramp's top edge the centre ray finds nothing while
+	# the rear still touches the edge. Counting that as grounded moved the car
+	# level for about 80 ms and then launched it: a hitch, then a second pop
+	# (FC-2: "the bounce feels like it occurs after leaving the ramp"). So a
+	# grounded car whose centre is past the edge, after a climb, takes off now.
+	var crest: bool = (
+		grounded and not ray_hit and launch_vertical_speed(travel, _ground_normal, speed) > 0.0
+	)
+	if grounded and not crest:
+		# Keep the slope seen last when the ray misses, so a launch uses it.
+		if ray_hit:
+			_ground_normal = _ground_ray.get_collision_normal()
+		# Going uphill, carry the climb's upward speed (speed x sin(slope)).
+		# That is a little shallower than the slope, so the car still presses
+		# into it, and it leaves the top edge already rising, with no level
+		# tick before the launch (T-037). On flat ground and downhill it is 0.
+		velocity.y = launch_vertical_speed(travel, _ground_normal, speed)
 		if not _was_grounded:
 			_land()
 	else:
@@ -328,7 +343,13 @@ func _physics_process(delta: float) -> void:
 			)
 		velocity.y -= _gravity * stats.air_gravity_scale * delta
 		_air_tick(delta)
-	_was_grounded = grounded
+	_was_grounded = grounded and not crest
+	# Climbing needs no floor snap: the car pushes into the slope. At the top
+	# edge the snap pulled the car down onto the edge and held it level for a
+	# tick before the launch (T-037). Snap stays on elsewhere, for bumps and
+	# downhill.
+	var climbing: bool = launch_vertical_speed(travel, _ground_normal, speed) > 0.0
+	floor_snap_length = 0.0 if climbing else _default_floor_snap
 
 	# The slide removes the into-wall part of velocity, so read it before.
 	var pre_slide_velocity: Vector3 = velocity
@@ -645,15 +666,14 @@ func _keep_floor_motion(commanded: Vector3) -> void:
 	velocity.z = commanded.z
 
 
-## Normal of the surface under the car's centre (T-030), from the ground ray,
-## or `fallback` if the ray misses.
-func _surface_normal(fallback: Vector3) -> Vector3:
+## Updates the downward ray from the car's centre (T-030) and returns whether
+## it hit a surface. With no ray (a bare script instance in tests) it reports a
+## hit, so the car behaves as grounded.
+func _update_ground_ray() -> bool:
 	if _ground_ray == null:
-		return fallback
+		return true
 	_ground_ray.force_raycast_update()
-	if _ground_ray.is_colliding():
-		return _ground_ray.get_collision_normal()
-	return fallback
+	return _ground_ray.is_colliding()
 
 
 func _apply_wall_align(delta: float) -> void:
