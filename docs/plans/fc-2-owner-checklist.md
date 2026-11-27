@@ -162,6 +162,23 @@ layouts are in [test-tracks.md](../design/test-tracks.md).
     direction to prototype.
 
 
+## 10. New since the gate: boost and drift depth (prototypes)
+
+From your FC-2 questions, built to your choices. See
+[boost-meter-and-drift-chains.md](../design/boost-meter-and-drift-chains.md).
+
+- [ ] **Drift chain** ([T-038](../tasks/T-038-drift-chain.md)): link
+      left-right drifts within 0.75 s through the chicane and the
+      sweeper. Each link makes the payout 25% longer (F3 shows
+      `CHAIN xN`). Weaving on a straight should earn nothing.
+- [ ] **Boost gauge** ([T-039](../tasks/T-039-boost-gauge-contextual.md)):
+      releases bank charge into the pips on the car's back. A **quick tap**
+      of space with no steer spends one segment. Hold and steer still
+      drifts. You never spend by accident when you press, then steer.
+- [ ] **Overcharge:** chaining past three full pips lights the hot pip,
+      which pulses and drains about 2 s after your last charge. It feels
+      like a nudge to spend, not a punishment.
+
 ## Deferred from FC-1
 
 Not answered at FC-1. They are deferred until the owner picks them up

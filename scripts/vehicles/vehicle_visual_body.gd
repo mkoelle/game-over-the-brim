@@ -39,6 +39,17 @@ const TIER_COLORS: Array[Color] = [
 ## Trick boost colour (T-033): white, apart from the three tier hues.
 const TRICK_COLOR: Color = Color(1.0, 1.0, 1.0)
 
+## Boost gauge (T-039): one pip per segment on the car's back, plus the hot
+## overcharge pip, so the gauge reads in a small viewport with no HUD.
+const GAUGE_COLOR: Color = Color(1.0, 0.85, 0.3)
+const OVERCHARGE_COLOR: Color = Color(1.0, 0.35, 0.1)
+const PIP_SIZE: Vector3 = Vector3(0.16, 0.06, 0.16)
+const PIP_Y: float = 0.53
+const PIP_Z: float = 0.75
+const PIP_XS: Array[float] = [-0.3, -0.1, 0.1, 0.3]
+## Overcharge pulse, in pulses per second.
+const OVERCHARGE_PULSE: float = 3.0
+
 ## Trick animation (T-033): one barrel roll, in seconds.
 const TRICK_SPIN_TIME: float = 0.45
 
@@ -54,6 +65,8 @@ var _roll: float = 0.0
 var _align: Basis = Basis.IDENTITY
 var _hop_left: float = 0.0
 var _trick_left: float = 0.0
+var _pips: Array[StandardMaterial3D] = []
+var _pulse: float = 0.0
 var _material: StandardMaterial3D
 var _sparks: Array[GPUParticles3D] = []
 var _spark_material: ParticleProcessMaterial
@@ -69,6 +82,7 @@ func _ready() -> void:
 	_car.trick_performed.connect(_on_trick_performed)
 	_take_own_material()
 	_make_sparks()
+	_make_gauge_pips()
 
 
 ## Roll angle, in radians, for a steer value and speed share (0-1): into the
@@ -129,6 +143,7 @@ func _physics_process(delta: float) -> void:
 		Vector3.UP * hop_offset(_hop_left),
 	)
 	_update_tier_cues()
+	_update_gauge_pips(delta)
 
 
 func _on_drift_started(_direction: int) -> void:
@@ -197,6 +212,9 @@ func _update_tier_cues() -> void:
 		if boosting and cue_tier == 0:
 			_material.emission = TRICK_COLOR
 			_material.emission_energy_multiplier = BOOST_TINT_ENERGY
+		elif boosting and cue_tier == VehicleController.GAUGE_BOOST_TIER:
+			_material.emission = GAUGE_COLOR
+			_material.emission_energy_multiplier = BOOST_TINT_ENERGY
 		elif cue_tier > 0:
 			_material.emission = TIER_COLORS[cue_tier - 1]
 			_material.emission_energy_multiplier = (
@@ -209,6 +227,42 @@ func _update_tier_cues() -> void:
 		_spark_material.color = TIER_COLORS[tier - 1]
 	for sparks: GPUParticles3D in _sparks:
 		sparks.emitting = spark_on
+
+
+func _make_gauge_pips() -> void:
+	var box := BoxMesh.new()
+	box.size = PIP_SIZE
+	for i: int in PIP_XS.size():
+		var look := StandardMaterial3D.new()
+		look.albedo_color = Color(0.15, 0.12, 0.1)
+		look.emission_enabled = true
+		look.emission = OVERCHARGE_COLOR if i == PIP_XS.size() - 1 else GAUGE_COLOR
+		look.emission_energy_multiplier = 0.0
+		var pip := MeshInstance3D.new()
+		pip.name = "GaugePip%d" % i
+		pip.mesh = box
+		pip.material_override = look
+		pip.position = Vector3(PIP_XS[i], PIP_Y, PIP_Z)
+		add_child(pip)
+		_pips.append(look)
+
+
+## Lit share of pip `index` (0-2 base, 3 overcharge) for a gauge (T-039).
+static func pip_fill(index: int, segments: float, overcharge: float) -> float:
+	if index >= 3:
+		return clampf(overcharge, 0.0, 1.0)
+	return clampf(segments - float(index), 0.0, 1.0)
+
+
+func _update_gauge_pips(delta: float) -> void:
+	_pulse = fmod(_pulse + delta * OVERCHARGE_PULSE, 1.0)
+	for i: int in _pips.size():
+		var fill: float = pip_fill(i, _car.boost_gauge, _car.boost_overcharge)
+		# A full pip glows bright, and a partial one dimly. The hot one pulses.
+		var energy: float = 2.0 if fill >= 1.0 else fill * 0.6
+		if i == _pips.size() - 1 and fill > 0.0:
+			energy *= 0.6 + 0.4 * sin(_pulse * TAU)
+		_pips[i].emission_energy_multiplier = energy
 
 
 ## Current tint colour and energy, for tests and readouts.

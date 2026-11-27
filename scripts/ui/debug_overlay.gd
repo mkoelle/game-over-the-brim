@@ -34,6 +34,11 @@ func _process(_delta: float) -> void:
 		]
 	elif drift:
 		drift_state = "held"
+	if target.boost_gauge > 0.0 or target.boost_overcharge > 0.0:
+		drift_state += "  GAUGE %.2f%s" % [
+			target.boost_gauge,
+			(" +hot %.2f" % target.boost_overcharge) if target.boost_overcharge > 0.0 else "",
+		]
 	if target.chain_count > 0:
 		drift_state += "  CHAIN x%d" % target.chain_count
 	if target.boost_time_left > 0.0:

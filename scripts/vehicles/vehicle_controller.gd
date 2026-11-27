@@ -15,6 +15,8 @@ extends CharacterBody3D
 ## - T-029: wall contact response (keep momentum, bounce on hard hits)
 ## - T-031: drift charge in three tiers, paid out as a boost on release
 ## - T-038: drifts linked left-right within 0.75 s lengthen each payout
+## - T-039: payouts and tricks bank into a 3-segment gauge (plus a draining
+##   overcharge segment); a quick tap of the drift button spends a segment
 ## - T-033: a trick (the drift button just after a ramp launch) boosts on
 ##   landing
 ## - T-032: the mesh lives under a VehicleVisualBody child, which rolls, tilts,
@@ -51,6 +53,10 @@ signal boost_started(tier: int)
 
 ## Emitted when a trick fires in the air (T-033). The boost follows on landing.
 signal trick_performed
+
+## Emitted when the boost gauge changes (T-039): `segments` is the base gauge
+## (0-3) and `overcharge` the hot 4th segment (0-1).
+signal gauge_changed(segments: float, overcharge: float)
 
 ## Emitted when a new drift links onto the last one (T-038). `count` is the
 ## links in the chain so far, 1 to CHAIN_MAX.
@@ -130,6 +136,25 @@ const CHAIN_WINDOW: float = 0.75
 const CHAIN_BONUS: float = 0.25
 const CHAIN_MAX: int = 3
 
+## Boost gauge (T-039, owner choices 2b and 3c). Drift payouts and tricks bank
+## charge into GAUGE_SEGMENTS segments. Past full, a hot 4th "overcharge"
+## segment fills, and it drains after OVERCHARGE_GRACE seconds with no new
+## charge. A quick tap of the drift button on the ground, without steering,
+## spends one segment. Hold and steer is still a drift, and in the air the
+## button still tricks.
+const GAUGE_SEGMENTS: float = 3.0
+const GAUGE_BANK_BY_TIER: Array[float] = [1.0 / 3.0, 2.0 / 3.0, 1.0]
+const GAUGE_BANK_TRICK: float = 1.0 / 3.0
+const OVERCHARGE_GRACE: float = 2.0
+const OVERCHARGE_DRAIN: float = 0.25
+
+## A press shorter than this, in seconds, with no steer and no drift, is a
+## boost tap. The boost starts on release, so it lags by at most this much.
+const BOOST_TAP_TIME: float = 0.15
+
+## boost_tier value for a gauge boost (0 is a trick, 1-3 drift tiers).
+const GAUGE_BOOST_TIER: int = 4
+
 ## Smallest steer input that starts a drift (T-028).
 const DRIFT_ENTRY_STEER: float = 0.3
 
@@ -184,6 +209,11 @@ var slide_angle_deg: float = 0.0
 ## Links in the current drift chain, 0 to CHAIN_MAX (T-038).
 var chain_count: int = 0
 
+## Boost gauge, in segments: base 0-3, plus the hot overcharge segment 0-1
+## (T-039).
+var boost_gauge: float = 0.0
+var boost_overcharge: float = 0.0
+
 ## True after a trick fired in the air, until the landing pays it (T-033).
 var has_trick: bool = false
 
@@ -211,6 +241,10 @@ var _contact_peak_speed: float = 0.0
 var _drift_air_time: float = 0.0
 var _drift_charge: int = 0
 var _since_payout: float = INF
+var _since_bank: float = INF
+var _press_time: float = 0.0
+var _press_steered: bool = false
+var _press_drifted: bool = false
 var _last_payout_direction: int = 0
 var _boost_extra: float = 0.0
 var _drift_was_held: bool = false
@@ -246,7 +280,9 @@ func _physics_process(delta: float) -> void:
 	var raw_steer: float = clampf(float(input.get("steer", 0.0)), -1.0, 1.0)
 	var steer: float = _ramped_steer(raw_steer, delta)
 	var drift_held: bool = bool(input.get("drift", false))
-	_since_press = 0.0 if drift_held and not _drift_was_held else _since_press + delta
+	var pressed: bool = drift_held and not _drift_was_held
+	var released: bool = not drift_held and _drift_was_held
+	_since_press = 0.0 if pressed else _since_press + delta
 	_drift_was_held = drift_held
 	var grounded: bool = is_on_floor()
 
@@ -283,6 +319,8 @@ func _physics_process(delta: float) -> void:
 	_tick_boost(delta)
 
 	_update_drift(drift_held, raw_steer, steer, grounded, delta)
+	_track_boost_tap(pressed, released, drift_held, raw_steer, grounded, delta)
+	_tick_overcharge(delta)
 
 	# --- Steering (T-027): a flat yaw rate once moving, so the turn radius
 	# grows with speed (handling-reference.md section 1). It fades in from
@@ -557,8 +595,10 @@ func _end_drift(pay_out: bool) -> void:
 	_drift_charge = 0
 	drift_ended.emit()
 	if pay_out and tier > 0:
-		var length: float = stats.boost_times[tier - 1] * chain_payout_scale(chain_count)
+		var scale: float = chain_payout_scale(chain_count)
+		var length: float = stats.boost_times[tier - 1] * scale
 		_start_boost(tier, stats.boost_speed, length)
+		_bank(GAUGE_BANK_BY_TIER[tier - 1] * scale)
 		_since_payout = 0.0
 		_last_payout_direction = direction
 	else:
@@ -612,6 +652,7 @@ func _land() -> void:
 	if has_trick:
 		has_trick = false
 		_start_boost(0, stats.trick_boost_speed, stats.trick_boost_time)
+		_bank(GAUGE_BANK_TRICK)
 
 
 func _tick_boost(delta: float) -> void:
@@ -622,6 +663,73 @@ func _tick_boost(delta: float) -> void:
 		boost_time_left = 0.0
 		boost_tier = 0
 		boost_ended.emit()
+
+
+## Gauge after banking `amount` into `base` and `hot` (T-039): the base fills
+## to GAUGE_SEGMENTS, then the overcharge to 1, and the rest is lost.
+static func bank_into(base: float, hot: float, amount: float) -> Vector2:
+	var room: float = GAUGE_SEGMENTS - base
+	var into_base: float = clampf(amount, 0.0, maxf(room, 0.0))
+	var into_hot: float = clampf(amount - into_base, 0.0, 1.0 - hot)
+	return Vector2(base + into_base, hot + into_hot)
+
+
+## Whether a released press was a boost tap (T-039): short, never steered past
+## the drift entry, and never became a drift.
+static func is_boost_tap(press_time: float, steered: bool, drifted: bool) -> bool:
+	return press_time <= BOOST_TAP_TIME and not steered and not drifted
+
+
+func _bank(amount: float) -> void:
+	var after: Vector2 = bank_into(boost_gauge, boost_overcharge, amount)
+	boost_gauge = after.x
+	boost_overcharge = after.y
+	_since_bank = 0.0
+	gauge_changed.emit(boost_gauge, boost_overcharge)
+
+
+func _track_boost_tap(
+	pressed: bool,
+	released: bool,
+	held: bool,
+	raw_steer: float,
+	grounded: bool,
+	delta: float,
+) -> void:
+	if pressed:
+		_press_time = 0.0
+		_press_steered = false
+		_press_drifted = false
+	if held:
+		_press_time += delta
+		_press_steered = _press_steered or absf(raw_steer) >= DRIFT_ENTRY_STEER
+		_press_drifted = _press_drifted or is_drifting
+	if released and grounded and is_boost_tap(_press_time, _press_steered, _press_drifted):
+		_spend_gauge()
+
+
+## Spends one gauge segment (T-039), the hot overcharge first, since it is
+## draining. It stacks onto a running boost.
+func _spend_gauge() -> void:
+	if boost_gauge + boost_overcharge < 1.0:
+		return
+	var from_hot: float = minf(boost_overcharge, 1.0)
+	boost_overcharge -= from_hot
+	boost_gauge -= 1.0 - from_hot
+	gauge_changed.emit(boost_gauge, boost_overcharge)
+	var seconds: float = stats.gauge_boost_time + maxf(boost_time_left, 0.0)
+	var extra: float = stats.gauge_boost_speed
+	if boost_time_left > 0.0:
+		extra = maxf(extra, _boost_extra)
+	_start_boost(GAUGE_BOOST_TIER, extra, seconds)
+
+
+func _tick_overcharge(delta: float) -> void:
+	_since_bank += delta
+	if boost_overcharge <= 0.0 or _since_bank <= OVERCHARGE_GRACE:
+		return
+	boost_overcharge = maxf(boost_overcharge - OVERCHARGE_DRAIN * delta, 0.0)
+	gauge_changed.emit(boost_gauge, boost_overcharge)
 
 
 func _ticks_per_second() -> int:
