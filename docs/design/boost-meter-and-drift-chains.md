@@ -1,8 +1,16 @@
 # Boost Meter and Drift Chains (Proposal)
 
 **Date:** 2026-11-26
-**Status:** Proposal. The owner picks a direction; nothing here is built
-yet.
+**Status:** Decided (owner, 2026-11-26).
+- **Q1:** chain combo, built in [T-038](../tasks/T-038-drift-chain.md).
+- **Q2:** hybrid gauge with **contextual space**
+  ([T-039](../tasks/T-039-boost-gauge-contextual.md)).
+- **Q3:** **overcharge drain** (T-039).
+
+One change from the proposal: the chain bonus lengthens the payout
+instead of speeding up the charge. With a faster charge, 0.5 s weaving
+drifts could reach tier 1 on a straight. With a longer payout, every
+drift still needs the full 0.85 s, about 80 degrees of turning.
 **Source:** owner questions at FC-2, in the
 [FC-2 checklist](../plans/fc-2-owner-checklist.md) §9:
 > could chaining drifts be possible? could building up a boost be done
