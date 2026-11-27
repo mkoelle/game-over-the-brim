@@ -47,7 +47,8 @@ imported prop from the side, from behind and from below.
 
 The outer walls must be taller than the highest point a car can reach
 off any ramp, plus 2 m. On the test track the highest car origin
-measured is 5.77 m, off the Kenney ramp, now that ramps launch (T-030).
+measured is 5.89 m, off the Kenney ramp, now that ramps launch (T-030,
+re-measured in T-037).
 It was 8.64 m off the old 8 m Ramp2 (T-024). The walls are 12 m. At 3 m,
 a right turn off the old Ramp2 cleared the west wall in 13 of 40
 scripted runs.

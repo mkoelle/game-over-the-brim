@@ -6,9 +6,9 @@ extends GdUnitTestSuite
 
 const MAIN_SCENE: String = "res://scenes/main.tscn"
 const TRACK: String = "res://scenes/arenas/test_track.tscn"
-## Highest car origin measured off the current ramps: 5.77 m off the Kenney
-## ramp since ramps launch (T-030). It was 8.64 m off the old Ramp2 (T-024).
-const MAX_JUMP_APEX: float = 5.77
+## Highest car origin measured off the current ramps: 5.89 m off the Kenney
+## ramp (T-037; 5.77 m in T-030). It was 8.64 m off the old Ramp2 (T-024).
+const MAX_JUMP_APEX: float = 5.89
 const BOUND: float = 49.0
 
 
