@@ -115,7 +115,7 @@ written from its results after FC-1.
 | [T-010](../tasks/T-010-asset-credits-manifest.md) | `assets/CREDITS.md` + licensing standard | P2 | 1h | — | [019](../adr/ADR-019-third-party-asset-sourcing-and-licensing.md) |
 | [T-011](../tasks/T-011-kenney-greybox-kit.md) | Import Kenney greybox kit into test track | P2 | 3h | T-010 | 019 |
 
-## Phase 3 — Track building (after the "1-Car Fun" gate)
+## Phase 3 — Track building (after the "1-Car Fun" gate; **gate passed at FC-2, 2026-11-26**)
 
 | Ticket | Title | Pri | Est | Depends on | ADR |
 |---|---|---|---|---|---|

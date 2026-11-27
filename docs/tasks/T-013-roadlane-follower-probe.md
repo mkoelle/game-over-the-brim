@@ -3,7 +3,7 @@
 **Assignee:** Unassigned
 **Date:** 2026-11-24
 **Priority:** P3
-**Status:** Blocked (1-Car Fun gate not passed)
+**Status:** Todo (the 1-Car Fun gate passed at FC-2, 2026-11-26)
 **Estimate:** 2h
 **Phase:** 3 — Track building ([plan](../plans/addon-adoption-plan.md))
 **ADR:** [ADR-017](../adr/ADR-017-track-tooling-road-generator-and-scatter.md), [ADR-011](../adr/ADR-011-ai-state-machine-addon-limboai.md)
